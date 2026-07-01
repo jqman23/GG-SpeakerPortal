@@ -29,7 +29,7 @@ const TAB_CONFIG = [
   },
   {
     id: "speaker-resource-center",
-    label: "Cvent Speaker Portal & Questionnaire",
+    label: "Speaker Portal & Questionnaire",
     url: "REPLACE_WITH_2026_SPEAKER_PORTAL_URL",
     enabled: true,
     external: true
