@@ -1,4 +1,4 @@
-const SESSION_DATA_URL = "https://gist.githubusercontent.com/jqman23/8f66cc78cbe2f6e05ed2cafce3776942/raw/session-speaker-index.json";
+const SESSION_DATA_URL = "/api/sessions";
 const MAX_GENERATE_CLICKS = 5;
 
 // Toggle tabs here. Set enabled: false to hide a tab without editing markup.
