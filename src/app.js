@@ -8,7 +8,7 @@ const TAB_CONFIG = [
   { id: "session-lookup-tab", label: "Session Information Lookup", sectionId: "session-lookup", enabled: true },
   {
     id: "ceu-tab",
-    label: "CEU Information and Question Generator",
+    label: "CEU Information & Question Generator",
     mobileLabel: "CEU Information",
     sectionId: "ceu",
     enabled: true
@@ -16,21 +16,21 @@ const TAB_CONFIG = [
   {
     id: "speaker-resource-guide",
     label: "Speaker Resource Guide (PDF)",
-    url: "https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/6e39e63ddecc460ba1e0481e3ecf2d04/cbf0f7896c9e45018217c1d9f9df0386.pdf",
+    url: "REPLACE_WITH_2026_SPEAKER_RESOURCE_GUIDE_URL",
     enabled: false,
     external: true
   },
   {
     id: "attendee-hub-video",
     label: "Informational Video on Attendee Hub",
-    url: "https://youtu.be/WQYB2zQsYaM",
+    url: "REPLACE_WITH_2026_ATTENDEE_HUB_VIDEO_URL",
     enabled: false,
     external: true
   },
   {
     id: "speaker-resource-center",
-    label: "Speaker Portal & Questionnaire",
-    url: "https://cvent.me/YRmVVA",
+    label: "Cvent Speaker Portal & Questionnaire",
+    url: "REPLACE_WITH_2026_SPEAKER_PORTAL_URL",
     enabled: true,
     external: true
   }
@@ -120,7 +120,7 @@ function bindGenerator() {
 
     const remainingClicks = MAX_GENERATE_CLICKS - generateData.count;
     if (remainingClicks <= 0) {
-      out.textContent = `You have reached the maximum number of generations (${MAX_GENERATE_CLICKS}) for today. This limit resets each day. Your saved knowledge-check questions and measurable objectives will remain available for you to copy and paste so long as you do not clear your browser's local storage.`;
+      out.textContent = "You have reached the maximum number of draft generations for today. This limit resets each day. Your saved drafts will remain available in this browser unless you clear your browser's local storage.";
       return;
     }
 
@@ -128,7 +128,7 @@ function bindGenerator() {
     const desc = document.getElementById("description");
     if (!title.value.trim() || !desc.value.trim()) {
       selectedVersion = null;
-      out.textContent = "Please fill in at least the title and description.";
+      out.textContent = "Please add at least the session title and description before generating a draft.";
       return;
     }
 
@@ -136,7 +136,7 @@ function bindGenerator() {
       if (!generated) return;
       generateData.count += 1;
       localStorage.setItem("generateData", JSON.stringify(generateData));
-      btn.textContent = `Re-Generate (${MAX_GENERATE_CLICKS - generateData.count} Remaining)`;
+      btn.textContent = `Generate Draft (${MAX_GENERATE_CLICKS - generateData.count} Remaining)`;
     });
   });
 
@@ -144,22 +144,22 @@ function bindGenerator() {
     navigator.clipboard.writeText(out.textContent);
     copyBtn.textContent = "Copied!";
     setTimeout(() => {
-      copyBtn.textContent = "Copy Output";
+      copyBtn.textContent = "Copy Draft";
     }, 2000);
   });
 
   editBtn.addEventListener("click", () => {
     const currentOutput = out.textContent.trim();
-    if (editBtn.textContent === "Edit Output") {
+    if (editBtn.textContent === "Edit Draft") {
       out.contentEditable = "true";
       out.focus();
-      editBtn.textContent = "Save Output";
+      editBtn.textContent = "Save Draft";
       editBtn.style.background = "var(--green)";
       return;
     }
 
     out.contentEditable = "false";
-    editBtn.textContent = "Edit Output";
+    editBtn.textContent = "Edit Draft";
     editBtn.style.background = "var(--blue)";
 
     if (selectedVersion) {
@@ -219,7 +219,7 @@ function initializeGenerateLimit() {
     localStorage.setItem("generateData", JSON.stringify(generateData));
   }
 
-  btn.textContent = `Generate (${MAX_GENERATE_CLICKS - generateData.count} Remaining)`;
+  btn.textContent = `Generate Draft (${MAX_GENERATE_CLICKS - generateData.count} Remaining)`;
 }
 
 async function generateCEU() {
@@ -283,7 +283,7 @@ function loadSavedVersions() {
 
 function saveVersion(content, savedVersionsDiv) {
   const versionCount = savedVersionsDiv.children.length + 1;
-  const versionDiv = createVersionElement(`Saved Output, Version ${versionCount}`, content, savedVersionsDiv);
+  const versionDiv = createVersionElement(`Saved Draft, Version ${versionCount}`, content, savedVersionsDiv);
   savedVersionsDiv.appendChild(versionDiv);
   saveToLocalStorage();
 }
@@ -329,7 +329,7 @@ async function loadSessions() {
   } catch (err) {
     console.error("Error loading sessions:", err);
     const status = document.getElementById("lookup-status");
-    if (status) status.textContent = "Error loading session data.";
+    if (status) status.textContent = "Session data could not be loaded. Please refresh the page or contact the Global Gathering Team if the problem continues.";
   }
 }
 
@@ -442,7 +442,7 @@ function searchByTitle(query) {
 function renderResults(rows, statusEl, containerEl, mode) {
   if (!rows.length) {
     containerEl.innerHTML = "";
-    statusEl.textContent = "No matches found.";
+    statusEl.textContent = "No matches found. Try a shorter search term or contact the Global Gathering Team if you need help.";
     return;
   }
 
@@ -475,7 +475,7 @@ function renderResults(rows, statusEl, containerEl, mode) {
       </tbody>
     </table>
   `;
-  statusEl.textContent = `${rows.length} match${rows.length === 1 ? "" : "es"} found - Registration status as of ${SESSIONS_AS_OF}.`;
+  statusEl.textContent = `${rows.length} match${rows.length === 1 ? "" : "es"} found - Session and registration data as of ${SESSIONS_AS_OF}.`;
 }
 
 function bindLookup() {
@@ -492,10 +492,10 @@ function bindLookup() {
       tipsEl.innerHTML = `
         <p>Tips for Speaker search:</p>
         <ul class="list-disc list-inside">
-          <li>If the search is not returning any results, try just using your first or last name.</li>
-          <li>If you still can't identify yourself, please contact the CTA Conference Team.</li>
-          <li>Double check the <b>Speaker</b> column to confirm the outputted sessions belong to you.</li>
-          <li>The <b>Registered</b> column indicates whether or not a speaker is registered for the conference as of the date and time listed below.</li>
+          <li>If the search is not returning any results, try using only your first name or only your last name.</li>
+          <li>Double check the <b>Speaker</b> column to confirm that the listed session belongs to you.</li>
+          <li>The <b>Registered</b> column indicates whether a listed speaker is registered as of the data date shown below.</li>
+          <li>If you still cannot identify yourself, please contact the Global Gathering Team.</li>
         </ul>
       `;
       return;
@@ -504,7 +504,8 @@ function bindLookup() {
     tipsEl.innerHTML = `
       <p>Tips for Session search:</p>
       <ul class="list-disc list-inside">
-        <li>Start typing a few consecutive words from your session title and then select the proper title from the drop-down.</li>
+        <li>Start typing a few consecutive words from your session title and select the correct title from the drop-down if it appears.</li>
+        <li>If your title does not appear, try a shorter keyword or phrase from the session title.</li>
       </ul>
     `;
   }
@@ -535,7 +536,12 @@ function bindLookup() {
     const first = document.getElementById("speaker-first").value || "";
     const last = document.getElementById("speaker-last").value || "";
     if (!first && !last) {
-      statusEl.textContent = "Enter at least a first or last name.";
+      statusEl.textContent = "Enter at least a first or last name to search for speaker records.";
+      resultsEl.innerHTML = "";
+      return;
+    }
+    if (!sessions.length) {
+      statusEl.textContent = "Session data is still loading. Please try again in a moment.";
       resultsEl.innerHTML = "";
       return;
     }
@@ -553,7 +559,12 @@ function bindLookup() {
     e.preventDefault();
     const q = document.getElementById("session-title").value || "";
     if (!q.trim()) {
-      statusEl.textContent = "Type a few words from the session title.";
+      statusEl.textContent = "Type a few words from the session title to search for session records.";
+      resultsEl.innerHTML = "";
+      return;
+    }
+    if (!sessions.length) {
+      statusEl.textContent = "Session data is still loading. Please try again in a moment.";
       resultsEl.innerHTML = "";
       return;
     }
