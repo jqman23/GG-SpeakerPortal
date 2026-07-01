@@ -400,8 +400,7 @@ function buildSpeakerIndex() {
       const display = sp.name || "";
       const n = normalize(display);
       const n2 = n.replace(/\s+/g, "");
-      const reg = (sp.registration || "").trim();
-      rows.push([s, display, n, n2, reg]);
+      rows.push([s, display, n, n2]);
     });
   }
   return rows;
@@ -412,14 +411,13 @@ function searchBySpeaker(first, last) {
   const qTight = qFull.replace(/\s+/g, "");
   const results = [];
 
-  for (const [sess, display, n, n2, reg] of SPEAKER_INDEX) {
+  for (const [sess, display, n, n2] of SPEAKER_INDEX) {
     const sim = Math.max(tokenSimilarity(qFull, n), tokenSimilarity(qTight, n2));
     if (sim >= 0.45) {
       results.push({
         session: sess,
         similarity: sim,
-        speakerMatched: display,
-        registration: reg || "Unknown"
+        speakerMatched: display
       });
     }
   }
@@ -454,7 +452,6 @@ function renderResults(rows, statusEl, containerEl, mode) {
         <tr class="border-b">
           <th class="text-left py-2 pr-4 font-semibold">Title</th>
           ${mode === "speaker" ? '<th class="text-left py-2 pr-4 font-semibold">Speaker</th>' : ""}
-          ${mode === "speaker" ? '<th class="text-left py-2 pr-4 font-semibold">Registered</th>' : ""}
           <th class="text-left py-2 pr-4 font-semibold">Recording</th>
           <th class="text-left py-2 pr-4 font-semibold">CEU</th>
           <th class="text-left py-2 pr-4 font-semibold">Video Format</th>
@@ -467,7 +464,6 @@ function renderResults(rows, statusEl, containerEl, mode) {
             <tr class="border-b align-top">
               <td class="py-2 pr-4">${escapeHtml(s.title || "")}</td>
               ${mode === "speaker" ? `<td class="py-2 pr-4">${escapeHtml(row.speakerMatched || "")}</td>` : ""}
-              ${mode === "speaker" ? `<td class="py-2 pr-4">${escapeHtml(row.registration || "Unknown")}</td>` : ""}
               <td class="py-2 pr-4">${escapeHtml(s.recordingStatus || "")}</td>
               <td class="py-2 pr-4">${escapeHtml(s.ceuEligibility || "")}</td>
               <td class="py-2 pr-4">${escapeHtml(s.videoFormat || "")}</td>
@@ -477,7 +473,7 @@ function renderResults(rows, statusEl, containerEl, mode) {
       </tbody>
     </table>
   `;
-  statusEl.textContent = `${rows.length} match${rows.length === 1 ? "" : "es"} found - Session and registration data as of ${SESSIONS_AS_OF}.`;
+  statusEl.textContent = `${rows.length} match${rows.length === 1 ? "" : "es"} found - Session data as of ${SESSIONS_AS_OF}.`;
 }
 
 function bindLookup() {
@@ -496,7 +492,6 @@ function bindLookup() {
         <ul class="list-disc list-inside">
           <li>If the search is not returning any results, try using only your first name or only your last name.</li>
           <li>Double check the <b>Speaker</b> column to confirm that the listed session belongs to you.</li>
-          <li>The <b>Registered</b> column indicates whether a listed speaker is registered as of the data date shown below.</li>
           <li>If you still cannot identify yourself, please contact the Global Gathering Team.</li>
         </ul>
       `;
