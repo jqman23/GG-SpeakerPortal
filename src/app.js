@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTabs();
   bindGenerator();
   bindLookup();
+  bindClickTracking();
   loadSessions();
   initializeGenerateLimit();
   loadSavedVersions();
@@ -620,4 +621,35 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+// Click tracking (once per session)
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxq8HofSFbnFxS7HeKQKZVhyuPIqpu_7NAWhvOzAXBzyxfatdeJu8hfGCRCahOINshA/exec";
+var TRACK_KEY = "ggSpeakerPortalTracked";
+
+async function trackClick() {
+  if (sessionStorage.getItem(TRACK_KEY)) return;
+  sessionStorage.setItem(TRACK_KEY, "1");
+
+  var params = new URLSearchParams({
+    sheet: "2026SpeakerPortal",
+    button: "SpeakerPortal"
+  });
+
+  try {
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 3000);
+    var geo = await fetch("https://ipapi.co/json/", { signal: ctrl.signal }).then(function (r) { return r.json(); });
+    clearTimeout(timer);
+    if (geo.ip) params.set("ip", geo.ip);
+    if (geo.country_name) params.set("country", geo.country_name);
+    if (geo.region) params.set("state", geo.region);
+    if (geo.city) params.set("city", geo.city);
+  } catch (_) {}
+
+  fetch(SCRIPT_URL + "?" + params.toString(), { mode: "no-cors" }).catch(function () {});
+}
+
+function bindClickTracking() {
+  document.getElementById("speakerPortalShell").addEventListener("pointerdown", trackClick, { once: true });
 }
