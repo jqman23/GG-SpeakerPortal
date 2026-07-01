@@ -633,7 +633,7 @@ async function trackClick() {
   sessionStorage.setItem(TRACK_KEY, "1");
 
   var params = new URLSearchParams({
-    sheet: "2026SpeakerPortal",
+    sheet: "2026Registration",
     button: "SpeakerPortal"
   });
 
