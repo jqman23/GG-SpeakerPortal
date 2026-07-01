@@ -28,11 +28,10 @@ const TAB_CONFIG = [
     external: true
   },
   {
-    id: "speaker-resource-center",
-    label: "Speaker Portal & Questionnaire",
-    url: "REPLACE_WITH_2026_SPEAKER_PORTAL_URL",
-    enabled: true,
-    external: true
+    id: "survey-tab",
+    label: "Speaker Survey",
+    sectionId: "survey",
+    enabled: true
   }
 ];
 
@@ -45,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTabs();
   bindGenerator();
   bindLookup();
+  bindSurvey();
   bindClickTracking();
   bindIframeHeight();
   loadSessions();
@@ -648,6 +648,55 @@ async function trackClick() {
 
 function bindClickTracking() {
   document.getElementById("speakerPortalShell").addEventListener("pointerdown", trackClick, { once: true });
+}
+
+function bindSurvey() {
+  const form = document.getElementById("survey-form");
+  if (!form) return;
+
+  const submitBtn = document.getElementById("survey-submit");
+  const statusEl = document.getElementById("survey-status");
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+    statusEl.className = "hidden p-4 rounded-lg text-sm font-medium";
+
+    const body = {
+      name: document.getElementById("survey-name").value,
+      email: document.getElementById("survey-email").value,
+      q1: document.getElementById("survey-q1").value,
+      q2: document.getElementById("survey-q2").value,
+      q3: document.getElementById("survey-q3").value
+    };
+
+    try {
+      const res = await fetch("/api/submit-survey", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        form.reset();
+        statusEl.textContent = "Thank you! Your survey response has been submitted successfully.";
+        statusEl.className = "p-4 rounded-lg text-sm font-medium bg-green-50 text-green-800 border border-green-200";
+        submitBtn.textContent = "Submit Survey";
+      } else {
+        statusEl.textContent = data.error || "Something went wrong. Please try again.";
+        statusEl.className = "p-4 rounded-lg text-sm font-medium bg-red-50 text-red-800 border border-red-200";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Survey";
+      }
+    } catch (err) {
+      statusEl.textContent = "Network error. Please check your connection and try again.";
+      statusEl.className = "p-4 rounded-lg text-sm font-medium bg-red-50 text-red-800 border border-red-200";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Survey";
+    }
+  });
 }
 
 function bindIframeHeight() {
