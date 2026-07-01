@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindGenerator();
   bindLookup();
   bindClickTracking();
+  bindIframeHeight();
   loadSessions();
   initializeGenerateLimit();
   loadSavedVersions();
@@ -652,4 +653,21 @@ async function trackClick() {
 
 function bindClickTracking() {
   document.getElementById("speakerPortalShell").addEventListener("pointerdown", trackClick, { once: true });
+}
+
+function bindIframeHeight() {
+  const shell = document.getElementById("speakerPortalShell");
+  if (!shell || !window.parent || window.parent === window) return;
+
+  function emitHeight() {
+    const height = shell.scrollHeight + 32;
+    window.parent.postMessage({ ggWidgetHeight: height }, "*");
+  }
+
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(emitHeight).observe(shell);
+  }
+
+  window.addEventListener("load", emitHeight);
+  emitHeight();
 }
