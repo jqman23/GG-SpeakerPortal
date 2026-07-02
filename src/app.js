@@ -302,7 +302,7 @@ function buildFormatComparisonRows() {
     { label: "Captions", zoom: "Supported", embedded: "Supported" },
     { label: "Transcripts", zoom: "Supported", zoomNote: "Presenter must manually start the transcript at the beginning of their session and download it to their computer at the end.", embedded: "Not supported" },
     { label: "Share video or audio", zoom: "Supported", embedded: "Supported" },
-    { label: "Participant management", zoom: "Full control", embedded: "Limited control", embeddedNote: "Hosts can't directly mute or start participants' video; attendees must do it themselves." },
+    { label: "Participant management", zoom: "Full control", embedded: "Limited control", embeddedNote: "Participants must request to unmute or turn on video, and the presenter can then accept." },
     { label: "Participants showing video / coming off mute", zoom: "Supported", embedded: "Requires permission", embeddedNote: "Participants must request permission to unmute or turn on video." }
   ];
 }
