@@ -1205,7 +1205,7 @@ function bindSurvey() {
       if (state.count === CEU_INITIAL_LIMIT) {
         draftEl.textContent += " Please wait about 5 minutes before using the generator tool again.";
       } else if (state.count >= CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT) {
-        draftEl.textContent += " Please wait about 24 hours before using the generator tool again.";
+        draftEl.textContent += " Please wait 24 hours before using the generator tool again.";
       }
     } catch (err) {
       draftEl.textContent = `Unable to generate a draft right now: ${err.message}`;
