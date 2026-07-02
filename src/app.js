@@ -289,6 +289,10 @@ function isKeynote(session) {
   return normalize(session?.presentationType || "").includes("keynote");
 }
 
+function isSkillBuildingInstitute(session) {
+  return normalize(session?.presentationType || "").includes("skill building institute");
+}
+
 function hasPreRecordInterest(session) {
   return normalize(session?.preRecordInterest || "") === "yes";
 }
@@ -467,7 +471,7 @@ async function renderSurveyForSession(session, options = {}) {
 
   const formatSection = document.getElementById("survey-format-section");
   const feature = (session.videoFormat || "").trim();
-  const showFormat = !isKeynote(session) && ["zoom", "embedded"].includes(normalize(feature));
+  const showFormat = !isKeynote(session) && !isSkillBuildingInstitute(session) && ["zoom", "embedded"].includes(normalize(feature));
   formatSection.classList.toggle("hidden", !showFormat);
   if (showFormat) {
     const currentMode = normalize(feature) === "embedded" ? "embedded" : "zoom";
@@ -500,7 +504,7 @@ async function renderSurveyForSession(session, options = {}) {
   }
 
   const recordingSection = document.getElementById("survey-recording-section");
-  const showRecording = !isKeynote(session);
+  const showRecording = !isKeynote(session) && !isSkillBuildingInstitute(session);
   recordingSection.classList.toggle("hidden", !showRecording);
   if (showRecording) {
     const recordingText = normalize(session.recordingStatus || "").includes("not")
@@ -525,6 +529,14 @@ async function renderSurveyForSession(session, options = {}) {
       "I would prefer to present live."
     ])}
   ` : "";
+
+  const sbiSection = document.getElementById("survey-sbi-section");
+  const showSbi = isSkillBuildingInstitute(session);
+  sbiSection.classList.toggle("hidden", !showSbi);
+  document.getElementById("survey-sbi-max-participants").required = showSbi;
+  if (!showSbi) {
+    document.getElementById("survey-sbi-max-participants").value = "";
+  }
 
   const response = await checkExistingSurveyResponse(session);
   if (options.loadLatestResponse && response) {
@@ -583,6 +595,7 @@ function populateSurveyResponseFields(response) {
   document.getElementById("survey-ceu-objectives").value = response.ceuObjectives || "";
   document.getElementById("survey-ceu-questions").value = response.ceuQuestions || "";
   document.getElementById("survey-additional-notes").value = response.additionalNotes || "";
+  document.getElementById("survey-sbi-max-participants").value = response.sbiMaxParticipants || "";
   setRadioValue("format-confirmation", response.formatConfirmation);
   setRadioValue("recording-confirmation", response.recordingConfirmation);
   setRadioValue("prerecord-confirmation", response.prerecordConfirmation);
@@ -1223,6 +1236,7 @@ function bindSurvey() {
       formatConfirmation: selectedRadioValue("format-confirmation"),
       recordingConfirmation: selectedRadioValue("recording-confirmation"),
       prerecordConfirmation: selectedRadioValue("prerecord-confirmation"),
+      sbiMaxParticipants: isSkillBuildingInstitute(selectedSurveySession) ? document.getElementById("survey-sbi-max-participants").value : "",
       additionalNotes: document.getElementById("survey-additional-notes").value,
       isResubmission: wasResubmitting
     };

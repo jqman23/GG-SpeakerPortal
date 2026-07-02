@@ -26,6 +26,7 @@ export default async function handler(req, res) {
         format_confirmation,
         recording_confirmation,
         prerecord_confirmation,
+        sbi_max_participants,
         additional_notes,
         submitted_at
       FROM survey_responses
@@ -47,6 +48,7 @@ export default async function handler(req, res) {
         formatConfirmation: rows[0].format_confirmation || '',
         recordingConfirmation: rows[0].recording_confirmation || '',
         prerecordConfirmation: rows[0].prerecord_confirmation || '',
+        sbiMaxParticipants: rows[0].sbi_max_participants || '',
         additionalNotes: rows[0].additional_notes || '',
         submittedAt: rows[0].submitted_at
       } : null

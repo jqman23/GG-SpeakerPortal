@@ -49,6 +49,7 @@ function buildConfirmationEmail({
   formatConfirmation,
   recordingConfirmation,
   prerecordConfirmation,
+  sbiMaxParticipants,
   additionalNotes,
   isResubmission
 }) {
@@ -73,6 +74,7 @@ function buildConfirmationEmail({
     cleanSessionVideoFormat ? `Format: ${cleanSessionVideoFormat}` : '',
     cleanSessionRecordingStatus ? `Recording: ${cleanSessionRecordingStatus}` : '',
     prerecordConfirmation?.trim() ? `Pre-recording: ${prerecordConfirmation.trim()}` : '',
+    sbiMaxParticipants?.toString().trim() ? `Maximum participants: ${sbiMaxParticipants.toString().trim()}` : '',
     ceuObjectives?.trim() ? `CEU objectives:\n${ceuObjectives.trim()}` : '',
     ceuQuestions?.trim() ? `CEU questions:\n${ceuQuestions.trim()}` : '',
     additionalNotes?.trim() ? `Questions or requests:\n${additionalNotes.trim()}` : '',
@@ -91,6 +93,7 @@ function buildConfirmationEmail({
     ['Format', cleanSessionVideoFormat],
     ['Recording', cleanSessionRecordingStatus],
     ['Pre-recording', prerecordConfirmation],
+    ['Maximum participants', sbiMaxParticipants != null ? String(sbiMaxParticipants) : ''],
     ['CEU objectives', ceuObjectives],
     ['CEU questions', ceuQuestions],
     ['Questions or requests', additionalNotes]
@@ -221,6 +224,7 @@ export default async function handler(req, res) {
     formatConfirmation,
     recordingConfirmation,
     prerecordConfirmation,
+    sbiMaxParticipants,
     additionalNotes,
     isResubmission,
     q1,
@@ -252,6 +256,7 @@ export default async function handler(req, res) {
         format_confirmation,
         recording_confirmation,
         prerecord_confirmation,
+        sbi_max_participants,
         additional_notes,
         session_title_feedback,
         av_requirements
@@ -267,6 +272,7 @@ export default async function handler(req, res) {
         ${formatConfirmation?.trim() || null},
         ${recordingConfirmation?.trim() || null},
         ${prerecordConfirmation?.trim() || null},
+        ${sbiMaxParticipants ? String(sbiMaxParticipants).trim() : null},
         ${(additionalNotes || q3)?.trim() || null},
         ${q1?.trim() || null},
         ${q2?.trim() || null}
@@ -286,6 +292,7 @@ export default async function handler(req, res) {
         formatConfirmation,
         recordingConfirmation,
         prerecordConfirmation,
+        sbiMaxParticipants,
         additionalNotes: additionalNotes || q3 || '',
         isResubmission
       });
