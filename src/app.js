@@ -41,6 +41,7 @@ let selectedSurveySession = null;
 let latestSurveyResponse = null;
 let pendingOverviewSurveyLoad = false;
 let isResubmittingQuestionnaire = false;
+let ceuDraftGeneratedSessionId = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   const modalRoot = document.getElementById("format-comparison-modal-root");
@@ -443,6 +444,7 @@ async function renderSurveyForSession(session, options = {}) {
   latestSurveyResponse = null;
   isResubmittingQuestionnaire = false;
   updateQuestionnaireSubmitButton();
+  updateCeuGenerateButtonLabel(document.getElementById("survey-generate-ceu"));
   document.getElementById("survey-session-id").value = session.id || "";
   clearSurveyResponseFields();
   clearSurveyStatusMessage();
@@ -756,8 +758,8 @@ function recordCeuGenerateUse() {
 
 function updateCeuGenerateButtonLabel(button) {
   if (!button) return;
-  const state = getCeuGenerateState();
-  button.textContent = state.count > 0 ? "Regenerate CEU materials" : "Help me draft CEU materials";
+  const generatedForCurrentSession = !!selectedSurveySession && ceuDraftGeneratedSessionId === selectedSurveySession.id;
+  button.textContent = generatedForCurrentSession ? "Regenerate CEU materials" : "Help me draft CEU materials";
 }
 
 async function loadSessions() {
@@ -1191,6 +1193,8 @@ function bindSurvey() {
 
       if (parsed.objectives) objectivesEl.value = parsed.objectives;
       if (parsed.questions) questionsEl.value = parsed.questions;
+
+      ceuDraftGeneratedSessionId = selectedSurveySession.id;
 
       if (parsed.objectives && parsed.questions) {
         draftEl.textContent = "Draft added. Please review and edit before submitting.";
