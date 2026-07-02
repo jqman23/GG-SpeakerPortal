@@ -2,6 +2,7 @@
   "rewrites": [
     { "source": "/api/generate",       "destination": "/api/generate.js" },
     { "source": "/api/submit-survey",  "destination": "/api/submit-survey.js" },
+    { "source": "/api/survey-responses", "destination": "/api/survey-responses.js" },
     { "source": "/api/sessions",       "destination": "/api/sessions.js" }
   ]
 }

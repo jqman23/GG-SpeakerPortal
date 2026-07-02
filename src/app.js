@@ -31,6 +31,7 @@ let SESSIONS_AS_OF = "";
 let sessions = [];
 const SPEAKER_INDEX = [];
 let selectedSurveySession = null;
+let latestSurveyResponse = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   renderTabs();
@@ -173,7 +174,9 @@ function radioGroup(name, options, required = true) {
 
 function renderSurveyForSession(session) {
   selectedSurveySession = session;
+  latestSurveyResponse = null;
   document.getElementById("survey-session-id").value = session.id || "";
+  clearSurveyResponseFields();
 
   const summary = document.getElementById("survey-session-summary");
   summary.innerHTML = `
@@ -234,10 +237,85 @@ function renderSurveyForSession(session) {
       "I have a question or need to discuss this with the Global Gathering Team."
     ])}
   ` : "";
+
+  checkExistingSurveyResponse(session);
 }
 
 function selectedRadioValue(name) {
   return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
+}
+
+function setRadioValue(name, value) {
+  if (!value) return;
+  const radios = document.querySelectorAll(`input[name="${name}"]`);
+  radios.forEach(radio => {
+    radio.checked = radio.value === value;
+  });
+}
+
+function clearSurveyResponseFields() {
+  document.getElementById("survey-ceu-objectives").value = "";
+  document.getElementById("survey-ceu-questions").value = "";
+  document.getElementById("survey-additional-notes").value = "";
+  document.querySelectorAll('input[name="format-confirmation"], input[name="recording-confirmation"], input[name="prerecord-confirmation"]').forEach(radio => {
+    radio.checked = false;
+  });
+}
+
+function populateSurveyResponseFields(response) {
+  if (!response) return;
+  document.getElementById("survey-name").value = response.speakerName || "";
+  document.getElementById("survey-email").value = response.email || "";
+  document.getElementById("survey-ceu-objectives").value = response.ceuObjectives || "";
+  document.getElementById("survey-ceu-questions").value = response.ceuQuestions || "";
+  document.getElementById("survey-additional-notes").value = response.additionalNotes || "";
+  setRadioValue("format-confirmation", response.formatConfirmation);
+  setRadioValue("recording-confirmation", response.recordingConfirmation);
+  setRadioValue("prerecord-confirmation", response.prerecordConfirmation);
+}
+
+function formatSubmittedAt(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short"
+  }).format(date);
+}
+
+async function checkExistingSurveyResponse(session) {
+  latestSurveyResponse = null;
+  const box = document.getElementById("survey-existing-response");
+  box.classList.add("hidden");
+  box.innerHTML = "";
+  if (!session?.id) return;
+
+  try {
+    const res = await fetch(`/api/survey-responses?sessionId=${encodeURIComponent(session.id)}`, { cache: "no-store" });
+    const data = await res.json();
+    if (!res.ok || !data.latest) return;
+
+    latestSurveyResponse = data.latest;
+    const submittedAt = formatSubmittedAt(data.latest.submittedAt);
+    const countText = data.count > 1 ? ` There are ${data.count} submissions saved for this session.` : "";
+    box.innerHTML = `
+      <p class="text-[#162A53] font-semibold mb-2">A survey was already submitted for this session by ${escapeHtml(data.latest.speakerName || "another presenter")}.${submittedAt ? ` Latest submission: ${escapeHtml(submittedAt)}.` : ""}${escapeHtml(countText)}</p>
+      <p class="text-gray-800 mb-3">Would you like to view and update that response? If you submit changes, they will be saved as a new submission while the previous response remains available in the history.</p>
+      <button id="load-existing-survey-response" type="button" class="px-4 py-2 bg-[#162A53] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity">Yes, show the previous response</button>
+    `;
+    box.classList.remove("hidden");
+    document.getElementById("load-existing-survey-response").addEventListener("click", () => {
+      populateSurveyResponseFields(latestSurveyResponse);
+      box.querySelector("p").textContent = "The previous response has been loaded below. Review or change anything needed, then submit to save a new response.";
+    });
+  } catch (err) {
+    console.error("Existing survey response lookup error:", err);
+  }
 }
 
 function parseCeuDraft(output) {
@@ -619,9 +697,12 @@ function bindSurvey() {
   sessionInput.addEventListener("input", () => {
     const q = sessionInput.value.toLowerCase().trim();
     selectedSurveySession = null;
+    latestSurveyResponse = null;
     document.getElementById("survey-session-id").value = "";
     document.getElementById("survey-session-summary").classList.add("hidden");
+    document.getElementById("survey-existing-response").classList.add("hidden");
     document.getElementById("survey-conditional-fields").classList.add("hidden");
+    clearSurveyResponseFields();
     suggestionsBox.innerHTML = "";
 
     if (!q) {
@@ -734,7 +815,9 @@ function bindSurvey() {
       if (res.ok) {
         form.reset();
         selectedSurveySession = null;
+        latestSurveyResponse = null;
         document.getElementById("survey-session-summary").classList.add("hidden");
+        document.getElementById("survey-existing-response").classList.add("hidden");
         document.getElementById("survey-conditional-fields").classList.add("hidden");
         document.getElementById("survey-ceu-draft").classList.add("hidden");
         statusEl.textContent = data.warning || "Thank you! Your survey response has been submitted successfully. A confirmation email has been sent to the email address you provided.";

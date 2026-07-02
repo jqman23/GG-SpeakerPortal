@@ -183,6 +183,13 @@ export default async function handler(req, res) {
         prerecordConfirmation,
         additionalNotes: additionalNotes || q3 || ''
       });
+      if (!emailResult.sent) {
+        return res.status(200).json({
+          success: true,
+          confirmationEmailSent: false,
+          warning: 'Your response was saved, but the confirmation email could not be sent.'
+        });
+      }
       return res.status(200).json({ success: true, confirmationEmailSent: emailResult.sent });
     } catch (emailErr) {
       console.error('Survey confirmation email error:', emailErr);
