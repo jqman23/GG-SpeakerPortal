@@ -295,7 +295,7 @@ function buildFormatComparisonRows() {
     { label: "Breakout rooms", zoom: "Supported", embedded: "Not supported" },
     { label: "Polls", zoom: "External tool", zoomNote: "Zoom would rely on an external tool such as Mentimeter.", embedded: "Supported", embeddedNote: "Polling is a native Embedded feature." },
     { label: "Chat", zoom: "Supported", embedded: "Supported" },
-    { label: "Q&A", zoom: "Via chat", zoomNote: "Zoom has no native Q&A tool; chat could be used for questions instead.", embedded: "Supported", embeddedNote: "Q&A is a native Embedded feature." },
+    { label: "Q&A", zoom: "Via chat", zoomNote: "Q&A is not available for Zoom; chat could be used for questions instead.", embedded: "Supported", embeddedNote: "Q&A is a native Embedded feature." },
     { label: "Screen sharing", zoom: "Supported", zoomNote: "Zoom has more advanced screen sharing options.", embedded: "Supported", embeddedNote: "Embedded screen sharing is simpler." },
     { label: "Virtual backgrounds", zoom: "Supported", zoomNote: "See more background options in Zoom.", embedded: "Blurred only", embeddedNote: "Only a blurred background is available." },
     { label: "Waiting rooms", zoom: "Supported", embedded: "Not supported" },
