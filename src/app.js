@@ -204,8 +204,8 @@ function renderSurveyForSession(session) {
   formatSection.classList.toggle("hidden", !showFormat);
   if (showFormat) {
     const explanation = normalize(feature) === "zoom"
-      ? "Our records show this session is expected to use the standard Zoom-based format connected to the virtual event experience."
-      : "Our records show this session is expected to be embedded into Attendee Hub / the virtual event experience rather than functioning only as a standard external Zoom room.";
+      ? "This session is listed as using the standard Zoom-based format connected to the virtual event experience. Please confirm whether this format works for your session."
+      : "This session is listed as Embedded in Attendee Hub / the virtual event experience rather than only as a standard external Zoom room. Please confirm whether this format works for your session.";
     formatSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Session format confirmation</h3>
       <p class="text-sm text-gray-800">${escapeHtml(explanation)}</p>
@@ -239,6 +239,33 @@ function renderSurveyForSession(session) {
 
 function selectedRadioValue(name) {
   return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
+}
+
+function parseCeuDraft(output) {
+  const text = String(output || "").trim();
+  const questionsHeader = /Suggested Knowledge-Check Questions:/i;
+  const objectivesHeader = /Suggested Measurable Objectives:/i;
+  const questionsMatch = text.match(questionsHeader);
+  const objectivesMatch = text.match(objectivesHeader);
+
+  if (!questionsMatch || !objectivesMatch) {
+    return { questions: "", objectives: "" };
+  }
+
+  const questionsStart = questionsMatch.index + questionsMatch[0].length;
+  const objectivesStart = objectivesMatch.index + objectivesMatch[0].length;
+
+  if (questionsMatch.index < objectivesMatch.index) {
+    return {
+      questions: text.slice(questionsStart, objectivesMatch.index).trim(),
+      objectives: text.slice(objectivesStart).trim()
+    };
+  }
+
+  return {
+    objectives: text.slice(objectivesStart, questionsMatch.index).trim(),
+    questions: text.slice(questionsStart).trim()
+  };
 }
 
 async function loadSessions() {
@@ -644,7 +671,18 @@ function bindSurvey() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.details ? `${data.error}\n${data.details}` : data.error);
-      draftEl.textContent = `${data.output}\n\nYou may copy and edit this draft in the CEU response boxes above before submitting.`;
+      const parsed = parseCeuDraft(data.output);
+      const objectivesEl = document.getElementById("survey-ceu-objectives");
+      const questionsEl = document.getElementById("survey-ceu-questions");
+
+      if (parsed.objectives) objectivesEl.value = parsed.objectives;
+      if (parsed.questions) questionsEl.value = parsed.questions;
+
+      if (parsed.objectives && parsed.questions) {
+        draftEl.textContent = "Draft CEU content has been added to the boxes above. Please review and edit before submitting.";
+      } else {
+        draftEl.textContent = `${data.output}\n\nThe draft could not be split automatically. Please copy the relevant parts into the CEU boxes above before submitting.`;
+      }
     } catch (err) {
       draftEl.textContent = `Unable to generate a draft right now: ${err.message}`;
     } finally {
