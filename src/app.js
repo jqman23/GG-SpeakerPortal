@@ -499,14 +499,21 @@ async function renderSurveyForSession(session, options = {}) {
     formatSection.innerHTML = "";
   }
 
-  const recordingText = normalize(session.recordingStatus || "").includes("not")
-    ? "Our records show this session is marked as not recorded."
-    : "Our records show this session is marked to be recorded.";
-  document.getElementById("survey-recording-section").innerHTML = `
-    <h3 class="font-bold text-[#162A53]">Recording confirmation</h3>
-    <p class="text-sm text-gray-800">${escapeHtml(recordingText)}</p>
-    ${radioGroup("recording-confirmation", getRecordingPreferenceOptions(session.recordingStatus))}
-  `;
+  const recordingSection = document.getElementById("survey-recording-section");
+  const showRecording = !isKeynote(session);
+  recordingSection.classList.toggle("hidden", !showRecording);
+  if (showRecording) {
+    const recordingText = normalize(session.recordingStatus || "").includes("not")
+      ? "Our records show this session is marked as not recorded."
+      : "Our records show this session is marked to be recorded.";
+    recordingSection.innerHTML = `
+      <h3 class="font-bold text-[#162A53]">Recording confirmation</h3>
+      <p class="text-sm text-gray-800">${escapeHtml(recordingText)}</p>
+      ${radioGroup("recording-confirmation", getRecordingPreferenceOptions(session.recordingStatus))}
+    `;
+  } else {
+    recordingSection.innerHTML = "";
+  }
 
   const prerecordSection = document.getElementById("survey-prerecord-section");
   prerecordSection.classList.toggle("hidden", !hasPreRecordInterest(session));
