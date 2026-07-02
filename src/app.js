@@ -511,7 +511,7 @@ async function renderSurveyForSession(session, options = {}) {
   if (showRecording) {
     const recordingText = normalize(session.recordingStatus || "").includes("not")
       ? "Our records show this session is marked as not recorded."
-      : "Our records show this session is marked to be recorded.";
+      : "Our records show this session is marked to be recorded. If you choose to have your session recorded, you can request a copy of the video file afterwards.";
     recordingSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Recording confirmation</h3>
       <p class="text-sm text-gray-800">${escapeHtml(recordingText)}</p>
