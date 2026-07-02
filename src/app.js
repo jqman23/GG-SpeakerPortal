@@ -29,7 +29,7 @@ const TAB_CONFIG = [
   },
   {
     id: "survey-tab",
-    label: "Speaker Survey",
+    label: "Speaker Questionnaire",
     sectionId: "survey",
     enabled: true
   }
