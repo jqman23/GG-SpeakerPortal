@@ -315,8 +315,8 @@ function getFormatPreferenceOptions(currentMode) {
 
 function getRecordingPreferenceOptions(recordingStatus) {
   return normalize(recordingStatus || "").includes("not")
-    ? ["That is correct. Do not record my session.", "I would prefer that my session be recorded."]
-    : ["Yes, I want my session recorded.", "I would prefer that my session not be recorded."];
+    ? ["That is correct. Do not record my session.", "I would prefer that my session be recorded and made available to participants afterwards."]
+    : ["Yes, I want my session recorded and made available to participants afterwards.", "I would prefer that my session not be recorded."];
 }
 
 function buildFormatComparisonRows() {
