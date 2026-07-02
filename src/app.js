@@ -181,7 +181,6 @@ function renderSurveyForSession(session) {
     <p class="font-semibold text-sm text-gray-900 mb-2">${escapeHtml(session.title || "Not listed")}</p>
     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">Date/time:</dt><dd>${escapeHtml(formatSessionDateTime(session))}</dd></div>
-      <div class="flex gap-1"><dt class="font-semibold text-gray-600">Session code:</dt><dd>${escapeHtml(session.code || "Not listed")}</dd></div>
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">CEU:</dt><dd>${escapeHtml(session.ceuEligibility || "Not listed")}</dd></div>
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">Recording:</dt><dd>${escapeHtml(session.recordingStatus || "Not listed")}</dd></div>
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">Format:</dt><dd>${escapeHtml(session.videoFormat || "Not listed")}</dd></div>
@@ -204,8 +203,8 @@ function renderSurveyForSession(session) {
   formatSection.classList.toggle("hidden", !showFormat);
   if (showFormat) {
     const explanation = normalize(feature) === "zoom"
-      ? "This session is listed as using the standard Zoom-based format connected to the virtual event experience. Please confirm whether this format works for your session."
-      : "This session is listed as Embedded in Attendee Hub / the virtual event experience rather than only as a standard external Zoom room. Please confirm whether this format works for your session.";
+      ? "Please confirm that the standard Zoom-based format works for your session."
+      : "Please confirm that the Embedded format in Attendee Hub / the virtual event experience works for your session.";
     formatSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Session format confirmation</h3>
       <p class="text-sm text-gray-800">${escapeHtml(explanation)}</p>
@@ -216,8 +215,8 @@ function renderSurveyForSession(session) {
   }
 
   const recordingText = normalize(session.recordingStatus || "").includes("not")
-    ? "Our records show this session is currently marked as not recorded."
-    : "Our records show this session is currently marked to be recorded.";
+    ? "Please confirm that this session should not be recorded."
+    : "Please confirm that this session should be recorded.";
   document.getElementById("survey-recording-section").innerHTML = `
     <h3 class="font-bold text-[#162A53]">Recording confirmation</h3>
     <p class="text-sm text-gray-800">${escapeHtml(recordingText)}</p>
