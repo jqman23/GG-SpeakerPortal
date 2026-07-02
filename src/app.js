@@ -292,18 +292,18 @@ function getRecordingPreferenceOptions(recordingStatus) {
 
 function buildFormatComparisonRows() {
   return [
-    { label: "Breakout rooms", zoom: "Zoom only", embedded: "Not a Zoom breakout-room experience", note: "Zoom breakout rooms are available directly in Zoom." },
-    { label: "Polls", zoom: "External polling tool if needed", embedded: "Native polling", note: "Embedded includes native polls; Zoom can use an external tool such as Mentimeter." },
-    { label: "Chat", zoom: "Chat", embedded: "Chat", note: "No practical difference." },
-    { label: "Q&A", zoom: "Regular chat", embedded: "Native Q&A", note: "Embedded includes native Q&A; Zoom uses chat for questions." },
-    { label: "Screen sharing", zoom: "Generally simpler and cleaner", embedded: "Supported", note: "Both allow screen sharing, but Zoom is usually simpler for the host and presenter." },
-    { label: "Virtual backgrounds", zoom: "Full virtual backgrounds", embedded: "Blurred background only", note: "Zoom supports the full range of virtual backgrounds." },
-    { label: "Waiting rooms", zoom: "Yes", embedded: "No", note: "Waiting rooms are a Zoom feature." },
+    { label: "Breakout rooms", zoom: "Supported", embedded: "Not supported", note: "Zoom breakout rooms are available directly in Zoom; Embedded does not offer a breakout-room experience." },
+    { label: "Polls", zoom: "External tool", embedded: "Native", note: "Embedded includes native polls; Zoom relies on an external tool such as Mentimeter." },
+    { label: "Chat", zoom: "Supported", embedded: "Supported", note: "No practical difference." },
+    { label: "Q&A", zoom: "Via chat", embedded: "Native", note: "Embedded includes native Q&A; Zoom uses chat for questions." },
+    { label: "Screen sharing", zoom: "Supported", embedded: "Supported", note: "Both allow screen sharing, but Zoom is usually simpler for the host and presenter." },
+    { label: "Virtual backgrounds", zoom: "Full support", embedded: "Blurred only", note: "Zoom supports the full range of virtual backgrounds; Embedded only offers background blur." },
+    { label: "Waiting rooms", zoom: "Supported", embedded: "Not supported", note: "Waiting rooms are a Zoom feature." },
     { label: "Captions", zoom: "Supported", embedded: "Supported", note: "No practical difference." },
-    { label: "Transcripts", zoom: "Yes", embedded: "No", note: "Transcripts are a Zoom feature." },
-    { label: "Share video or audio", zoom: "Yes", embedded: "Yes", note: "No practical difference." },
-    { label: "Participant management", zoom: "More direct control over audio/video", embedded: "Some participant management", note: "Zoom gives hosts more direct participant audio/video control." },
-    { label: "Participants showing video / coming off mute", zoom: "Yes", embedded: "Yes, but participants generally request permission first", note: "Embedded typically requires a permission request before participants come on video or unmute." }
+    { label: "Transcripts", zoom: "Supported", embedded: "Not supported", note: "Transcripts are a Zoom feature." },
+    { label: "Share video or audio", zoom: "Supported", embedded: "Supported", note: "No practical difference." },
+    { label: "Participant management", zoom: "Full control", embedded: "Limited control", note: "Zoom gives hosts more direct control over participant audio/video." },
+    { label: "Participants showing video / coming off mute", zoom: "Supported", embedded: "Requires permission", note: "Embedded typically requires a permission request before participants come on video or unmute; Zoom does not." }
   ];
 }
 
