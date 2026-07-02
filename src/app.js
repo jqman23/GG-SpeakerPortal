@@ -293,17 +293,17 @@ function getRecordingPreferenceOptions(recordingStatus) {
 function buildFormatComparisonRows() {
   return [
     { label: "Breakout rooms", zoom: "Supported", embedded: "Not supported" },
-    { label: "Polls", zoom: "External tool", zoomNote: "Zoom relies on an external tool such as Mentimeter.", embedded: "Native", embeddedNote: "Embedded includes native polls." },
+    { label: "Polls", zoom: "External tool", zoomNote: "Zoom would rely on an external tool such as Mentimeter.", embedded: "Supported", embeddedNote: "Polling is a native Embedded feature." },
     { label: "Chat", zoom: "Supported", embedded: "Supported" },
-    { label: "Q&A", zoom: "Via chat", zoomNote: "Zoom uses chat for questions.", embedded: "Native", embeddedNote: "Embedded includes native Q&A." },
-    { label: "Screen sharing", zoom: "Supported", zoomNote: "Zoom is usually simpler for the host and presenter.", embedded: "Supported" },
-    { label: "Virtual backgrounds", zoom: "Full support", embedded: "Blurred only", embeddedNote: "Embedded only offers background blur, not full virtual backgrounds." },
+    { label: "Q&A", zoom: "Via chat", zoomNote: "Zoom has no native Q&A tool; chat could be used for questions instead.", embedded: "Supported", embeddedNote: "Q&A is a native Embedded feature." },
+    { label: "Screen sharing", zoom: "Supported", zoomNote: "Zoom has more advanced screen sharing options.", embedded: "Supported", embeddedNote: "Embedded screen sharing is simpler." },
+    { label: "Virtual backgrounds", zoom: "Supported", zoomNote: "See more background options in Zoom.", embedded: "Blurred only", embeddedNote: "Only a blurred background is available." },
     { label: "Waiting rooms", zoom: "Supported", embedded: "Not supported" },
     { label: "Captions", zoom: "Supported", embedded: "Supported" },
     { label: "Transcripts", zoom: "Supported", embedded: "Not supported" },
     { label: "Share video or audio", zoom: "Supported", embedded: "Supported" },
-    { label: "Participant management", zoom: "Full control", embedded: "Limited control", embeddedNote: "Zoom gives hosts more direct control over participant audio/video." },
-    { label: "Participants showing video / coming off mute", zoom: "Supported", embedded: "Requires permission", embeddedNote: "Participants generally must request permission before coming on video or unmuting." }
+    { label: "Participant management", zoom: "Full control", embedded: "Limited control", embeddedNote: "Hosts can't directly mute or start participants' video; attendees must do it themselves." },
+    { label: "Participants showing video / coming off mute", zoom: "Supported", embedded: "Requires permission", embeddedNote: "Participants must request permission to unmute or turn on video." }
   ];
 }
 
@@ -378,9 +378,9 @@ function renderFormatComparisonRows(mode) {
     const embeddedHighlighted = mode === "embedded";
     return `
       <tr>
-        <th class="border-t border-gray-200 px-4 py-3 text-left font-semibold text-[#122345] align-top">${escapeHtml(row.label)}</th>
-        <td class="border-t border-gray-200 px-4 py-3 align-top ${zoomHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${formatComparisonCellValue(row.label, row.zoom, row.zoomNote)}</td>
-        <td class="border-t border-gray-200 px-4 py-3 align-top ${embeddedHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${formatComparisonCellValue(row.label, row.embedded, row.embeddedNote)}</td>
+        <th class="border-t border-black/10 px-4 py-3 text-left font-semibold text-[#122345] align-top">${escapeHtml(row.label)}</th>
+        <td class="border-t border-black/10 px-4 py-3 align-top ${zoomHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${formatComparisonCellValue(row.label, row.zoom, row.zoomNote)}</td>
+        <td class="border-t border-black/10 px-4 py-3 align-top ${embeddedHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${formatComparisonCellValue(row.label, row.embedded, row.embeddedNote)}</td>
       </tr>
     `;
   }).join("");
