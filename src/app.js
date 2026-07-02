@@ -58,10 +58,23 @@ document.addEventListener("DOMContentLoaded", () => {
       activateTab("survey");
       loadRememberedSurveyResponse();
     }
+    const gotoLookupLink = event.target.closest?.("[data-goto-lookup]");
+    if (gotoLookupLink) {
+      event.preventDefault();
+      activateTab("session-lookup");
+    }
     const openComparisonLink = event.target.closest?.("[data-open-comparison]");
     if (openComparisonLink) {
       event.preventDefault();
       openFormatComparisonModal("zoom");
+    }
+    const expandAllFaqs = event.target.closest?.("[data-faq-expand-all]");
+    if (expandAllFaqs) {
+      document.querySelectorAll("#faqs details").forEach(details => { details.open = true; });
+    }
+    const collapseAllFaqs = event.target.closest?.("[data-faq-collapse-all]");
+    if (collapseAllFaqs) {
+      document.querySelectorAll("#faqs details").forEach(details => { details.open = false; });
     }
     const modeButton = event.target.closest?.("[data-format-mode]");
     if (modeButton) {
