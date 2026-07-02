@@ -278,6 +278,18 @@ function radioGroup(name, options, required = true) {
   `).join("");
 }
 
+function getFormatPreferenceOptions(currentMode) {
+  return currentMode === "embedded"
+    ? ["Yes, I want my session to be Embedded.", "I would prefer that my session use Zoom."]
+    : ["Yes, I want my session to use Zoom.", "I would prefer that my session use Embedded."];
+}
+
+function getRecordingPreferenceOptions(recordingStatus) {
+  return normalize(recordingStatus || "").includes("not")
+    ? ["Yes, I want my session not recorded.", "I would prefer that my session be recorded."]
+    : ["Yes, I want my session recorded.", "I would prefer that my session not be recorded."];
+}
+
 function buildFormatComparisonRows() {
   return [
     { label: "Breakout rooms", zoom: "Zoom only", embedded: "Not a Zoom breakout-room experience", note: "Zoom breakout rooms are available directly in Zoom." },
@@ -440,7 +452,7 @@ async function renderSurveyForSession(session, options = {}) {
           ${currentMode === "zoom" ? "Zoom" : "Embedded"} currently listed
         </span>
       </div>
-      ${radioGroup("format-confirmation", ["Yes, this works for my session.", "I have a question or concern."])}
+      ${radioGroup("format-confirmation", getFormatPreferenceOptions(currentMode))}
     `;
     const openFormatButton = document.getElementById("format-comparison-open");
     if (openFormatButton) {
@@ -456,7 +468,7 @@ async function renderSurveyForSession(session, options = {}) {
   document.getElementById("survey-recording-section").innerHTML = `
     <h3 class="font-bold text-[#162A53]">Recording confirmation</h3>
     <p class="text-sm text-gray-800">${escapeHtml(recordingText)}</p>
-    ${radioGroup("recording-confirmation", ["This looks correct.", "I have a question or this does not look correct."])}
+    ${radioGroup("recording-confirmation", getRecordingPreferenceOptions(session.recordingStatus))}
   `;
 
   const prerecordSection = document.getElementById("survey-prerecord-section");
@@ -466,7 +478,7 @@ async function renderSurveyForSession(session, options = {}) {
     <p class="text-sm text-gray-800">You previously expressed interest in pre-recording. Please confirm whether you formally plan to pre-record this session. If we do not receive a response, we will assume you plan to present live.</p>
     ${radioGroup("prerecord-confirmation", [
       "Yes, I plan to pre-record.",
-      "No, I plan to present live.",
+      "I would prefer to present live.",
       "I have a question."
     ])}
   ` : "";
