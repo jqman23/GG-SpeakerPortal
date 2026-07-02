@@ -1,4 +1,5 @@
 const SESSION_DATA_URL = "/api/sessions";
+const SURVEY_SUBMISSION_KEY = "ggSpeakerSurveyLastSubmission";
 // Toggle tabs here. Set enabled: false to hide a tab without editing markup.
 const TAB_CONFIG = [
   { id: "overview-tab", label: "Overview", sectionId: "overview", enabled: true },
@@ -32,6 +33,7 @@ let sessions = [];
 const SPEAKER_INDEX = [];
 let selectedSurveySession = null;
 let latestSurveyResponse = null;
+let pendingOverviewSurveyLoad = false;
 
 document.addEventListener("DOMContentLoaded", () => {
   renderTabs();
@@ -100,7 +102,53 @@ function activateTab(sectionId) {
 function bindOverviewSurveyCta() {
   const cta = document.getElementById("overview-survey-cta");
   if (!cta) return;
-  cta.addEventListener("click", () => activateTab("survey"));
+  cta.addEventListener("click", () => {
+    activateTab("survey");
+    loadRememberedSurveyResponse();
+  });
+}
+
+function getRememberedSurveySubmission() {
+  try {
+    return JSON.parse(localStorage.getItem(SURVEY_SUBMISSION_KEY)) || null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function rememberSurveySubmission(session) {
+  if (!session?.id) return;
+  localStorage.setItem(SURVEY_SUBMISSION_KEY, JSON.stringify({
+    sessionId: session.id,
+    sessionTitle: session.title || "",
+    submittedAt: new Date().toISOString()
+  }));
+}
+
+function updateOverviewSurveyCta() {
+  const remembered = getRememberedSurveySubmission();
+  const heading = document.getElementById("overview-survey-cta-heading");
+  const copy = document.getElementById("overview-survey-cta-copy");
+  const button = document.getElementById("overview-survey-cta");
+  if (!remembered?.sessionId || !heading || !copy || !button) return;
+
+  heading.textContent = "Thank you for completing the Speaker Survey";
+  copy.textContent = `We received a Speaker Survey response for ${remembered.sessionTitle || "your session"}. You have until August 7, 2026 to make any changes. Use the button below to review the latest saved response and submit updates if needed.`;
+  button.textContent = "Review or update your Speaker Survey";
+}
+
+async function loadRememberedSurveyResponse() {
+  const remembered = getRememberedSurveySubmission();
+  if (!remembered?.sessionId) return;
+  const session = sessions.find(s => s.id === remembered.sessionId);
+  if (!session) {
+    pendingOverviewSurveyLoad = true;
+    return;
+  }
+
+  const input = document.getElementById("survey-session-search");
+  if (input) input.value = session.title || "";
+  await renderSurveyForSession(session, { loadLatestResponse: true });
 }
 
 function formatSessionDateTime(session) {
@@ -172,7 +220,7 @@ function radioGroup(name, options, required = true) {
   `).join("");
 }
 
-function renderSurveyForSession(session) {
+async function renderSurveyForSession(session, options = {}) {
   selectedSurveySession = session;
   latestSurveyResponse = null;
   document.getElementById("survey-session-id").value = session.id || "";
@@ -238,7 +286,16 @@ function renderSurveyForSession(session) {
     ])}
   ` : "";
 
-  checkExistingSurveyResponse(session);
+  const response = await checkExistingSurveyResponse(session);
+  if (options.loadLatestResponse && response) {
+    populateSurveyResponseFields(response);
+    const box = document.getElementById("survey-existing-response");
+    box.classList.remove("hidden");
+    box.innerHTML = `
+      <p class="text-[#162A53] font-semibold mb-2">Your latest saved response has been loaded below.</p>
+      <p class="text-gray-800">Review or change anything needed, then submit to save a new response. You have until August 7, 2026 to make changes.</p>
+    `;
+  }
 }
 
 function selectedRadioValue(name) {
@@ -298,7 +355,7 @@ async function checkExistingSurveyResponse(session) {
   try {
     const res = await fetch(`/api/survey-responses?sessionId=${encodeURIComponent(session.id)}`, { cache: "no-store" });
     const data = await res.json();
-    if (!res.ok || !data.latest) return;
+    if (!res.ok || !data.latest) return null;
 
     latestSurveyResponse = data.latest;
     const submittedAt = formatSubmittedAt(data.latest.submittedAt);
@@ -313,8 +370,10 @@ async function checkExistingSurveyResponse(session) {
       populateSurveyResponseFields(latestSurveyResponse);
       box.querySelector("p").textContent = "The previous response has been loaded below. Review or change anything needed, then submit to save a new response.";
     });
+    return data.latest;
   } catch (err) {
     console.error("Existing survey response lookup error:", err);
+    return null;
   }
 }
 
@@ -362,6 +421,11 @@ async function loadSessions() {
     SESSIONS_AS_OF = data.SESSIONS_AS_OF || "";
     sessions = data.sessions || [];
     SPEAKER_INDEX.splice(0, SPEAKER_INDEX.length, ...buildSpeakerIndex());
+    updateOverviewSurveyCta();
+    if (pendingOverviewSurveyLoad) {
+      pendingOverviewSurveyLoad = false;
+      loadRememberedSurveyResponse();
+    }
   } catch (err) {
     console.error("Error loading sessions:", err);
     const status = document.getElementById("lookup-status");
@@ -813,6 +877,8 @@ function bindSurvey() {
       const data = await res.json();
 
       if (res.ok) {
+        rememberSurveySubmission(selectedSurveySession);
+        updateOverviewSurveyCta();
         form.reset();
         selectedSurveySession = null;
         latestSurveyResponse = null;
