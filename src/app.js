@@ -737,8 +737,10 @@ function bindSurvey() {
         document.getElementById("survey-session-summary").classList.add("hidden");
         document.getElementById("survey-conditional-fields").classList.add("hidden");
         document.getElementById("survey-ceu-draft").classList.add("hidden");
-        statusEl.textContent = "Thank you! Your survey response has been submitted successfully.";
-        statusEl.className = "p-4 rounded-lg text-sm font-medium bg-green-50 text-green-800 border border-green-200";
+        statusEl.textContent = data.warning || "Thank you! Your survey response has been submitted successfully. A confirmation email has been sent to the email address you provided.";
+        statusEl.className = data.warning
+          ? "p-4 rounded-lg text-sm font-medium bg-yellow-50 text-yellow-800 border border-yellow-200"
+          : "p-4 rounded-lg text-sm font-medium bg-green-50 text-green-800 border border-green-200";
         submitBtn.disabled = false;
         submitBtn.textContent = "Submit Survey";
       } else {
