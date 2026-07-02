@@ -333,13 +333,13 @@ function buildFormatComparisonModal() {
           </div>
         </div>
         <div class="px-5 pb-5 pt-4">
-          <div class="overflow-hidden rounded-lg border border-gray-200">
+          <div class="rounded-lg border border-gray-200">
             <table class="w-full border-collapse text-sm">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-4 py-3 text-left font-semibold text-[#122345]">Feature</th>
+                  <th class="rounded-tl-lg px-4 py-3 text-left font-semibold text-[#122345]">Feature</th>
                   <th class="px-4 py-3 text-left font-semibold text-[#122345]">Zoom</th>
-                  <th class="px-4 py-3 text-left font-semibold text-[#122345]">Embedded</th>
+                  <th class="rounded-tr-lg px-4 py-3 text-left font-semibold text-[#122345]">Embedded</th>
                 </tr>
               </thead>
               <tbody id="format-comparison-rows"></tbody>
@@ -359,15 +359,22 @@ function renderFormatComparisonRows(mode) {
     const zoomHighlighted = mode === "zoom";
     const embeddedHighlighted = mode === "embedded";
     return `
-      <tr class="border-t border-gray-200">
-        <th class="px-4 py-3 text-left font-semibold text-[#122345] align-top">
+      <tr>
+        <th class="border-t border-gray-200 px-4 py-3 text-left font-semibold text-[#122345] align-top">
           <span class="inline-flex items-center gap-1">
             ${escapeHtml(row.label)}
-            <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-gray-700 leading-none" title="${escapeHtml(row.note)}">i</span>
+            <span class="group relative inline-flex">
+              <button type="button" class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-gray-700 leading-none" aria-label="${escapeHtml(row.label)} details">
+                i
+              </button>
+              <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 hidden w-64 -translate-x-1/2 rounded-md bg-[#122345] px-3 py-2 text-left text-xs font-normal leading-5 text-white shadow-lg group-hover:block group-focus-within:block">
+                ${escapeHtml(row.note)}
+              </span>
+            </span>
           </span>
         </th>
-        <td class="px-4 py-3 align-top ${zoomHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${escapeHtml(row.zoom)}</td>
-        <td class="px-4 py-3 align-top ${embeddedHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${escapeHtml(row.embedded)}</td>
+        <td class="border-t border-gray-200 px-4 py-3 align-top ${zoomHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${escapeHtml(row.zoom)}</td>
+        <td class="border-t border-gray-200 px-4 py-3 align-top ${embeddedHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${escapeHtml(row.embedded)}</td>
       </tr>
     `;
   }).join("");
