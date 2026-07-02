@@ -300,7 +300,7 @@ function buildFormatComparisonRows() {
     { label: "Virtual backgrounds", zoom: "Supported", zoomNote: "Various virtual backgrounds are supported for Zoom.", embedded: "Blurred only", embeddedNote: "Only a blurred background is available." },
     { label: "Waiting rooms", zoom: "Supported", embedded: "Not supported" },
     { label: "Captions", zoom: "Supported", embedded: "Supported" },
-    { label: "Transcripts", zoom: "Supported", embedded: "Not supported" },
+    { label: "Transcripts", zoom: "Supported", zoomNote: "Presenter must manually start the transcript at the beginning of their session and download it to their computer at the end.", embedded: "Not supported" },
     { label: "Share video or audio", zoom: "Supported", embedded: "Supported" },
     { label: "Participant management", zoom: "Full control", embedded: "Limited control", embeddedNote: "Hosts can't directly mute or start participants' video; attendees must do it themselves." },
     { label: "Participants showing video / coming off mute", zoom: "Supported", embedded: "Requires permission", embeddedNote: "Participants must request permission to unmute or turn on video." }
