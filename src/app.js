@@ -148,6 +148,19 @@ function updateOverviewSurveyCta() {
   button.textContent = "Review or update your Speaker Questionnaire";
 }
 
+function splitSpeakerName(fullName) {
+  const clean = String(fullName || "").trim().replace(/\s+/g, " ");
+  if (!clean) return { firstName: "", lastName: "" };
+  const parts = clean.split(" ");
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: "" };
+  }
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(" ")
+  };
+}
+
 async function loadRememberedSurveyResponse() {
   const remembered = getRememberedSurveySubmission();
   if (!remembered?.sessionId) return;
@@ -346,7 +359,10 @@ function updateQuestionnaireSubmitButton() {
 function populateSurveyResponseFields(response) {
   if (!response) return;
   isResubmittingQuestionnaire = true;
-  document.getElementById("survey-name").value = response.speakerName || "";
+  const speakerName = response.speakerName || "";
+  const splitName = splitSpeakerName(speakerName);
+  document.getElementById("survey-first-name").value = splitName.firstName || "";
+  document.getElementById("survey-last-name").value = splitName.lastName || "";
   document.getElementById("survey-email").value = response.email || "";
   document.getElementById("survey-ceu-objectives").value = response.ceuObjectives || "";
   document.getElementById("survey-ceu-questions").value = response.ceuQuestions || "";
@@ -978,7 +994,8 @@ function bindSurvey() {
     statusEl.className = "hidden p-4 rounded-lg text-sm font-medium";
 
     const body = {
-      name: document.getElementById("survey-name").value,
+      firstName: document.getElementById("survey-first-name").value,
+      lastName: document.getElementById("survey-last-name").value,
       email: document.getElementById("survey-email").value,
       sessionId: selectedSurveySession.id || "",
       sessionCode: selectedSurveySession.code || "",

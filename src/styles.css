@@ -15,11 +15,27 @@
 
 html,
 body,
+#speakerPortalShell,
+#speakerPortalShell *,
 input,
 textarea,
 button,
 label,
+h1,
 h2,
+h3,
+h4,
+h5,
+h6,
+p,
+div,
+span,
+li,
+summary,
+details,
+table,
+th,
+td,
 .output {
   font-family: "Montserrat", sans-serif !important;
 }

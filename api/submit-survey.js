@@ -13,7 +13,16 @@ function compactLines(lines) {
   return lines.filter(Boolean).join('\n');
 }
 
+function splitLegacyName(value) {
+  const clean = String(value || '').trim().replace(/\s+/g, ' ');
+  if (!clean) return { firstName: '', lastName: '' };
+  const parts = clean.split(' ');
+  if (parts.length === 1) return { firstName: parts[0], lastName: '' };
+  return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
+}
+
 function buildConfirmationEmail({
+  firstName,
   name,
   sessionTitle,
   ceuObjectives,
@@ -24,13 +33,14 @@ function buildConfirmationEmail({
   additionalNotes,
   isResubmission
 }) {
-  const cleanName = name.trim();
+  const cleanName = (name || [firstName].filter(Boolean).join(" ")).trim();
+  const salutationName = (firstName?.trim() || cleanName || "there").split(/\s+/)[0];
   const cleanSessionTitle = sessionTitle?.trim() || 'Not provided';
   const responseNoun = isResubmission ? 'updated response' : 'response';
   const subjectPrefix = isResubmission ? 'Speaker Questionnaire update confirmation' : 'Speaker Questionnaire confirmation';
   const eyebrow = isResubmission ? 'Speaker Questionnaire update received' : 'Speaker Questionnaire received';
   const text = compactLines([
-    `Hello ${cleanName},`,
+    `Hello ${salutationName},`,
     '',
     isResubmission
       ? 'Thank you for updating your Speaker Questionnaire for the 2026 Global Gathering. We received your updated response for:'
@@ -70,7 +80,7 @@ function buildConfirmationEmail({
       <div style="max-width:680px; margin:0 auto;">
         <div style="background:#ffffff; border:1px solid #d9e2ea; border-radius:8px; padding:28px;">
           <p style="margin:0 0 8px 0; color:#46775D; font-size:12px; font-weight:bold; letter-spacing:0.04em; text-transform:uppercase;">${escapeHtml(eyebrow)}</p>
-          <h1 style="margin:0 0 14px 0; color:#122345; font-size:26px; line-height:1.25;">Thank you, ${escapeHtml(cleanName)}.</h1>
+          <h1 style="margin:0 0 14px 0; color:#122345; font-size:26px; line-height:1.25;">Thank you, ${escapeHtml(salutationName)}.</h1>
           <p style="margin:0 0 18px 0; font-size:15px;">We received your ${escapeHtml(responseNoun)} for the Speaker Questionnaire for the 2026 Global Gathering.</p>
           <div style="margin:0 0 22px 0; padding:14px 16px; background:#F5F7FA; border-left:4px solid #46775D; border-radius:6px;">
             <p style="margin:0 0 4px 0; font-size:12px; color:#46775D; font-weight:bold; text-transform:uppercase; letter-spacing:0.04em;">Session</p>
@@ -176,6 +186,8 @@ export default async function handler(req, res) {
   }
 
   const {
+    firstName,
+    lastName,
     name,
     email,
     sessionId,
@@ -193,8 +205,13 @@ export default async function handler(req, res) {
     q3
   } = req.body || {};
 
-  if (!name?.trim() || !email?.trim() || !sessionId?.trim()) {
-    return res.status(400).json({ error: 'Name, email, and session selection are required.' });
+  const parsedLegacyName = splitLegacyName(name);
+  const cleanFirstName = firstName?.trim() || parsedLegacyName.firstName || "";
+  const cleanLastName = lastName?.trim() || parsedLegacyName.lastName || "";
+  const cleanName = [cleanFirstName, cleanLastName].filter(Boolean).join(' ') || name?.trim() || "";
+
+  if (!cleanFirstName || !cleanLastName || !email?.trim() || !sessionId?.trim()) {
+    return res.status(400).json({ error: 'First name, last name, email, and session selection are required.' });
   }
 
   try {
@@ -217,7 +234,7 @@ export default async function handler(req, res) {
         av_requirements
       )
       VALUES (
-        ${name.trim()},
+        ${cleanName},
         ${email.trim()},
         ${sessionId.trim()},
         ${sessionCode?.trim() || null},
@@ -235,7 +252,8 @@ export default async function handler(req, res) {
 
     try {
       const emailResult = await sendConfirmationEmail({
-        name,
+        firstName: cleanFirstName,
+        name: cleanName,
         email,
         sessionTitle,
         ceuObjectives,
