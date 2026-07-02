@@ -267,6 +267,14 @@ function parseCeuDraft(output) {
   };
 }
 
+function buildCeuGenerationContext(session) {
+  return [
+    session.presentationType ? `Presentation Type: ${session.presentationType}` : "",
+    (session.speakers || []).length ? `Presenter(s): ${session.speakers.map(speaker => speaker.name).filter(Boolean).join(", ")}` : "",
+    session.ceuEligibility ? `CEU Eligibility: ${session.ceuEligibility}` : ""
+  ].filter(Boolean).join("\n");
+}
+
 async function loadSessions() {
   try {
     const res = await fetch(SESSION_DATA_URL, { cache: "no-store" });
@@ -665,7 +673,7 @@ function bindSurvey() {
         body: JSON.stringify({
           title: selectedSurveySession.title || "",
           description: selectedSurveySession.description || "",
-          extra: ""
+          extra: buildCeuGenerationContext(selectedSurveySession)
         })
       });
       const data = await res.json();

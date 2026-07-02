@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         content:
           `Session Title: ${title.trim()}\n` +
           `Description: ${description.trim()}\n` +
-          `Additional Info: ${extra.trim()}`
+          `Relevant Session Context:\n${extra.trim() || "None provided."}`
       }
     ],
     temperature: 0.7,
