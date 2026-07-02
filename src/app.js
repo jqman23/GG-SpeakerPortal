@@ -297,7 +297,7 @@ function buildFormatComparisonRows() {
     { label: "Chat", zoom: "Supported", embedded: "Supported" },
     { label: "Q&A", zoom: "Via chat", zoomNote: "Q&A is not available for Zoom; chat could be used for questions instead.", embedded: "Supported", embeddedNote: "Q&A is a native Embedded feature." },
     { label: "Screen sharing", zoom: "Supported", zoomNote: "Zoom has more advanced screen sharing options.", embedded: "Supported", embeddedNote: "Screen sharing features are less robust for Embedded." },
-    { label: "Virtual backgrounds", zoom: "Supported", zoomNote: "See more background options in Zoom.", embedded: "Blurred only", embeddedNote: "Only a blurred background is available." },
+    { label: "Virtual backgrounds", zoom: "Supported", zoomNote: "Various virtual backgrounds are supported for Zoom.", embedded: "Blurred only", embeddedNote: "Only a blurred background is available." },
     { label: "Waiting rooms", zoom: "Supported", embedded: "Not supported" },
     { label: "Captions", zoom: "Supported", embedded: "Supported" },
     { label: "Transcripts", zoom: "Supported", embedded: "Not supported" },
