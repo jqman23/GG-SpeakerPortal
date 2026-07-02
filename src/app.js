@@ -403,7 +403,7 @@ async function checkExistingSurveyResponse(session) {
 }
 
 function parseCeuDraft(output) {
-  const text = String(output || "").trim();
+  const text = cleanCeuDraftText(output);
   const questionsHeader = /Suggested Knowledge-Check Questions:/i;
   const objectivesHeader = /Suggested Measurable Objectives:/i;
   const questionsMatch = text.match(questionsHeader);
@@ -418,15 +418,23 @@ function parseCeuDraft(output) {
 
   if (questionsMatch.index < objectivesMatch.index) {
     return {
-      questions: text.slice(questionsStart, objectivesMatch.index).trim(),
-      objectives: text.slice(objectivesStart).trim()
+      questions: cleanCeuDraftText(text.slice(questionsStart, objectivesMatch.index)),
+      objectives: cleanCeuDraftText(text.slice(objectivesStart))
     };
   }
 
   return {
-    objectives: text.slice(objectivesStart, questionsMatch.index).trim(),
-    questions: text.slice(questionsStart).trim()
+    objectives: cleanCeuDraftText(text.slice(objectivesStart, questionsMatch.index)),
+    questions: cleanCeuDraftText(text.slice(questionsStart))
   };
+}
+
+function cleanCeuDraftText(value) {
+  return String(value || "")
+    .replace(/^\s*#{1,6}\s*/gm, "")
+    .replace(/\n\s*#{1,6}\s*$/g, "")
+    .replace(/\s*#{1,6}\s*$/g, "")
+    .trim();
 }
 
 function buildCeuGenerationContext(session) {
@@ -928,7 +936,8 @@ function bindSurvey() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.details ? `${data.error}\n${data.details}` : data.error);
-      const parsed = parseCeuDraft(data.output);
+      const cleanedOutput = cleanCeuDraftText(data.output);
+      const parsed = parseCeuDraft(cleanedOutput);
       const objectivesEl = document.getElementById("survey-ceu-objectives");
       const questionsEl = document.getElementById("survey-ceu-questions");
 
@@ -938,7 +947,7 @@ function bindSurvey() {
       if (parsed.objectives && parsed.questions) {
         draftEl.textContent = "Draft added. Please review and edit before submitting.";
       } else {
-        draftEl.textContent = `${data.output}\n\nThe draft could not be placed automatically. Please copy the useful parts into the boxes above.`;
+        draftEl.textContent = `${cleanedOutput}\n\nThe draft could not be placed automatically. Please copy the useful parts into the boxes above.`;
       }
       const state = recordCeuGenerateUse();
       if (state.count === CEU_INITIAL_LIMIT) {
