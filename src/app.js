@@ -310,7 +310,7 @@ function radioGroup(name, options, required = true) {
 function getFormatPreferenceOptions(currentMode) {
   return currentMode === "embedded"
     ? ["Yes, I want my session to be Embedded.", "I would prefer that my session use Zoom."]
-    : ["Yes, I want my session to use Zoom.", "I would prefer that my session use Embedded."];
+    : ["Yes, I want my session to use Zoom.", "I would prefer that my session is Embedded."];
 }
 
 function getRecordingPreferenceOptions(recordingStatus) {
