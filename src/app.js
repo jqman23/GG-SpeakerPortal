@@ -292,18 +292,18 @@ function getRecordingPreferenceOptions(recordingStatus) {
 
 function buildFormatComparisonRows() {
   return [
-    { label: "Breakout rooms", zoom: "Supported", embedded: "Not supported", note: "Zoom breakout rooms are available directly in Zoom; Embedded does not offer a breakout-room experience." },
-    { label: "Polls", zoom: "External tool", embedded: "Native", note: "Embedded includes native polls; Zoom relies on an external tool such as Mentimeter." },
+    { label: "Breakout rooms", zoom: "Supported", embedded: "Not supported" },
+    { label: "Polls", zoom: "External tool", zoomNote: "Zoom relies on an external tool such as Mentimeter.", embedded: "Native", embeddedNote: "Embedded includes native polls." },
     { label: "Chat", zoom: "Supported", embedded: "Supported" },
-    { label: "Q&A", zoom: "Via chat", embedded: "Native", note: "Embedded includes native Q&A; Zoom uses chat for questions." },
-    { label: "Screen sharing", zoom: "Supported", embedded: "Supported", note: "Both allow screen sharing, but Zoom is usually simpler for the host and presenter." },
-    { label: "Virtual backgrounds", zoom: "Full support", embedded: "Blurred only", note: "Zoom supports the full range of virtual backgrounds; Embedded only offers background blur." },
-    { label: "Waiting rooms", zoom: "Supported", embedded: "Not supported", note: "Waiting rooms are a Zoom feature." },
+    { label: "Q&A", zoom: "Via chat", zoomNote: "Zoom uses chat for questions.", embedded: "Native", embeddedNote: "Embedded includes native Q&A." },
+    { label: "Screen sharing", zoom: "Supported", zoomNote: "Zoom is usually simpler for the host and presenter.", embedded: "Supported" },
+    { label: "Virtual backgrounds", zoom: "Full support", embedded: "Blurred only", embeddedNote: "Embedded only offers background blur, not full virtual backgrounds." },
+    { label: "Waiting rooms", zoom: "Supported", embedded: "Not supported" },
     { label: "Captions", zoom: "Supported", embedded: "Supported" },
-    { label: "Transcripts", zoom: "Supported", embedded: "Not supported", note: "Transcripts are a Zoom feature." },
+    { label: "Transcripts", zoom: "Supported", embedded: "Not supported" },
     { label: "Share video or audio", zoom: "Supported", embedded: "Supported" },
-    { label: "Participant management", zoom: "Full control", embedded: "Limited control", note: "Zoom gives hosts more direct control over participant audio/video." },
-    { label: "Participants showing video / coming off mute", zoom: "Supported", embedded: "Requires permission", note: "Embedded typically requires a permission request before participants come on video or unmute; Zoom does not." }
+    { label: "Participant management", zoom: "Full control", embedded: "Limited control", embeddedNote: "Zoom gives hosts more direct control over participant audio/video." },
+    { label: "Participants showing video / coming off mute", zoom: "Supported", embedded: "Requires permission", embeddedNote: "Participants generally must request permission before coming on video or unmuting." }
   ];
 }
 
@@ -352,6 +352,24 @@ function buildFormatComparisonModal() {
   `;
 }
 
+function formatComparisonCellValue(label, value, note) {
+  return `
+    <span class="inline-flex items-center gap-1">
+      ${escapeHtml(value)}
+      ${note ? `
+      <span class="group relative inline-flex">
+        <button type="button" class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-gray-700 leading-none" aria-label="${escapeHtml(label)} details">
+          i
+        </button>
+        <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 hidden w-64 -translate-x-1/2 rounded-md bg-[#122345] px-3 py-2 text-left text-xs font-normal leading-5 text-white shadow-lg group-hover:block group-focus-within:block">
+          ${escapeHtml(note)}
+        </span>
+      </span>
+      ` : ""}
+    </span>
+  `;
+}
+
 function renderFormatComparisonRows(mode) {
   const tbody = document.getElementById("format-comparison-rows");
   if (!tbody) return;
@@ -360,23 +378,9 @@ function renderFormatComparisonRows(mode) {
     const embeddedHighlighted = mode === "embedded";
     return `
       <tr>
-        <th class="border-t border-gray-200 px-4 py-3 text-left font-semibold text-[#122345] align-top">
-          <span class="inline-flex items-center gap-1">
-            ${escapeHtml(row.label)}
-            ${row.note ? `
-            <span class="group relative inline-flex">
-              <button type="button" class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-gray-700 leading-none" aria-label="${escapeHtml(row.label)} details">
-                i
-              </button>
-              <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 hidden w-64 -translate-x-1/2 rounded-md bg-[#122345] px-3 py-2 text-left text-xs font-normal leading-5 text-white shadow-lg group-hover:block group-focus-within:block">
-                ${escapeHtml(row.note)}
-              </span>
-            </span>
-            ` : ""}
-          </span>
-        </th>
-        <td class="border-t border-gray-200 px-4 py-3 align-top ${zoomHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${escapeHtml(row.zoom)}</td>
-        <td class="border-t border-gray-200 px-4 py-3 align-top ${embeddedHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${escapeHtml(row.embedded)}</td>
+        <th class="border-t border-gray-200 px-4 py-3 text-left font-semibold text-[#122345] align-top">${escapeHtml(row.label)}</th>
+        <td class="border-t border-gray-200 px-4 py-3 align-top ${zoomHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${formatComparisonCellValue(row.label, row.zoom, row.zoomNote)}</td>
+        <td class="border-t border-gray-200 px-4 py-3 align-top ${embeddedHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${formatComparisonCellValue(row.label, row.embedded, row.embeddedNote)}</td>
       </tr>
     `;
   }).join("");
