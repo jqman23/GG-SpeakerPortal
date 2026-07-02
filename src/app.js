@@ -107,7 +107,47 @@ function formatSessionDateTime(session) {
   const end = session.end || "";
   if (!start && !end) return "Not listed";
   const [date, time] = start.split("|");
-  return `${date || "Date not listed"}${time ? `, ${time}` : ""}${end ? `-${end}` : ""}`;
+  const dateLabel = formatSessionDate(date);
+  const timeLabel = formatSessionTimeRange(time, end);
+  return [dateLabel, timeLabel].filter(Boolean).join(", ") || "Not listed";
+}
+
+function formatSessionDate(dateValue) {
+  if (!dateValue) return "";
+  const [year, month, day] = dateValue.split("-").map(Number);
+  if (!year || !month || !day) return dateValue;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC"
+  }).format(new Date(Date.UTC(year, month - 1, day)));
+}
+
+function parseTimeParts(value) {
+  const [hour, minute] = String(value || "").split(":").map(Number);
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return null;
+  return { hour, minute };
+}
+
+function formatClockTime(parts, includePeriod) {
+  if (!parts) return "";
+  const period = parts.hour >= 12 ? "pm" : "am";
+  const hour = parts.hour % 12 || 12;
+  const minute = String(parts.minute).padStart(2, "0");
+  return `${hour}:${minute}${includePeriod ? period : ""}`;
+}
+
+function formatSessionTimeRange(startValue, endValue) {
+  const start = parseTimeParts(startValue);
+  const end = parseTimeParts(endValue);
+  if (!start && !end) return "";
+  if (start && !end) return `${formatClockTime(start, true)} MDT`;
+  if (!start && end) return `${formatClockTime(end, true)} MDT`;
+
+  const samePeriod = (start.hour >= 12) === (end.hour >= 12);
+  const startText = formatClockTime(start, !samePeriod);
+  const endText = formatClockTime(end, true);
+  return `${startText}-${endText} MDT`;
 }
 
 function isCeuEligible(session) {
@@ -137,15 +177,15 @@ function renderSurveyForSession(session) {
 
   const summary = document.getElementById("survey-session-summary");
   summary.innerHTML = `
-    <h3 class="font-bold text-[#162A53] mb-3">Selected session</h3>
-    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-      <div><dt class="font-semibold text-gray-600">Title</dt><dd>${escapeHtml(session.title || "Not listed")}</dd></div>
-      <div><dt class="font-semibold text-gray-600">Date/time</dt><dd>${escapeHtml(formatSessionDateTime(session))}</dd></div>
-      <div><dt class="font-semibold text-gray-600">Session code</dt><dd>${escapeHtml(session.code || "Not listed")}</dd></div>
-      <div><dt class="font-semibold text-gray-600">CEU eligibility</dt><dd>${escapeHtml(session.ceuEligibility || "Not listed")}</dd></div>
-      <div><dt class="font-semibold text-gray-600">Recording status</dt><dd>${escapeHtml(session.recordingStatus || "Not listed")}</dd></div>
-      <div><dt class="font-semibold text-gray-600">Video format/session feature</dt><dd>${escapeHtml(session.videoFormat || "Not listed")}</dd></div>
-      ${session.preRecordInterest ? `<div><dt class="font-semibold text-gray-600">Pre-recording interest</dt><dd>${escapeHtml(session.preRecordInterest)}</dd></div>` : ""}
+    <h3 class="font-bold text-[#162A53] mb-2">Selected session</h3>
+    <p class="font-semibold text-sm text-gray-900 mb-2">${escapeHtml(session.title || "Not listed")}</p>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
+      <div class="flex gap-1"><dt class="font-semibold text-gray-600">Date/time:</dt><dd>${escapeHtml(formatSessionDateTime(session))}</dd></div>
+      <div class="flex gap-1"><dt class="font-semibold text-gray-600">Session code:</dt><dd>${escapeHtml(session.code || "Not listed")}</dd></div>
+      <div class="flex gap-1"><dt class="font-semibold text-gray-600">CEU:</dt><dd>${escapeHtml(session.ceuEligibility || "Not listed")}</dd></div>
+      <div class="flex gap-1"><dt class="font-semibold text-gray-600">Recording:</dt><dd>${escapeHtml(session.recordingStatus || "Not listed")}</dd></div>
+      <div class="flex gap-1"><dt class="font-semibold text-gray-600">Format:</dt><dd>${escapeHtml(session.videoFormat || "Not listed")}</dd></div>
+      ${session.preRecordInterest ? `<div class="flex gap-1"><dt class="font-semibold text-gray-600">Pre-recording interest:</dt><dd>${escapeHtml(session.preRecordInterest)}</dd></div>` : ""}
     </dl>
   `;
   summary.classList.remove("hidden");
@@ -569,7 +609,7 @@ function bindSurvey() {
       div.className = "px-3 py-2 hover:bg-gray-100 cursor-pointer";
       div.innerHTML = `
         <div class="font-semibold">${escapeHtml(session.title || "")}</div>
-        <div class="text-xs text-gray-600">${escapeHtml([session.code, formatSessionDateTime(session)].filter(Boolean).join(" | "))}</div>
+        <div class="text-xs font-semibold text-[#162A53]">${escapeHtml(formatSessionDateTime(session))}</div>
       `;
       div.addEventListener("click", () => {
         sessionInput.value = session.title || "";
