@@ -52,6 +52,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (event.target?.matches?.("[data-close-format-modal]")) {
       closeFormatComparisonModal();
     }
+    const gotoSurveyLink = event.target.closest?.("[data-goto-survey]");
+    if (gotoSurveyLink) {
+      event.preventDefault();
+      activateTab("survey");
+      loadRememberedSurveyResponse();
+    }
+    const openComparisonLink = event.target.closest?.("[data-open-comparison]");
+    if (openComparisonLink) {
+      event.preventDefault();
+      openFormatComparisonModal("zoom");
+    }
     const modeButton = event.target.closest?.("[data-format-mode]");
     if (modeButton) {
       const modal = document.getElementById("format-comparison-modal");
