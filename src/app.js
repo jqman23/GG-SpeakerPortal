@@ -306,7 +306,7 @@ async function checkExistingSurveyResponse(session) {
     box.innerHTML = `
       <p class="text-[#162A53] font-semibold mb-2">A survey was already submitted for this session by ${escapeHtml(data.latest.speakerName || "another presenter")}.${submittedAt ? ` Latest submission: ${escapeHtml(submittedAt)}.` : ""}${escapeHtml(countText)}</p>
       <p class="text-gray-800 mb-3">Would you like to view and update that response? If you submit changes, they will be saved as a new submission while the previous response remains available in the history.</p>
-      <button id="load-existing-survey-response" type="button" class="px-4 py-2 bg-[#162A53] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity">Yes, show the previous response</button>
+      <button id="load-existing-survey-response" type="button" class="px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Yes, show the previous response</button>
     `;
     box.classList.remove("hidden");
     document.getElementById("load-existing-survey-response").addEventListener("click", () => {
@@ -545,11 +545,11 @@ function bindLookup() {
     const isSpeaker = which === "speaker";
     tabSpeakerBtn.classList.toggle("tab-active", isSpeaker);
     tabSpeakerBtn.classList.toggle("tab-inactive", !isSpeaker);
-    tabSpeakerBtn.classList.toggle("bg-[#162A53]", isSpeaker);
+    tabSpeakerBtn.classList.toggle("bg-[var(--survey-primary)]", isSpeaker);
     tabSpeakerBtn.classList.toggle("text-white", isSpeaker);
     tabSessionBtn.classList.toggle("tab-active", !isSpeaker);
     tabSessionBtn.classList.toggle("tab-inactive", isSpeaker);
-    tabSessionBtn.classList.toggle("bg-[#162A53]", !isSpeaker);
+    tabSessionBtn.classList.toggle("bg-[var(--survey-primary)]", !isSpeaker);
     tabSessionBtn.classList.toggle("text-white", !isSpeaker);
     speakerForm.classList.toggle("hidden", !isSpeaker);
     sessionForm.classList.toggle("hidden", isSpeaker);

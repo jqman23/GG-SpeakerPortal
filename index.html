@@ -170,7 +170,7 @@
         <p>Use this tool to identify details about sessions in which you are presenting, facilitating, or serving on a panel. Search by speaker name or session title to review available session information, including recording status, CEU eligibility, and video format when available.</p><br />
         <div class="mb-4">
           <div class="inline-flex rounded-md shadow-sm" role="group">
-            <button id="lookup-tab-speaker" type="button" class="px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg tab-active bg-[#162A53] text-white">By Speaker</button>
+            <button id="lookup-tab-speaker" type="button" class="px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg tab-active bg-[var(--survey-primary)] text-white">By Speaker</button>
             <button id="lookup-tab-session" type="button" class="px-4 py-2 text-sm font-medium border border-gray-200 rounded-r-lg tab-inactive">By Session</button>
           </div>
         </div>
@@ -178,14 +178,14 @@
         <form id="speaker-form" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end mb-4">
           <div>
             <label for="speaker-first" class="block text-sm font-medium text-gray-700">First name</label>
-            <input id="speaker-first" type="text" placeholder="e.g., Jane" class="mt-1 w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0" />
+            <input id="speaker-first" type="text" placeholder="e.g., Jane" class="mt-1 w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0" />
           </div>
           <div>
             <label for="speaker-last" class="block text-sm font-medium text-gray-700">Last name</label>
-            <input id="speaker-last" type="text" placeholder="e.g., Doe" class="mt-1 w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0" />
+            <input id="speaker-last" type="text" placeholder="e.g., Doe" class="mt-1 w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0" />
           </div>
           <div class="flex gap-2">
-            <button id="speaker-search" type="submit" class="w-full px-4 py-2 bg-[#162A53] text-white font-semibold rounded-lg">Search</button>
+            <button id="speaker-search" type="submit" class="w-full px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Search</button>
             <button id="speaker-clear" type="button" class="px-4 py-2 border-2 border-gray-200 rounded-lg">Clear</button>
           </div>
         </form>
@@ -193,11 +193,11 @@
         <form id="session-form" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end mb-4 hidden" autocomplete="off">
           <div class="sm:col-span-2 relative">
             <label for="session-title" class="block text-sm font-medium text-gray-700">Session title</label>
-            <input id="session-title" type="text" placeholder="Type a few words from the title..." class="mt-1 w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0" />
+            <input id="session-title" type="text" placeholder="Type a few words from the title..." class="mt-1 w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0" />
             <div id="session-suggestions" class="absolute z-10 bg-white border border-gray-200 rounded-lg shadow mt-1 w-full hidden max-h-48 overflow-y-auto"></div>
           </div>
           <div class="flex gap-2">
-            <button id="session-search" type="submit" class="w-full px-4 py-2 bg-[#162A53] text-white font-semibold rounded-lg">Search</button>
+            <button id="session-search" type="submit" class="w-full px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Search</button>
             <button id="session-clear" type="button" class="px-4 py-2 border-2 border-gray-200 rounded-lg">Clear</button>
           </div>
         </form>
