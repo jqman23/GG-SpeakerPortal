@@ -1,6 +1,10 @@
 :root {
   --primary-blue: #162A53;
   --primary-green: #89A84F;
+  --gg-navy: #122345;
+  --survey-primary: #46775D;
+  --survey-primary-dark: #235540;
+  --survey-primary-soft: #E5EBE9;
   --light-gray: #F5F7FA;
   --blue: #162A53;
   --green: #89A84F;
@@ -74,15 +78,15 @@ a {
 }
 
 .tab-featured {
-  background-color: var(--primary-green);
+  background-color: var(--survey-primary);
   color: #fff;
-  border: 1px solid rgba(111, 142, 62, 0.7);
-  box-shadow: 0 6px 12px rgba(137, 168, 79, 0.24);
+  border: 1px solid var(--survey-primary-dark);
+  box-shadow: 0 6px 12px rgba(70, 119, 93, 0.24);
 }
 
 .tab-featured.tab-inactive:hover,
 .tab-featured.tab-active {
-  background-color: #6f8e3e;
+  background-color: var(--survey-primary-dark);
   color: #fff;
 }
 

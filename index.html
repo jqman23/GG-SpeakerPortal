@@ -18,10 +18,10 @@
         <p class="text-gray-700">
           Welcome to the 2026 Global Gathering Speaker Resource &amp; Questionnaire Page. This page brings together practical information to help presenters prepare for A Global Gathering for the Future of Child Welfare. We recommend bookmarking this page and completing the <strong>Speaker Survey</strong> using the tab above, where you can submit required speaker information directly to the Global Gathering Team.<br><br>As the event approaches, this page will continue to be updated with guidance about Attendee Hub, session hosting, CEU requirements, resource deadlines, and other presenter supports.
         </p>
-        <div class="survey-cta mt-6 border-l-4 border-[#89A84F] bg-[#F2F7EA] p-5 rounded-r-lg">
+        <div class="survey-cta mt-6 border-l-4 border-[var(--survey-primary)] bg-[var(--survey-primary-soft)] p-5 rounded-r-lg">
           <h3 class="text-xl font-bold text-[#162A53] mb-2">Required next step: complete the Speaker Survey</h3>
           <p class="text-gray-800 mb-4">Please complete the Speaker Survey for your session as your first priority. Your responses confirm important session details, including CEU materials, recording status, video format, and any pre-recording plans that apply to your session.</p>
-          <button id="overview-survey-cta" type="button" class="px-5 py-3 bg-[#89A84F] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity">
+          <button id="overview-survey-cta" type="button" class="px-5 py-3 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">
             Complete the Speaker Survey
           </button>
         </div>
@@ -107,12 +107,12 @@
             <div>
               <label for="survey-name" class="block text-sm font-semibold text-gray-700 mb-1">Full Name *</label>
               <input id="survey-name" type="text" required placeholder="e.g., Jane Smith"
-                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0" />
+                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0" />
             </div>
             <div>
               <label for="survey-email" class="block text-sm font-semibold text-gray-700 mb-1">Email Address *</label>
               <input id="survey-email" type="email" required placeholder="e.g., jane@example.com"
-                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0" />
+                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0" />
             </div>
           </div>
 
@@ -121,7 +121,7 @@
             <p class="text-sm text-gray-600 mb-2">Begin typing your session title, then choose the correct session from the dropdown.</p>
             <div class="relative">
               <input id="survey-session-search" type="text" required autocomplete="off" placeholder="Start typing your session title..."
-                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0" />
+                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0" />
               <div id="survey-session-suggestions" class="absolute z-20 bg-white border border-gray-200 rounded-lg shadow mt-1 w-full hidden max-h-64 overflow-y-auto"></div>
             </div>
           </div>
@@ -130,16 +130,16 @@
           <div id="survey-existing-response" class="hidden border border-[#162A53] rounded-lg p-4 bg-blue-50 text-sm"></div>
 
           <div id="survey-conditional-fields" class="hidden space-y-6">
-            <div id="survey-ceu-section" class="hidden border border-[#89A84F] rounded-lg p-4 bg-[#F8FBF3] space-y-4">
+            <div id="survey-ceu-section" class="hidden border border-[var(--survey-primary)] rounded-lg p-4 bg-[var(--survey-primary-soft)] space-y-4">
               <div>
                 <label for="survey-ceu-objectives" class="block text-sm font-semibold text-gray-700 mb-1">Your session is CEU Eligible. Please list 3 measurable objectives (i.e., lessons learned) in this box. One sentence or bullet is fine for each.</label>
-                <textarea id="survey-ceu-objectives" rows="5" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0"></textarea>
+                <textarea id="survey-ceu-objectives" rows="5" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0"></textarea>
               </div>
               <div>
                 <label for="survey-ceu-questions" class="block text-sm font-semibold text-gray-700 mb-1">Your session is CEU Eligible. We should receive 3 single-answer multiple-choice OR True/False questions for your session that measure content retention. Multiple-choice questions should have 3&ndash;4 options, however True/False questions are perfectly fine. Attendees claiming CEU credit for this session must respond to these questions in order to receive credit. In this box, please clearly list all 3 questions.</label>
-                <textarea id="survey-ceu-questions" rows="7" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0"></textarea>
+                <textarea id="survey-ceu-questions" rows="7" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0"></textarea>
               </div>
-              <button id="survey-generate-ceu" type="button" class="px-4 py-2 bg-[#162A53] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity">Generate draft CEU questions/objectives</button>
+              <button id="survey-generate-ceu" type="button" class="px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Generate draft CEU questions/objectives</button>
               <div id="survey-ceu-draft" class="hidden text-sm whitespace-pre-wrap border border-gray-200 rounded-lg p-3 bg-white"></div>
             </div>
 
@@ -152,12 +152,12 @@
             <div>
               <label for="survey-additional-notes" class="block text-sm font-semibold text-gray-700 mb-1">Please use this space to express any Global Gathering related questions, requests, or needs. We will do our best to accommodate. (Optional)</label>
               <textarea id="survey-additional-notes" rows="4" placeholder="Optional"
-                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0"></textarea>
+                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0"></textarea>
             </div>
           </div>
 
           <button type="submit" id="survey-submit"
-            class="px-6 py-3 bg-[#162A53] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity">
+            class="px-6 py-3 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">
             Submit Survey
           </button>
 
