@@ -435,8 +435,8 @@ async function renderSurveyForSession(session, options = {}) {
   if (showFormat) {
     const currentMode = normalize(feature) === "embedded" ? "embedded" : "zoom";
     const explanation = normalize(feature) === "zoom"
-      ? "Our records show this session is planned for Zoom. This means presenters will use a standard Zoom-based session setup connected to the virtual event experience."
-      : "Our records show this session is planned as Embedded. This means the session experience will be embedded into Attendee Hub rather than functioning only as a standard external Zoom room.";
+      ? "Our records show this session is planned for Zoom. Zoom supports breakout rooms, waiting rooms, full virtual backgrounds, transcripts, and more direct participant audio/video control, with chat used for questions."
+      : "Our records show this session is planned as Embedded. Embedded lives inside Attendee Hub and supports native polling and Q&A, with blurred background only and participants generally requesting permission before coming on video or unmuting.";
     formatSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Session format confirmation</h3>
       <p class="text-sm text-gray-800">${escapeHtml(explanation)}</p>
