@@ -36,7 +36,7 @@ function buildConfirmationEmail({
       ? 'Thank you for updating your Speaker Questionnaire for the 2026 Global Gathering. We received your updated response for:'
       : 'Thank you for completing the Speaker Questionnaire for the 2026 Global Gathering. We received your response for:',
     '',
-    cleanSessionTitle,
+    `*${cleanSessionTitle}*`,
     '',
     'Summary of your response:',
     formatConfirmation?.trim() ? `Format: ${formatConfirmation.trim()}` : '',
@@ -82,26 +82,49 @@ function buildConfirmationEmail({
               ${htmlRows.map(([label, value], index) => `
                 <tr>
                   <td style="vertical-align: top; padding:12px 14px; font-weight:bold; color:#122345; width:190px; border-top:${index === 0 ? '0' : '1px solid #e5edf3'};">${escapeHtml(label)}</td>
-                  <td style="vertical-align: top; padding:12px 14px; white-space:pre-wrap; border-top:${index === 0 ? '0' : '1px solid #e5edf3'};">${escapeHtml(value.trim())}</td>
+                  <td style="vertical-align: top; padding:12px 14px; white-space:pre-wrap; border-top:${index === 0 ? '0' : '1px solid #e5edf3'};">${label === 'Session' ? `<em>${escapeHtml(value.trim())}</em>` : escapeHtml(value.trim())}</td>
                 </tr>
               `).join('')}
             </table>
           </div>
           <p style="margin:22px 0 0 0;">Questions? Reply to this email or contact <a href="mailto:globalgathering@cuanschutz.edu" style="color:#0563C1; text-decoration:underline;">globalgathering@cuanschutz.edu</a>.</p>
         </div>
-        <div style="margin-top:24px; padding-top:18px; border-top:1px solid #d9e2ea; font-family:Arial, sans-serif; color:#023890;">
-          <p style="margin:0 0 4px 0; font-size:12px; line-height:1.4; font-weight:bold; color:#023890;">Global Gathering Team</p>
-          <p style="margin:0; font-size:12px; line-height:1.4; color:#023890;">The Kempe Center for the Prevention and Treatment of Child Abuse &amp; Neglect</p>
-          <p style="margin:0; font-size:12px; line-height:1.4; color:#023890;">University of Colorado Anschutz Medical Campus | Department of Pediatrics</p>
-          <p style="margin:0; font-size:12px; line-height:1.4; color:#023890;">13121 E. 17th Ave., 5th Floor, Box C221, Aurora, CO 80045</p>
-          <p style="margin:0 0 12px 0; font-size:12px; line-height:1.4; color:#023890;">
-            <strong>E:</strong>
-            <a href="mailto:globalgathering@cuanschutz.edu" style="color:#0563C1; text-decoration:underline;">globalgathering@cuanschutz.edu</a>
-            <span style="color:#023890;"> | </span>
-            <a href="https://www.futureofchildwelfare.org/" style="color:#0563C1; text-decoration:underline;">www.futureofchildwelfare.org</a>
-          </p>
-          <img src="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/4c40728a45af4e0289e8075b9759c684.png" width="485" height="109" alt="2026 Global Gathering for the Future of Child Welfare" style="display:block; width:100%; max-width:485px; height:auto; border:0; outline:none; text-decoration:none;" />
-        </div>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:24px;">
+          <tr>
+            <td style="font-family:Arial, sans-serif; color:#023890; font-size:12px; line-height:1.4;">
+              <p style="margin:0 0 2px 0; font-size:12px; line-height:1.4; font-weight:bold; color:#023890;">
+                Global Gathering Team
+              </p>
+
+              <p style="margin:0; font-size:12px; line-height:1.4; color:#023890;">
+                The Kempe Center for the Prevention and Treatment of Child Abuse &amp; Neglect
+              </p>
+
+              <p style="margin:0; font-size:12px; line-height:1.4; color:#023890;">
+                University of Colorado Anschutz Medical Campus | Department of Pediatrics
+              </p>
+
+              <p style="margin:0; font-size:12px; line-height:1.4; color:#023890;">
+                13121 E. 17th Ave., 5th Floor, Box C221, Aurora, CO 80045
+              </p>
+
+              <p style="margin:0 0 12px 0; font-size:12px; line-height:1.4; color:#023890;">
+                <strong>E:</strong>
+                <a href="mailto:globalgathering@cuanschutz.edu" style="color:#0563C1; text-decoration:underline;">globalgathering@cuanschutz.edu</a>
+                <span style="color:#023890;"> | </span>
+                <a href="https://www.futureofchildwelfare.org/" style="color:#0563C1; text-decoration:underline;">www.futureofchildwelfare.org</a>
+              </p>
+
+              <img
+                src="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/4c40728a45af4e0289e8075b9759c684.png"
+                width="485"
+                height="109"
+                alt="2026 Global Gathering for the Future of Child Welfare"
+                style="display:block; width:485px; max-width:100%; height:auto; border:0; outline:none; text-decoration:none;"
+              />
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
   `;

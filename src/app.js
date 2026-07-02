@@ -143,7 +143,8 @@ function updateOverviewSurveyCta() {
   if (icon) icon.classList.remove("hidden");
   if (icon) icon.classList.add("flex");
   heading.textContent = "Speaker Questionnaire received";
-  copy.textContent = `Thank you. We have a response on file for ${remembered.sessionTitle || "your session"}. You have until August 7, 2026 to review or submit changes.`;
+  const sessionTitle = remembered.sessionTitle || "your session";
+  copy.innerHTML = `Thank you. We have a response on file for <em>${escapeHtml(sessionTitle)}</em>. You have until August 7, 2026 to review or submit changes.`;
   button.textContent = "Review or update your Speaker Questionnaire";
 }
 
@@ -481,11 +482,11 @@ function getCeuGenerateBlockMessage() {
   const state = getCeuGenerateState();
 
   if (state.dailyCooldownUntil && now < state.dailyCooldownUntil) {
-    return `You have reached the CEU draft limit for now. Please try again in about ${formatWaitTime(state.dailyCooldownUntil - now)}.`;
+    return `Please wait about ${formatWaitTime(state.dailyCooldownUntil - now)} before using the generator tool again.`;
   }
 
   if (state.count >= CEU_INITIAL_LIMIT && state.count < CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT && state.shortCooldownUntil && now < state.shortCooldownUntil) {
-    return `Please wait about ${formatWaitTime(state.shortCooldownUntil - now)} before generating more CEU drafts.`;
+    return `Please wait about ${formatWaitTime(state.shortCooldownUntil - now)} before using the generator tool again.`;
   }
 
   return "";
@@ -951,9 +952,9 @@ function bindSurvey() {
       }
       const state = recordCeuGenerateUse();
       if (state.count === CEU_INITIAL_LIMIT) {
-        draftEl.textContent += " You can regenerate more drafts in about 5 minutes.";
+        draftEl.textContent += " Please wait about 5 minutes before using the generator tool again.";
       } else if (state.count >= CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT) {
-        draftEl.textContent += " You have reached the CEU draft limit for now. Please try again in 24 hours.";
+        draftEl.textContent += " Please wait about 24 hours before using the generator tool again.";
       }
     } catch (err) {
       draftEl.textContent = `Unable to generate a draft right now: ${err.message}`;
