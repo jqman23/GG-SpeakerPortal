@@ -43,6 +43,31 @@ let pendingOverviewSurveyLoad = false;
 let isResubmittingQuestionnaire = false;
 
 document.addEventListener("DOMContentLoaded", () => {
+  const modalRoot = document.getElementById("format-comparison-modal-root");
+  if (modalRoot) modalRoot.innerHTML = buildFormatComparisonModal();
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeFormatComparisonModal();
+  });
+  document.addEventListener("click", event => {
+    if (event.target?.matches?.("[data-close-format-modal]")) {
+      closeFormatComparisonModal();
+    }
+    const modeButton = event.target.closest?.("[data-format-mode]");
+    if (modeButton) {
+      const modal = document.getElementById("format-comparison-modal");
+      if (!modal) return;
+      const mode = modeButton.dataset.formatMode === "embedded" ? "embedded" : "zoom";
+      modal.dataset.mode = mode;
+      renderFormatComparisonRows(mode);
+      modal.querySelectorAll("[data-format-mode]").forEach(btn => {
+        const isActive = btn.dataset.formatMode === mode;
+        btn.classList.toggle("bg-white", isActive);
+        btn.classList.toggle("shadow-sm", isActive);
+        btn.classList.toggle("text-[#122345]", isActive);
+        btn.classList.toggle("text-gray-600", !isActive);
+      });
+    }
+  });
   renderTabs();
   bindOverviewSurveyCta();
   bindLookup();
@@ -253,6 +278,113 @@ function radioGroup(name, options, required = true) {
   `).join("");
 }
 
+function buildFormatComparisonRows() {
+  return [
+    { label: "Breakout rooms", zoom: "Zoom only", embedded: "Not a Zoom breakout-room experience", note: "Zoom breakout rooms are available directly in Zoom." },
+    { label: "Polls", zoom: "External polling tool if needed", embedded: "Native polling", note: "Embedded includes native polls; Zoom can use an external tool such as Mentimeter." },
+    { label: "Chat", zoom: "Chat", embedded: "Chat", note: "No practical difference." },
+    { label: "Q&A", zoom: "Regular chat", embedded: "Native Q&A", note: "Embedded includes native Q&A; Zoom uses chat for questions." },
+    { label: "Screen sharing", zoom: "Generally simpler and cleaner", embedded: "Supported", note: "Both allow screen sharing, but Zoom is usually simpler for the host and presenter." },
+    { label: "Virtual backgrounds", zoom: "Full virtual backgrounds", embedded: "Blurred background only", note: "Zoom supports the full range of virtual backgrounds." },
+    { label: "Waiting rooms", zoom: "Yes", embedded: "No", note: "Waiting rooms are a Zoom feature." },
+    { label: "Captions", zoom: "Supported", embedded: "Supported", note: "No practical difference." },
+    { label: "Transcripts", zoom: "Yes", embedded: "No", note: "Transcripts are a Zoom feature." },
+    { label: "Share video or audio", zoom: "Yes", embedded: "Yes", note: "No practical difference." },
+    { label: "Participant management", zoom: "More direct control over audio/video", embedded: "Some participant management", note: "Zoom gives hosts more direct participant audio/video control." },
+    { label: "Participants showing video / coming off mute", zoom: "Yes", embedded: "Yes, but participants generally request permission first", note: "Embedded typically requires a permission request before participants come on video or unmute." }
+  ];
+}
+
+function buildFormatComparisonModal() {
+  return `
+    <div id="format-comparison-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+      <div class="absolute inset-0 bg-black/40" data-close-format-modal></div>
+      <div class="relative z-10 w-full max-w-4xl rounded-xl bg-white shadow-2xl border border-gray-200">
+        <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
+          <div>
+            <p class="text-xs font-bold tracking-[0.08em] text-[var(--survey-primary)] uppercase">Compare formats</p>
+            <h4 class="text-lg font-bold text-[#122345]">Zoom vs Embedded</h4>
+            <p class="text-sm text-gray-600">Use the buttons to compare the two session formats before confirming.</p>
+          </div>
+          <button type="button" class="text-gray-500 hover:text-gray-900" aria-label="Close comparison" data-close-format-modal>✕</button>
+        </div>
+        <div class="px-5 pt-4">
+          <div class="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1" role="tablist" aria-label="Format comparison mode">
+            <button type="button" class="format-toggle inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-[#122345] bg-white shadow-sm" data-format-mode="zoom">
+              <img src="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/bd24b84857c14ef4b86468396df75280.png" alt="" class="h-5 w-5" />
+              Zoom
+            </button>
+            <button type="button" class="format-toggle inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-gray-600" data-format-mode="embedded">
+              <img src="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/affeaea0d0264febbb47bca747a38e4d.png" alt="" class="h-5 w-5" />
+              Embedded
+            </button>
+          </div>
+        </div>
+        <div class="px-5 pb-5 pt-4">
+          <div class="overflow-hidden rounded-lg border border-gray-200">
+            <table class="w-full border-collapse text-sm">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left font-semibold text-[#122345]">Feature</th>
+                  <th class="px-4 py-3 text-left font-semibold text-[#122345]">Zoom</th>
+                  <th class="px-4 py-3 text-left font-semibold text-[#122345]">Embedded</th>
+                </tr>
+              </thead>
+              <tbody id="format-comparison-rows"></tbody>
+            </table>
+          </div>
+          <p class="mt-3 text-xs text-gray-600">The highlighted side shows the selected comparison view. Your questionnaire answer still confirms whether the currently listed format works for your session.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderFormatComparisonRows(mode) {
+  const tbody = document.getElementById("format-comparison-rows");
+  if (!tbody) return;
+  tbody.innerHTML = buildFormatComparisonRows().map(row => {
+    const zoomHighlighted = mode === "zoom";
+    const embeddedHighlighted = mode === "embedded";
+    return `
+      <tr class="border-t border-gray-200">
+        <th class="px-4 py-3 text-left font-semibold text-[#122345] align-top">
+          <span class="inline-flex items-center gap-1">
+            ${escapeHtml(row.label)}
+            <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-gray-700 leading-none" title="${escapeHtml(row.note)}">i</span>
+          </span>
+        </th>
+        <td class="px-4 py-3 align-top ${zoomHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${escapeHtml(row.zoom)}</td>
+        <td class="px-4 py-3 align-top ${embeddedHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${escapeHtml(row.embedded)}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function openFormatComparisonModal(initialMode) {
+  const modal = document.getElementById("format-comparison-modal");
+  if (!modal) return;
+  const activeMode = initialMode === "embedded" ? "embedded" : "zoom";
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+  renderFormatComparisonRows(activeMode);
+  modal.dataset.mode = activeMode;
+
+  modal.querySelectorAll("[data-format-mode]").forEach(btn => {
+    btn.classList.toggle("bg-white", btn.dataset.formatMode === activeMode);
+    btn.classList.toggle("shadow-sm", btn.dataset.formatMode === activeMode);
+    btn.classList.toggle("text-[#122345]", btn.dataset.formatMode === activeMode);
+    btn.classList.toggle("text-gray-600", btn.dataset.formatMode !== activeMode);
+  });
+}
+
+function closeFormatComparisonModal() {
+  const modal = document.getElementById("format-comparison-modal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+}
+
 async function renderSurveyForSession(session, options = {}) {
   selectedSurveySession = session;
   latestSurveyResponse = null;
@@ -289,14 +421,31 @@ async function renderSurveyForSession(session, options = {}) {
   const showFormat = !isKeynote(session) && ["zoom", "embedded"].includes(normalize(feature));
   formatSection.classList.toggle("hidden", !showFormat);
   if (showFormat) {
+    const currentMode = normalize(feature) === "embedded" ? "embedded" : "zoom";
     const explanation = normalize(feature) === "zoom"
       ? "Our records show this session is planned for Zoom. This means presenters will use a standard Zoom-based session setup connected to the virtual event experience."
       : "Our records show this session is planned as Embedded. This means the session experience will be embedded into Attendee Hub rather than functioning only as a standard external Zoom room.";
     formatSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Session format confirmation</h3>
       <p class="text-sm text-gray-800">${escapeHtml(explanation)}</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <button type="button" id="format-comparison-open" class="inline-flex items-center gap-2 text-sm font-semibold text-[var(--survey-primary)] hover:text-[var(--survey-primary-dark)]">
+          <span aria-hidden="true">ⓘ</span>
+          Compare Zoom and Embedded
+        </button>
+        <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#122345] border border-gray-200">
+          <img src="${currentMode === "zoom"
+            ? "https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/bd24b84857c14ef4b86468396df75280.png"
+            : "https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/affeaea0d0264febbb47bca747a38e4d.png"}" alt="" class="h-4 w-4" />
+          ${currentMode === "zoom" ? "Zoom" : "Embedded"} currently listed
+        </span>
+      </div>
       ${radioGroup("format-confirmation", ["Yes, this works for my session.", "I have a question or concern."])}
     `;
+    const openFormatButton = document.getElementById("format-comparison-open");
+    if (openFormatButton) {
+      openFormatButton.addEventListener("click", () => openFormatComparisonModal(currentMode));
+    }
   } else {
     formatSection.innerHTML = "";
   }
