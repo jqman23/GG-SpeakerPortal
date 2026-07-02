@@ -5,7 +5,7 @@ const TAB_CONFIG = [
   { id: "overview-tab", label: "Overview", sectionId: "overview", enabled: true },
   {
     id: "survey-tab",
-    label: "Speaker Survey",
+    label: "Speaker Questionnaire",
     sectionId: "survey",
     enabled: true,
     featured: true
@@ -133,9 +133,9 @@ function updateOverviewSurveyCta() {
   const button = document.getElementById("overview-survey-cta");
   if (!remembered?.sessionId || !heading || !copy || !button) return;
 
-  heading.textContent = "Thank you for completing the Speaker Survey";
-  copy.textContent = `We received a Speaker Survey response for ${remembered.sessionTitle || "your session"}. You have until August 7, 2026 to make any changes. Use the button below to review the latest saved response and submit updates if needed.`;
-  button.textContent = "Review or update your Speaker Survey";
+  heading.textContent = "Thank you for completing the Speaker Questionnaire";
+  copy.textContent = `We received a Speaker Questionnaire response for ${remembered.sessionTitle || "your session"}. You have until August 7, 2026 to make any changes. Use the button below to review the latest saved response and submit updates if needed.`;
+  button.textContent = "Review or update your Speaker Questionnaire";
 }
 
 async function loadRememberedSurveyResponse() {
@@ -229,7 +229,7 @@ async function renderSurveyForSession(session, options = {}) {
 
   const summary = document.getElementById("survey-session-summary");
   summary.innerHTML = `
-    <h3 class="font-bold text-[#162A53] mb-2">Selected session</h3>
+    <h3 class="font-bold text-[#162A53] mb-2">Session selected</h3>
     <p class="font-semibold text-sm text-gray-900 mb-2">${escapeHtml(session.title || "Not listed")}</p>
     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">Date/time:</dt><dd>${escapeHtml(formatSessionDateTime(session))}</dd></div>
@@ -255,20 +255,20 @@ async function renderSurveyForSession(session, options = {}) {
   formatSection.classList.toggle("hidden", !showFormat);
   if (showFormat) {
     const explanation = normalize(feature) === "zoom"
-      ? "Please confirm that the standard Zoom-based format works for your session."
-      : "Please confirm that the Embedded format in Attendee Hub / the virtual event experience works for your session.";
+      ? "Our records show this session is planned for Zoom. This means presenters will use a standard Zoom-based session setup connected to the virtual event experience."
+      : "Our records show this session is planned as Embedded. This means the session experience will be embedded into Attendee Hub rather than functioning only as a standard external Zoom room.";
     formatSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Session format confirmation</h3>
       <p class="text-sm text-gray-800">${escapeHtml(explanation)}</p>
-      ${radioGroup("format-confirmation", ["Yes, this works for my session.", "I have a question or concern about this format."])}
+      ${radioGroup("format-confirmation", ["Yes, this works for my session.", "I have a question or concern."])}
     `;
   } else {
     formatSection.innerHTML = "";
   }
 
   const recordingText = normalize(session.recordingStatus || "").includes("not")
-    ? "Please confirm that this session should not be recorded."
-    : "Please confirm that this session should be recorded.";
+    ? "Our records show this session is marked as not recorded."
+    : "Our records show this session is marked to be recorded.";
   document.getElementById("survey-recording-section").innerHTML = `
     <h3 class="font-bold text-[#162A53]">Recording confirmation</h3>
     <p class="text-sm text-gray-800">${escapeHtml(recordingText)}</p>
@@ -278,12 +278,12 @@ async function renderSurveyForSession(session, options = {}) {
   const prerecordSection = document.getElementById("survey-prerecord-section");
   prerecordSection.classList.toggle("hidden", !hasPreRecordInterest(session));
   prerecordSection.innerHTML = hasPreRecordInterest(session) ? `
-    <h3 class="font-bold text-[#162A53]">Pre-recording confirmation</h3>
-    <p class="text-sm text-gray-800">You expressed interest in pre-recording your session. Please indicate here if you formally plan on pre-recording your session. If we do not receive a response, we will assume you will present your session live.</p>
+    <h3 class="font-bold text-[#162A53]">Pre-recording</h3>
+    <p class="text-sm text-gray-800">You previously expressed interest in pre-recording. Please confirm whether you formally plan to pre-record this session. If we do not receive a response, we will assume you plan to present live.</p>
     ${radioGroup("prerecord-confirmation", [
-      "Yes, I formally plan to pre-record this session.",
-      "No, I plan to present this session live.",
-      "I have a question or need to discuss this with the Global Gathering Team."
+      "Yes, I plan to pre-record.",
+      "No, I plan to present live.",
+      "I have a question."
     ])}
   ` : "";
 
@@ -293,8 +293,8 @@ async function renderSurveyForSession(session, options = {}) {
     const box = document.getElementById("survey-existing-response");
     box.classList.remove("hidden");
     box.innerHTML = `
-      <p class="text-[#162A53] font-semibold mb-2">Your latest saved response has been loaded below.</p>
-      <p class="text-gray-800">Review or change anything needed, then submit to save a new response. You have until August 7, 2026 to make changes.</p>
+      <p class="text-[#162A53] font-semibold mb-2">Latest response loaded. Review, edit, and submit again if needed. A new submission will be saved.</p>
+      <p class="text-gray-800">You have until August 7, 2026 to make changes.</p>
     `;
   }
 }
@@ -360,16 +360,16 @@ async function checkExistingSurveyResponse(session) {
 
     latestSurveyResponse = data.latest;
     const submittedAt = formatSubmittedAt(data.latest.submittedAt);
-    const countText = data.count > 1 ? ` There are ${data.count} submissions saved for this session.` : "";
     box.innerHTML = `
-      <p class="text-[#162A53] font-semibold mb-2">A survey was already submitted for this session by ${escapeHtml(data.latest.speakerName || "another presenter")}.${submittedAt ? ` Latest submission: ${escapeHtml(submittedAt)}.` : ""}${escapeHtml(countText)}</p>
+      <p class="text-[#162A53] font-semibold mb-2">A questionnaire response already exists for this session.</p>
+      <p class="text-gray-800 mb-3">Latest submitted by: ${escapeHtml(data.latest.speakerName || "another presenter")}. Total submissions: ${escapeHtml(String(data.count))}.${submittedAt ? ` Latest submission: ${escapeHtml(submittedAt)}.` : ""}</p>
       <p class="text-gray-800 mb-3">Would you like to view and update that response? If you submit changes, they will be saved as a new submission while the previous response remains available in the history.</p>
-      <button id="load-existing-survey-response" type="button" class="px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Yes, show the previous response</button>
+      <button id="load-existing-survey-response" type="button" class="px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Load latest response</button>
     `;
     box.classList.remove("hidden");
     document.getElementById("load-existing-survey-response").addEventListener("click", () => {
       populateSurveyResponseFields(latestSurveyResponse);
-      box.querySelector("p").textContent = "The previous response has been loaded below. Review or change anything needed, then submit to save a new response.";
+      box.querySelector("p").textContent = "Latest response loaded. Review, edit, and submit again if needed. A new submission will be saved.";
     });
     return data.latest;
   } catch (err) {
@@ -541,7 +541,7 @@ function searchByTitle(query) {
 function renderResults(rows, statusEl, containerEl, mode) {
   if (!rows.length) {
     containerEl.innerHTML = "";
-    statusEl.textContent = "No matches found. Try a shorter search term or contact the Global Gathering Team if you need help.";
+    statusEl.textContent = "No matches found. Try a shorter search or email globalgathering@cuanschutz.edu.";
     return;
   }
 
@@ -589,9 +589,9 @@ function bindLookup() {
       tipsEl.innerHTML = `
         <p>Tips for Speaker search:</p>
         <ul class="list-disc list-inside">
-          <li>If the search is not returning any results, try using only your first name or only your last name.</li>
-          <li>Double check the <b>Speaker</b> column to confirm that the listed session belongs to you.</li>
-          <li>If you still cannot identify yourself, please contact the Global Gathering Team.</li>
+          <li>Try first name, last name, or both.</li>
+          <li>Check the Speaker column to confirm the right match.</li>
+          <li>Email us if you cannot find your session.</li>
         </ul>
       `;
       return;
@@ -600,8 +600,8 @@ function bindLookup() {
     tipsEl.innerHTML = `
       <p>Tips for Session search:</p>
       <ul class="list-disc list-inside">
-        <li>Start typing a few consecutive words from your session title and select the correct title from the drop-down if it appears.</li>
-        <li>If your title does not appear, try a shorter keyword or phrase from the session title.</li>
+        <li>Search with a few distinctive words from your title.</li>
+        <li>Try a shorter keyword if the full title does not appear.</li>
       </ul>
     `;
   }
@@ -832,9 +832,9 @@ function bindSurvey() {
       if (parsed.questions) questionsEl.value = parsed.questions;
 
       if (parsed.objectives && parsed.questions) {
-        draftEl.textContent = "Draft CEU content has been added to the boxes above. Please review and edit before submitting.";
+        draftEl.textContent = "Draft added. Please review and edit before submitting.";
       } else {
-        draftEl.textContent = `${data.output}\n\nThe draft could not be split automatically. Please copy the relevant parts into the CEU boxes above before submitting.`;
+        draftEl.textContent = `${data.output}\n\nThe draft could not be placed automatically. Please copy the useful parts into the boxes above.`;
       }
     } catch (err) {
       draftEl.textContent = `Unable to generate a draft right now: ${err.message}`;
@@ -846,7 +846,7 @@ function bindSurvey() {
   form.addEventListener("submit", async e => {
     e.preventDefault();
     if (!selectedSurveySession) {
-      statusEl.textContent = "Please select your session from the dropdown before submitting.";
+      statusEl.textContent = "Please select your session from the dropdown before submitting the questionnaire.";
       statusEl.className = "p-4 rounded-lg text-sm font-medium bg-red-50 text-red-800 border border-red-200";
       return;
     }
@@ -887,7 +887,7 @@ function bindSurvey() {
         document.getElementById("survey-existing-response").classList.add("hidden");
         document.getElementById("survey-conditional-fields").classList.add("hidden");
         document.getElementById("survey-ceu-draft").classList.add("hidden");
-        statusEl.textContent = data.warning || "Thank you! Your survey response has been submitted successfully. A confirmation email has been sent to the email address you provided.";
+        statusEl.textContent = data.warning || "Thank you — your Speaker Questionnaire response was submitted. A confirmation email has been sent.";
         statusEl.className = data.warning
           ? "p-4 rounded-lg text-sm font-medium bg-yellow-50 text-yellow-800 border border-yellow-200"
           : "p-4 rounded-lg text-sm font-medium bg-green-50 text-green-800 border border-green-200";

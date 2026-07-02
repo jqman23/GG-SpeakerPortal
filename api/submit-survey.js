@@ -26,35 +26,35 @@ function buildConfirmationEmail({
   const text = compactLines([
     `Hello ${name.trim()},`,
     '',
-    'Thank you for completing the 2026 Global Gathering Speaker Survey. We received your response.',
+    'Thank you for completing the Speaker Questionnaire for the 2026 Global Gathering. We received your response.',
     '',
     `Session: ${sessionTitle?.trim() || 'Not provided'}`,
-    formatConfirmation?.trim() ? `Session format confirmation: ${formatConfirmation.trim()}` : '',
-    recordingConfirmation?.trim() ? `Recording confirmation: ${recordingConfirmation.trim()}` : '',
-    prerecordConfirmation?.trim() ? `Pre-recording confirmation: ${prerecordConfirmation.trim()}` : '',
-    ceuObjectives?.trim() ? `CEU measurable objectives:\n${ceuObjectives.trim()}` : '',
-    ceuQuestions?.trim() ? `CEU knowledge-check questions:\n${ceuQuestions.trim()}` : '',
-    additionalNotes?.trim() ? `Additional questions, requests, or needs:\n${additionalNotes.trim()}` : '',
+    formatConfirmation?.trim() ? `Format: ${formatConfirmation.trim()}` : '',
+    recordingConfirmation?.trim() ? `Recording: ${recordingConfirmation.trim()}` : '',
+    prerecordConfirmation?.trim() ? `Pre-recording: ${prerecordConfirmation.trim()}` : '',
+    ceuObjectives?.trim() ? `CEU objectives:\n${ceuObjectives.trim()}` : '',
+    ceuQuestions?.trim() ? `CEU questions:\n${ceuQuestions.trim()}` : '',
+    additionalNotes?.trim() ? `Questions or requests:\n${additionalNotes.trim()}` : '',
     '',
-    'If you need to update your response or have questions, please contact the Global Gathering Team.',
+    'Questions? Reply to this email or contact globalgathering@cuanschutz.edu.',
     '',
     'Global Gathering Team'
   ]);
 
   const htmlRows = [
     ['Session', sessionTitle],
-    ['Session format confirmation', formatConfirmation],
-    ['Recording confirmation', recordingConfirmation],
-    ['Pre-recording confirmation', prerecordConfirmation],
-    ['CEU measurable objectives', ceuObjectives],
-    ['CEU knowledge-check questions', ceuQuestions],
-    ['Additional questions, requests, or needs', additionalNotes]
+    ['Format', formatConfirmation],
+    ['Recording', recordingConfirmation],
+    ['Pre-recording', prerecordConfirmation],
+    ['CEU objectives', ceuObjectives],
+    ['CEU questions', ceuQuestions],
+    ['Questions or requests', additionalNotes]
   ].filter(([, value]) => value?.trim());
 
   const html = `
     <div style="font-family: Arial, sans-serif; color: #1f2937; line-height: 1.5;">
       <p>Hello ${escapeHtml(name.trim())},</p>
-      <p>Thank you for completing the 2026 Global Gathering Speaker Survey. We received your response.</p>
+      <p>Thank you for completing the Speaker Questionnaire for the 2026 Global Gathering. We received your response.</p>
       <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 680px;">
         ${htmlRows.map(([label, value]) => `
           <tr>
@@ -63,13 +63,13 @@ function buildConfirmationEmail({
           </tr>
         `).join('')}
       </table>
-      <p>If you need to update your response or have questions, please contact the Global Gathering Team.</p>
+      <p>Questions? Reply to this email or contact globalgathering@cuanschutz.edu.</p>
       <p>Global Gathering Team</p>
     </div>
   `;
 
   return {
-    subject: `Speaker Survey confirmation: ${sessionTitle?.trim() || '2026 Global Gathering'}`,
+    subject: `Speaker Questionnaire confirmation: ${sessionTitle?.trim() || '2026 Global Gathering'}`,
     text,
     html
   };
@@ -79,7 +79,7 @@ async function sendConfirmationEmail(response) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.SURVEY_CONFIRMATION_FROM;
   if (!apiKey || !from) {
-    console.warn('Skipping survey confirmation email: RESEND_API_KEY or SURVEY_CONFIRMATION_FROM is not set.');
+    console.warn('Skipping questionnaire confirmation email: RESEND_API_KEY or SURVEY_CONFIRMATION_FROM is not set.');
     return { sent: false, skipped: true };
   }
 
@@ -187,16 +187,16 @@ export default async function handler(req, res) {
         return res.status(200).json({
           success: true,
           confirmationEmailSent: false,
-          warning: 'Your response was saved, but the confirmation email could not be sent.'
+          warning: 'Your questionnaire response was saved, but the confirmation email could not be sent.'
         });
       }
       return res.status(200).json({ success: true, confirmationEmailSent: emailResult.sent });
     } catch (emailErr) {
-      console.error('Survey confirmation email error:', emailErr);
+      console.error('Questionnaire confirmation email error:', emailErr);
       return res.status(200).json({
         success: true,
         confirmationEmailSent: false,
-        warning: 'Your response was saved, but the confirmation email could not be sent.'
+        warning: 'Your questionnaire response was saved, but the confirmation email could not be sent.'
       });
     }
   } catch (err) {
