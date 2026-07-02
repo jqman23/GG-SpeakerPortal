@@ -1126,7 +1126,7 @@ function bindSurvey() {
     }
 
     const matches = sessions
-      .filter(s => `${s.title || ""} ${s.code || ""}`.toLowerCase().includes(q))
+      .filter(s => `${s.title || ""} ${s.code || ""} ${(s.speakers || []).map(sp => sp.name).join(" ")}`.toLowerCase().includes(q))
       .slice(0, 12);
 
     if (!matches.length) {
@@ -1135,11 +1135,13 @@ function bindSurvey() {
     }
 
     matches.forEach(session => {
+      const speakerNames = (session.speakers || []).map(sp => sp.name).filter(Boolean).join(", ");
       const div = document.createElement("div");
       div.className = "px-3 py-2 hover:bg-gray-100 cursor-pointer";
       div.innerHTML = `
         <div class="font-semibold">${escapeHtml(session.title || "")}</div>
         <div class="text-xs font-semibold text-[#162A53]">${escapeHtml(formatSessionDateTime(session))}</div>
+        ${speakerNames ? `<div class="text-xs text-gray-600">${escapeHtml(speakerNames)}</div>` : ""}
       `;
       div.addEventListener("click", () => {
         sessionInput.value = session.title || "";
