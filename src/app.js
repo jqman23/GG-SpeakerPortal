@@ -294,14 +294,14 @@ function buildFormatComparisonRows() {
   return [
     { label: "Breakout rooms", zoom: "Supported", embedded: "Not supported", note: "Zoom breakout rooms are available directly in Zoom; Embedded does not offer a breakout-room experience." },
     { label: "Polls", zoom: "External tool", embedded: "Native", note: "Embedded includes native polls; Zoom relies on an external tool such as Mentimeter." },
-    { label: "Chat", zoom: "Supported", embedded: "Supported", note: "No practical difference." },
+    { label: "Chat", zoom: "Supported", embedded: "Supported" },
     { label: "Q&A", zoom: "Via chat", embedded: "Native", note: "Embedded includes native Q&A; Zoom uses chat for questions." },
     { label: "Screen sharing", zoom: "Supported", embedded: "Supported", note: "Both allow screen sharing, but Zoom is usually simpler for the host and presenter." },
     { label: "Virtual backgrounds", zoom: "Full support", embedded: "Blurred only", note: "Zoom supports the full range of virtual backgrounds; Embedded only offers background blur." },
     { label: "Waiting rooms", zoom: "Supported", embedded: "Not supported", note: "Waiting rooms are a Zoom feature." },
-    { label: "Captions", zoom: "Supported", embedded: "Supported", note: "No practical difference." },
+    { label: "Captions", zoom: "Supported", embedded: "Supported" },
     { label: "Transcripts", zoom: "Supported", embedded: "Not supported", note: "Transcripts are a Zoom feature." },
-    { label: "Share video or audio", zoom: "Supported", embedded: "Supported", note: "No practical difference." },
+    { label: "Share video or audio", zoom: "Supported", embedded: "Supported" },
     { label: "Participant management", zoom: "Full control", embedded: "Limited control", note: "Zoom gives hosts more direct control over participant audio/video." },
     { label: "Participants showing video / coming off mute", zoom: "Supported", embedded: "Requires permission", note: "Embedded typically requires a permission request before participants come on video or unmute; Zoom does not." }
   ];
@@ -363,6 +363,7 @@ function renderFormatComparisonRows(mode) {
         <th class="border-t border-gray-200 px-4 py-3 text-left font-semibold text-[#122345] align-top">
           <span class="inline-flex items-center gap-1">
             ${escapeHtml(row.label)}
+            ${row.note ? `
             <span class="group relative inline-flex">
               <button type="button" class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-gray-700 leading-none" aria-label="${escapeHtml(row.label)} details">
                 i
@@ -371,6 +372,7 @@ function renderFormatComparisonRows(mode) {
                 ${escapeHtml(row.note)}
               </span>
             </span>
+            ` : ""}
           </span>
         </th>
         <td class="border-t border-gray-200 px-4 py-3 align-top ${zoomHighlighted ? "bg-[var(--survey-primary-soft)]" : ""}">${escapeHtml(row.zoom)}</td>
