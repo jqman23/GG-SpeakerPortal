@@ -104,6 +104,10 @@ function activateTab(sectionId) {
   document.querySelectorAll(".content-section").forEach(section => {
     section.classList.toggle("active", section.id === sectionId);
   });
+
+  if (sectionId !== "survey") {
+    clearSurveyStatusMessage();
+  }
 }
 
 function bindOverviewSurveyCta() {
@@ -256,6 +260,7 @@ async function renderSurveyForSession(session, options = {}) {
   updateQuestionnaireSubmitButton();
   document.getElementById("survey-session-id").value = session.id || "";
   clearSurveyResponseFields();
+  clearSurveyStatusMessage();
 
   const summary = document.getElementById("survey-session-summary");
   summary.innerHTML = `
@@ -348,6 +353,13 @@ function clearSurveyResponseFields() {
   document.querySelectorAll('input[name="format-confirmation"], input[name="recording-confirmation"], input[name="prerecord-confirmation"]').forEach(radio => {
     radio.checked = false;
   });
+}
+
+function clearSurveyStatusMessage() {
+  const statusEl = document.getElementById("survey-status");
+  if (!statusEl) return;
+  statusEl.className = "hidden p-4 rounded-lg text-sm font-medium";
+  statusEl.textContent = "";
 }
 
 function updateQuestionnaireSubmitButton() {
