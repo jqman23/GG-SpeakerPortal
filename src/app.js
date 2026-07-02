@@ -462,7 +462,7 @@ async function renderSurveyForSession(session, options = {}) {
           <img src="${currentMode === "zoom"
             ? "https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/bd24b84857c14ef4b86468396df75280.png"
             : "https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/affeaea0d0264febbb47bca747a38e4d.png"}" alt="" class="h-4 w-4" />
-          ${currentMode === "zoom" ? "Zoom" : "Embedded"} currently listed
+          ${currentMode === "zoom" ? "Zoom" : "Embedded"} recommended for your session
         </span>
       </div>
       ${radioGroup("format-confirmation", getFormatPreferenceOptions(currentMode))}
