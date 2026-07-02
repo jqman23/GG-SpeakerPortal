@@ -17,4 +17,12 @@ export async function ensureSchema(sql) {
       submitted_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS session_id TEXT`;
+  await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS session_code TEXT`;
+  await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS session_title TEXT`;
+  await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS ceu_objectives TEXT`;
+  await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS ceu_questions TEXT`;
+  await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS format_confirmation TEXT`;
+  await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS recording_confirmation TEXT`;
+  await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS prerecord_confirmation TEXT`;
 }

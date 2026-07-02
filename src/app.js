@@ -1,18 +1,16 @@
 const SESSION_DATA_URL = "/api/sessions";
-const MAX_GENERATE_CLICKS = 5;
-
 // Toggle tabs here. Set enabled: false to hide a tab without editing markup.
 const TAB_CONFIG = [
   { id: "overview-tab", label: "Overview", sectionId: "overview", enabled: true },
+  {
+    id: "survey-tab",
+    label: "Speaker Survey",
+    sectionId: "survey",
+    enabled: true,
+    featured: true
+  },
   { id: "faqs-tab", label: "Frequently Asked Questions (FAQs)", sectionId: "faqs", enabled: true },
   { id: "session-lookup-tab", label: "Session Information Lookup", sectionId: "session-lookup", enabled: true },
-  {
-    id: "ceu-tab",
-    label: "CEU Information & Question Generator",
-    mobileLabel: "CEU Information",
-    sectionId: "ceu",
-    enabled: true
-  },
   {
     id: "speaker-resource-guide",
     label: "Speaker Resource Guide (PDF)",
@@ -27,29 +25,21 @@ const TAB_CONFIG = [
     enabled: false,
     external: true
   },
-  {
-    id: "survey-tab",
-    label: "Speaker Questionnaire",
-    sectionId: "survey",
-    enabled: true
-  }
 ];
 
 let SESSIONS_AS_OF = "";
 let sessions = [];
 const SPEAKER_INDEX = [];
-let selectedVersion = null;
+let selectedSurveySession = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   renderTabs();
-  bindGenerator();
+  bindOverviewSurveyCta();
   bindLookup();
   bindSurvey();
   bindClickTracking();
   bindIframeHeight();
   loadSessions();
-  initializeGenerateLimit();
-  loadSavedVersions();
 });
 
 function renderTabs() {
@@ -64,6 +54,7 @@ function renderTabs() {
     button.type = "button";
     button.className = [
       "tab-btn",
+      tab.featured ? "tab-featured" : "",
       tab.external ? "tab-external tab-inactive" : tab.sectionId === firstInternalTab?.sectionId ? "tab-active" : "tab-inactive",
       "px-6",
       "py-3",
@@ -105,218 +96,109 @@ function activateTab(sectionId) {
   });
 }
 
-function bindGenerator() {
-  const btn = document.getElementById("generate-btn");
-  const copyBtn = document.getElementById("copy-btn");
-  const editBtn = document.getElementById("edit-btn");
-  const out = document.getElementById("output");
-
-  btn.addEventListener("click", () => {
-    const today = new Date().toISOString().split("T")[0];
-    const generateData = JSON.parse(localStorage.getItem("generateData")) || { date: "", count: 0 };
-
-    if (generateData.date !== today) {
-      generateData.date = today;
-      generateData.count = 0;
-    }
-
-    const remainingClicks = MAX_GENERATE_CLICKS - generateData.count;
-    if (remainingClicks <= 0) {
-      out.textContent = "You have reached the maximum number of draft generations for today. This limit resets each day. Your saved drafts will remain available in this browser unless you clear your browser's local storage.";
-      return;
-    }
-
-    const title = document.getElementById("title");
-    const desc = document.getElementById("description");
-    if (!title.value.trim() || !desc.value.trim()) {
-      selectedVersion = null;
-      out.textContent = "Please add at least the session title and description before generating a draft.";
-      return;
-    }
-
-    generateCEU().then(generated => {
-      if (!generated) return;
-      generateData.count += 1;
-      localStorage.setItem("generateData", JSON.stringify(generateData));
-      btn.textContent = `Generate Draft (${MAX_GENERATE_CLICKS - generateData.count} Remaining)`;
-    });
-  });
-
-  copyBtn.addEventListener("click", () => {
-    navigator.clipboard.writeText(out.textContent);
-    copyBtn.textContent = "Copied!";
-    setTimeout(() => {
-      copyBtn.textContent = "Copy Draft";
-    }, 2000);
-  });
-
-  editBtn.addEventListener("click", () => {
-    const currentOutput = out.textContent.trim();
-    if (editBtn.textContent === "Edit Draft") {
-      out.contentEditable = "true";
-      out.focus();
-      editBtn.textContent = "Save Draft";
-      editBtn.style.background = "var(--green)";
-      return;
-    }
-
-    out.contentEditable = "false";
-    editBtn.textContent = "Edit Draft";
-    editBtn.style.background = "var(--blue)";
-
-    if (selectedVersion) {
-      selectedVersion.dataset.content = currentOutput;
-      saveToLocalStorage();
-    }
-  });
-
-  const titleInput = document.getElementById("title");
-  const descInput = document.getElementById("description");
-  const suggestionsDiv = document.getElementById("suggestions");
-
-  titleInput.addEventListener("input", () => {
-    const query = titleInput.value.toLowerCase().trim();
-    suggestionsDiv.innerHTML = "";
-    if (!query) {
-      suggestionsDiv.classList.add("hidden");
-      return;
-    }
-
-    const matches = sessions.filter(session => (session.title || "").toLowerCase().includes(query));
-    if (!matches.length) {
-      suggestionsDiv.classList.add("hidden");
-      return;
-    }
-
-    matches.forEach(session => {
-      const suggestion = document.createElement("div");
-      suggestion.textContent = session.title;
-      suggestion.addEventListener("click", () => {
-        titleInput.value = session.title;
-        descInput.value = session.description || "";
-        suggestionsDiv.classList.add("hidden");
-      });
-      suggestionsDiv.appendChild(suggestion);
-    });
-    suggestionsDiv.classList.remove("hidden");
-  });
-
-  titleInput.addEventListener("blur", () => {
-    setTimeout(() => suggestionsDiv.classList.add("hidden"), 200);
-  });
-
-  titleInput.addEventListener("change", () => {
-    const exactMatch = sessions.find(session => (session.title || "").toLowerCase() === titleInput.value.toLowerCase().trim());
-    if (exactMatch) descInput.value = exactMatch.description || "";
-  });
+function bindOverviewSurveyCta() {
+  const cta = document.getElementById("overview-survey-cta");
+  if (!cta) return;
+  cta.addEventListener("click", () => activateTab("survey"));
 }
 
-function initializeGenerateLimit() {
-  const btn = document.getElementById("generate-btn");
-  const today = new Date().toISOString().split("T")[0];
-  let generateData = JSON.parse(localStorage.getItem("generateData"));
+function formatSessionDateTime(session) {
+  const start = session.start || "";
+  const end = session.end || "";
+  if (!start && !end) return "Not listed";
+  const [date, time] = start.split("|");
+  return `${date || "Date not listed"}${time ? `, ${time}` : ""}${end ? `-${end}` : ""}`;
+}
 
-  if (!generateData || generateData.date !== today) {
-    generateData = { date: today, count: 0 };
-    localStorage.setItem("generateData", JSON.stringify(generateData));
+function isCeuEligible(session) {
+  return normalize(session?.ceuEligibility || "") === "ceu eligible";
+}
+
+function isKeynote(session) {
+  return normalize(session?.presentationType || "").includes("keynote");
+}
+
+function hasPreRecordInterest(session) {
+  return normalize(session?.preRecordInterest || "") === "yes";
+}
+
+function radioGroup(name, options, required = true) {
+  return options.map((option, index) => `
+    <label class="flex items-start gap-2 text-sm text-gray-800">
+      <input type="radio" name="${name}" value="${escapeHtml(option)}" ${required && index === 0 ? "required" : ""} class="mt-1" />
+      <span>${escapeHtml(option)}</span>
+    </label>
+  `).join("");
+}
+
+function renderSurveyForSession(session) {
+  selectedSurveySession = session;
+  document.getElementById("survey-session-id").value = session.id || "";
+
+  const summary = document.getElementById("survey-session-summary");
+  summary.innerHTML = `
+    <h3 class="font-bold text-[#162A53] mb-3">Selected session</h3>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+      <div><dt class="font-semibold text-gray-600">Title</dt><dd>${escapeHtml(session.title || "Not listed")}</dd></div>
+      <div><dt class="font-semibold text-gray-600">Date/time</dt><dd>${escapeHtml(formatSessionDateTime(session))}</dd></div>
+      <div><dt class="font-semibold text-gray-600">Session code</dt><dd>${escapeHtml(session.code || "Not listed")}</dd></div>
+      <div><dt class="font-semibold text-gray-600">CEU eligibility</dt><dd>${escapeHtml(session.ceuEligibility || "Not listed")}</dd></div>
+      <div><dt class="font-semibold text-gray-600">Recording status</dt><dd>${escapeHtml(session.recordingStatus || "Not listed")}</dd></div>
+      <div><dt class="font-semibold text-gray-600">Video format/session feature</dt><dd>${escapeHtml(session.videoFormat || "Not listed")}</dd></div>
+      ${session.preRecordInterest ? `<div><dt class="font-semibold text-gray-600">Pre-recording interest</dt><dd>${escapeHtml(session.preRecordInterest)}</dd></div>` : ""}
+    </dl>
+  `;
+  summary.classList.remove("hidden");
+
+  const conditional = document.getElementById("survey-conditional-fields");
+  conditional.classList.remove("hidden");
+
+  const ceuSection = document.getElementById("survey-ceu-section");
+  ceuSection.classList.toggle("hidden", !isCeuEligible(session));
+  document.getElementById("survey-ceu-objectives").required = isCeuEligible(session);
+  document.getElementById("survey-ceu-questions").required = isCeuEligible(session);
+
+  const formatSection = document.getElementById("survey-format-section");
+  const feature = (session.videoFormat || "").trim();
+  const showFormat = !isKeynote(session) && ["zoom", "embedded"].includes(normalize(feature));
+  formatSection.classList.toggle("hidden", !showFormat);
+  if (showFormat) {
+    const explanation = normalize(feature) === "zoom"
+      ? "Our records show this session is expected to use the standard Zoom-based format connected to the virtual event experience."
+      : "Our records show this session is expected to be embedded into Attendee Hub / the virtual event experience rather than functioning only as a standard external Zoom room.";
+    formatSection.innerHTML = `
+      <h3 class="font-bold text-[#162A53]">Session format confirmation</h3>
+      <p class="text-sm text-gray-800">${escapeHtml(explanation)}</p>
+      ${radioGroup("format-confirmation", ["Yes, this works for my session.", "I have a question or concern about this format."])}
+    `;
+  } else {
+    formatSection.innerHTML = "";
   }
 
-  btn.textContent = `Generate Draft (${MAX_GENERATE_CLICKS - generateData.count} Remaining)`;
+  const recordingText = normalize(session.recordingStatus || "").includes("not")
+    ? "Our records show this session is currently marked as not recorded."
+    : "Our records show this session is currently marked to be recorded.";
+  document.getElementById("survey-recording-section").innerHTML = `
+    <h3 class="font-bold text-[#162A53]">Recording confirmation</h3>
+    <p class="text-sm text-gray-800">${escapeHtml(recordingText)}</p>
+    ${radioGroup("recording-confirmation", ["This looks correct.", "I have a question or this does not look correct."])}
+  `;
+
+  const prerecordSection = document.getElementById("survey-prerecord-section");
+  prerecordSection.classList.toggle("hidden", !hasPreRecordInterest(session));
+  prerecordSection.innerHTML = hasPreRecordInterest(session) ? `
+    <h3 class="font-bold text-[#162A53]">Pre-recording confirmation</h3>
+    <p class="text-sm text-gray-800">You expressed interest in pre-recording your session. Please indicate here if you formally plan on pre-recording your session. If we do not receive a response, we will assume you will present your session live.</p>
+    ${radioGroup("prerecord-confirmation", [
+      "Yes, I formally plan to pre-record this session.",
+      "No, I plan to present this session live.",
+      "I have a question or need to discuss this with the Global Gathering Team."
+    ])}
+  ` : "";
 }
 
-async function generateCEU() {
-  const title = document.getElementById("title");
-  const desc = document.getElementById("description");
-  const extra = document.getElementById("extra");
-  const out = document.getElementById("output");
-  const copyBtn = document.getElementById("copy-btn");
-  const editBtn = document.getElementById("edit-btn");
-  const savedVersionsDiv = document.getElementById("saved-versions");
-
-  out.innerHTML = '<p class="loading">Generating...</p>';
-
-  try {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: title.value.trim(),
-        description: desc.value.trim(),
-        extra: extra.value.trim()
-      })
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      out.textContent = data.details ? `${data.error}\n${data.details}` : data.error;
-      return false;
-    }
-
-    out.textContent = data.output;
-    saveVersion(data.output, savedVersionsDiv);
-    copyBtn.classList.add("visible");
-    editBtn.classList.add("visible");
-    selectedVersion = null;
-    return true;
-  } catch (error) {
-    out.textContent = `Network error: ${error.message}`;
-    return false;
-  }
-}
-
-function saveToLocalStorage() {
-  const savedVersionsDiv = document.getElementById("saved-versions");
-  const versions = Array.from(savedVersionsDiv.children).map(div => ({
-    content: div.dataset.content,
-    label: div.textContent
-  }));
-  localStorage.setItem("savedVersions", JSON.stringify(versions));
-}
-
-function loadSavedVersions() {
-  const savedVersionsDiv = document.getElementById("saved-versions");
-  const savedVersions = JSON.parse(localStorage.getItem("savedVersions")) || [];
-
-  savedVersions.forEach(version => {
-    const versionDiv = createVersionElement(version.label, version.content, savedVersionsDiv);
-    savedVersionsDiv.appendChild(versionDiv);
-  });
-}
-
-function saveVersion(content, savedVersionsDiv) {
-  const versionCount = savedVersionsDiv.children.length + 1;
-  const versionDiv = createVersionElement(`Saved Draft, Version ${versionCount}`, content, savedVersionsDiv);
-  savedVersionsDiv.appendChild(versionDiv);
-  saveToLocalStorage();
-}
-
-function createVersionElement(label, content, savedVersionsDiv) {
-  const versionDiv = document.createElement("div");
-  versionDiv.className = "version";
-  versionDiv.textContent = label;
-  versionDiv.dataset.content = content;
-  versionDiv.addEventListener("click", () => {
-    const out = document.getElementById("output");
-    const copyBtn = document.getElementById("copy-btn");
-    const editBtn = document.getElementById("edit-btn");
-    const currentOutput = out.textContent.trim();
-
-    if (selectedVersion && selectedVersion.dataset.content !== currentOutput) {
-      selectedVersion.dataset.content = currentOutput;
-      saveToLocalStorage();
-    }
-
-    if (currentOutput && !selectedVersion) {
-      const isDuplicate = Array.from(savedVersionsDiv.children).some(div => div.dataset.content === currentOutput);
-      if (!isDuplicate) saveVersion(currentOutput, savedVersionsDiv);
-    }
-
-    selectedVersion = versionDiv;
-    out.textContent = versionDiv.dataset.content;
-    copyBtn.classList.add("visible");
-    editBtn.classList.add("visible");
-  });
-  return versionDiv;
+function selectedRadioValue(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
 }
 
 async function loadSessions() {
@@ -654,11 +536,90 @@ function bindSurvey() {
   const form = document.getElementById("survey-form");
   if (!form) return;
 
+  const sessionInput = document.getElementById("survey-session-search");
+  const suggestionsBox = document.getElementById("survey-session-suggestions");
+  const generateBtn = document.getElementById("survey-generate-ceu");
   const submitBtn = document.getElementById("survey-submit");
   const statusEl = document.getElementById("survey-status");
 
+  sessionInput.addEventListener("input", () => {
+    const q = sessionInput.value.toLowerCase().trim();
+    selectedSurveySession = null;
+    document.getElementById("survey-session-id").value = "";
+    document.getElementById("survey-session-summary").classList.add("hidden");
+    document.getElementById("survey-conditional-fields").classList.add("hidden");
+    suggestionsBox.innerHTML = "";
+
+    if (!q) {
+      suggestionsBox.classList.add("hidden");
+      return;
+    }
+
+    const matches = sessions
+      .filter(s => `${s.title || ""} ${s.code || ""}`.toLowerCase().includes(q))
+      .slice(0, 12);
+
+    if (!matches.length) {
+      suggestionsBox.classList.add("hidden");
+      return;
+    }
+
+    matches.forEach(session => {
+      const div = document.createElement("div");
+      div.className = "px-3 py-2 hover:bg-gray-100 cursor-pointer";
+      div.innerHTML = `
+        <div class="font-semibold">${escapeHtml(session.title || "")}</div>
+        <div class="text-xs text-gray-600">${escapeHtml([session.code, formatSessionDateTime(session)].filter(Boolean).join(" | "))}</div>
+      `;
+      div.addEventListener("click", () => {
+        sessionInput.value = session.title || "";
+        suggestionsBox.classList.add("hidden");
+        renderSurveyForSession(session);
+      });
+      suggestionsBox.appendChild(div);
+    });
+    suggestionsBox.classList.remove("hidden");
+  });
+
+  document.addEventListener("click", e => {
+    if (!suggestionsBox.contains(e.target) && e.target !== sessionInput) suggestionsBox.classList.add("hidden");
+  });
+
+  generateBtn.addEventListener("click", async () => {
+    if (!selectedSurveySession) return;
+    const draftEl = document.getElementById("survey-ceu-draft");
+    draftEl.textContent = "Generating draft...";
+    draftEl.classList.remove("hidden");
+    generateBtn.disabled = true;
+
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: selectedSurveySession.title || "",
+          description: selectedSurveySession.description || "",
+          extra: ""
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.details ? `${data.error}\n${data.details}` : data.error);
+      draftEl.textContent = `${data.output}\n\nYou may copy and edit this draft in the CEU response boxes above before submitting.`;
+    } catch (err) {
+      draftEl.textContent = `Unable to generate a draft right now: ${err.message}`;
+    } finally {
+      generateBtn.disabled = false;
+    }
+  });
+
   form.addEventListener("submit", async e => {
     e.preventDefault();
+    if (!selectedSurveySession) {
+      statusEl.textContent = "Please select your session from the dropdown before submitting.";
+      statusEl.className = "p-4 rounded-lg text-sm font-medium bg-red-50 text-red-800 border border-red-200";
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting...";
     statusEl.className = "hidden p-4 rounded-lg text-sm font-medium";
@@ -666,9 +627,15 @@ function bindSurvey() {
     const body = {
       name: document.getElementById("survey-name").value,
       email: document.getElementById("survey-email").value,
-      q1: document.getElementById("survey-q1").value,
-      q2: document.getElementById("survey-q2").value,
-      q3: document.getElementById("survey-q3").value
+      sessionId: selectedSurveySession.id || "",
+      sessionCode: selectedSurveySession.code || "",
+      sessionTitle: selectedSurveySession.title || "",
+      ceuObjectives: isCeuEligible(selectedSurveySession) ? document.getElementById("survey-ceu-objectives").value : "",
+      ceuQuestions: isCeuEligible(selectedSurveySession) ? document.getElementById("survey-ceu-questions").value : "",
+      formatConfirmation: selectedRadioValue("format-confirmation"),
+      recordingConfirmation: selectedRadioValue("recording-confirmation"),
+      prerecordConfirmation: selectedRadioValue("prerecord-confirmation"),
+      additionalNotes: document.getElementById("survey-additional-notes").value
     };
 
     try {
@@ -681,8 +648,13 @@ function bindSurvey() {
 
       if (res.ok) {
         form.reset();
+        selectedSurveySession = null;
+        document.getElementById("survey-session-summary").classList.add("hidden");
+        document.getElementById("survey-conditional-fields").classList.add("hidden");
+        document.getElementById("survey-ceu-draft").classList.add("hidden");
         statusEl.textContent = "Thank you! Your survey response has been submitted successfully.";
         statusEl.className = "p-4 rounded-lg text-sm font-medium bg-green-50 text-green-800 border border-green-200";
+        submitBtn.disabled = false;
         submitBtn.textContent = "Submit Survey";
       } else {
         statusEl.textContent = data.error || "Something went wrong. Please try again.";

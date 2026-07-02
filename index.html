@@ -16,8 +16,15 @@
       <section id="overview" class="content-section active bg-white p-6 rounded-lg shadow mb-6">
         <h2 class="text-2xl font-bold text-[#162A53] mb-4">Overview</h2>
         <p class="text-gray-700">
-          Welcome to the 2026 Global Gathering Speaker Resource &amp; Questionnaire Page. This page brings together practical information to help presenters prepare for A Global Gathering for the Future of Child Welfare. We recommend bookmarking this page and completing the <strong>Speaker Questionnaire</strong> using the tab above, where you can submit required speaker information directly to the Global Gathering Team.<br><br>As the event approaches, this page will continue to be updated with guidance about Attendee Hub, session hosting, CEU requirements, resource deadlines, and other presenter supports.
+          Welcome to the 2026 Global Gathering Speaker Resource &amp; Questionnaire Page. This page brings together practical information to help presenters prepare for A Global Gathering for the Future of Child Welfare. We recommend bookmarking this page and completing the <strong>Speaker Survey</strong> using the tab above, where you can submit required speaker information directly to the Global Gathering Team.<br><br>As the event approaches, this page will continue to be updated with guidance about Attendee Hub, session hosting, CEU requirements, resource deadlines, and other presenter supports.
         </p>
+        <div class="survey-cta mt-6 border-l-4 border-[#89A84F] bg-[#F2F7EA] p-5 rounded-r-lg">
+          <h3 class="text-xl font-bold text-[#162A53] mb-2">Required next step: complete the Speaker Survey</h3>
+          <p class="text-gray-800 mb-4">Please complete the Speaker Survey for your session as your first priority. Your responses confirm important session details, including CEU materials, recording status, video format, and any pre-recording plans that apply to your session.</p>
+          <button id="overview-survey-cta" type="button" class="px-5 py-3 bg-[#89A84F] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity">
+            Complete the Speaker Survey
+          </button>
+        </div>
       </section>
 
       <section id="faqs" class="content-section bg-white p-6 rounded-lg shadow">
@@ -45,7 +52,7 @@
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">What do CEU-eligible presenters need to submit?</summary>
-            <p class="mt-2">For CEU-eligible sessions, at least one presenter should submit three knowledge-check questions and three measurable learning objectives through the <strong>Speaker Questionnaire</strong> tab on this page by the deadline communicated by the Global Gathering Team. Questions should be based on the content of the session itself and should not be about the Global Gathering, the session format, or presenter biographies. If you need help drafting these materials, use the <b>CEU Information &amp; Question Generator</b> tab on this page.</p>
+            <p class="mt-2">For CEU-eligible sessions, at least one presenter should submit three knowledge-check questions and three measurable learning objectives through the <strong>Speaker Survey</strong> tab on this page by the deadline communicated by the Global Gathering Team. Questions should be based on the content of the session itself and should not be about the Global Gathering, the session format, or presenter biographies. A simple draft helper appears inside the Speaker Survey for CEU-eligible sessions.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How do I make changes to my session or speaker information?</summary>
@@ -90,58 +97,12 @@
         </div>
       </section>
 
-      <section id="ceu" class="content-section bg-white p-6 rounded-lg shadow">
-        <h2 class="text-2xl font-bold text-[#162A53] mb-4">CEU Information</h2>
-        <p class="mb-4 text-gray-800">Some sessions at the 2026 Global Gathering may be eligible for Continuing Education Units, or CEUs. CEU-eligible sessions require three knowledge-check questions and three measurable learning objectives. These materials help support the post-session CEU process for eligible participants.</p>
-        <p class="mb-4 text-gray-800">Knowledge-check questions should be based on the content of the session itself. They should help confirm that participants engaged with key ideas, concepts, frameworks, or practices shared during the session.</p>
-        <p class="mb-4 text-gray-800">Please submit three knowledge-check questions. True/False or Multiple Choice questions are preferred.</p>
-        <p class="mb-4 text-gray-800">Please submit three measurable learning objectives that describe what participants should be able to understand, describe, identify, apply, or reflect on after the session.</p>
-        <p class="mb-4 text-gray-800">Questions and objectives should be specific to your session content and should not be about the Global Gathering itself.</p>
-        <p class="mb-6 text-gray-800">Please submit CEU materials through the <strong>Speaker Questionnaire</strong> tab on this page by the deadline communicated by the Global Gathering Team. If you need support, contact <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
-
-        <div class="ceu-widget hidden sm:block">
-          <h2>Generate Draft CEU Knowledge-Check Questions &amp; Measurable Objectives</h2>
-          <p class="mt-6 mb-2 text-gray-800 font-semibold">Use this tool to draft possible CEU questions and objectives for your session. Please review and edit the output before submitting.</p>
-          <ol class="list-decimal list-inside text-gray-800 space-y-2 pl-6">
-            <li>Generated drafts remain saved in this browser unless you clear your browser's local storage.</li>
-            <li>You can edit and copy each draft before submitting your final CEU materials through the Speaker Questionnaire tab on this page.</li>
-          </ol>
-          <br />
-          <label for="title">Session Title</label>
-          <p class="instruction">Begin typing your session title and select it from the drop-down menu if it appears. You may also type the title manually.</p>
-          <div class="relative">
-            <input id="title" type="text" placeholder="Start typing and then choose from the drop-down..." />
-            <div id="suggestions" class="suggestions hidden"></div>
-          </div>
-
-          <label for="description">Session Description</label>
-          <p class="instruction">If your session description does not auto-populate, paste or type the description here.</p>
-          <textarea id="description" rows="4" placeholder="Enter a brief session description..."></textarea>
-
-          <label for="extra">Additional Info (Optional)</label>
-          <p class="instruction">Add any extra context that would help generate stronger questions and objectives, such as key concepts, frameworks, activities, takeaways, or terms participants should understand.</p>
-          <textarea id="extra" rows="3" placeholder="Add key concepts, frameworks, activities, or takeaways..."></textarea>
-
-          <button id="generate-btn" type="button">
-            <svg class="icon-send" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l7-7-7-7M5 12h14"/>
-            </svg>
-            Generate Draft
-          </button>
-          <div id="output" class="output"></div>
-          <div class="output-buttons">
-            <button id="copy-btn" class="copy-btn" type="button">Copy Draft</button>
-            <button id="edit-btn" class="edit-btn" type="button">Edit Draft</button>
-          </div>
-          <div id="saved-versions" class="saved-versions"></div>
-        </div>
-      </section>
-
       <section id="survey" class="content-section bg-white p-6 rounded-lg shadow">
-        <h2 class="text-2xl font-bold text-[#162A53] mb-4">Speaker Questionnaire</h2>
-        <p class="mb-6 text-gray-700">Please complete the speaker questionnaire below. Your responses help the Global Gathering Team prepare to support your session effectively. Fields marked with * are required.</p>
+        <h2 class="text-2xl font-bold text-[#162A53] mb-4">Speaker Survey</h2>
+        <p class="mb-6 text-gray-700">Please complete this required survey for each session you are presenting. Start by selecting your session so the questions below match the session details in the Program Database. Fields marked with * are required.</p>
 
         <form id="survey-form" class="space-y-6">
+          <input id="survey-session-id" type="hidden" />
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="survey-name" class="block text-sm font-semibold text-gray-700 mb-1">Full Name *</label>
@@ -156,27 +117,42 @@
           </div>
 
           <div>
-            <label for="survey-q1" class="block text-sm font-semibold text-gray-700 mb-1">
-              1. Please confirm that your session title and description are accurate as submitted. If any corrections are needed, describe them below. *
-            </label>
-            <textarea id="survey-q1" rows="3" required placeholder="e.g., Everything looks correct. / The session title should be updated to..."
-              class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0"></textarea>
+            <label for="survey-session-search" class="block text-sm font-semibold text-gray-700 mb-1">Session title *</label>
+            <p class="text-sm text-gray-600 mb-2">Begin typing your session title, then choose the correct session from the dropdown.</p>
+            <div class="relative">
+              <input id="survey-session-search" type="text" required autocomplete="off" placeholder="Start typing your session title..."
+                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0" />
+              <div id="survey-session-suggestions" class="absolute z-20 bg-white border border-gray-200 rounded-lg shadow mt-1 w-full hidden max-h-64 overflow-y-auto"></div>
+            </div>
           </div>
 
-          <div>
-            <label for="survey-q2" class="block text-sm font-semibold text-gray-700 mb-1">
-              2. Do you have any technical or A/V requirements for your session? (e.g., specific software, screen sharing needs, accessibility accommodations)
-            </label>
-            <textarea id="survey-q2" rows="3" placeholder="Enter any technical or accessibility requirements, or leave blank if none."
-              class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0"></textarea>
-          </div>
+          <div id="survey-session-summary" class="hidden border border-gray-200 rounded-lg p-4 bg-gray-50"></div>
 
-          <div>
-            <label for="survey-q3" class="block text-sm font-semibold text-gray-700 mb-1">
-              3. Is there anything else you would like the Global Gathering Team to know in preparation for your session?
-            </label>
-            <textarea id="survey-q3" rows="3" placeholder="Any additional information, questions, or requests for the Global Gathering Team."
-              class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0"></textarea>
+          <div id="survey-conditional-fields" class="hidden space-y-6">
+            <div id="survey-ceu-section" class="hidden border border-[#89A84F] rounded-lg p-4 bg-[#F8FBF3] space-y-4">
+              <div>
+                <label for="survey-ceu-objectives" class="block text-sm font-semibold text-gray-700 mb-1">Your session is CEU Eligible. Please list 3 measurable objectives (i.e., lessons learned) in this box. One sentence or bullet is fine for each.</label>
+                <textarea id="survey-ceu-objectives" rows="5" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0"></textarea>
+              </div>
+              <div>
+                <label for="survey-ceu-questions" class="block text-sm font-semibold text-gray-700 mb-1">Your session is CEU Eligible. We should receive 3 single-answer multiple-choice OR True/False questions for your session that measure content retention. Multiple-choice questions should have 3&ndash;4 options, however True/False questions are perfectly fine. Attendees claiming CEU credit for this session must respond to these questions in order to receive credit. In this box, please clearly list all 3 questions.</label>
+                <textarea id="survey-ceu-questions" rows="7" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0"></textarea>
+              </div>
+              <button id="survey-generate-ceu" type="button" class="px-4 py-2 bg-[#162A53] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity">Generate draft CEU questions/objectives</button>
+              <div id="survey-ceu-draft" class="hidden text-sm whitespace-pre-wrap border border-gray-200 rounded-lg p-3 bg-white"></div>
+            </div>
+
+            <div id="survey-format-section" class="hidden border border-gray-200 rounded-lg p-4 space-y-3"></div>
+
+            <div id="survey-recording-section" class="border border-gray-200 rounded-lg p-4 space-y-3"></div>
+
+            <div id="survey-prerecord-section" class="hidden border border-gray-200 rounded-lg p-4 space-y-3"></div>
+
+            <div>
+              <label for="survey-additional-notes" class="block text-sm font-semibold text-gray-700 mb-1">Please use this space to express any Global Gathering related questions, requests, or needs. We will do our best to accommodate. (Optional)</label>
+              <textarea id="survey-additional-notes" rows="4" placeholder="Optional"
+                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#89A84F] focus:ring-0"></textarea>
+            </div>
           </div>
 
           <button type="submit" id="survey-submit"

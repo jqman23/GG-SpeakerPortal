@@ -73,6 +73,19 @@ a {
   background-color: rgba(22, 42, 83, 0.2);
 }
 
+.tab-featured {
+  background-color: var(--primary-green);
+  color: #fff;
+  border: 1px solid rgba(111, 142, 62, 0.7);
+  box-shadow: 0 6px 12px rgba(137, 168, 79, 0.24);
+}
+
+.tab-featured.tab-inactive:hover,
+.tab-featured.tab-active {
+  background-color: #6f8e3e;
+  color: #fff;
+}
+
 .tab-external {
   background-color: rgba(137, 168, 79, 0.12);
   color: var(--primary-blue);
