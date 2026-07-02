@@ -21,14 +21,24 @@ function buildConfirmationEmail({
   formatConfirmation,
   recordingConfirmation,
   prerecordConfirmation,
-  additionalNotes
+  additionalNotes,
+  isResubmission
 }) {
+  const cleanName = name.trim();
+  const cleanSessionTitle = sessionTitle?.trim() || 'Not provided';
+  const responseNoun = isResubmission ? 'updated response' : 'response';
+  const subjectPrefix = isResubmission ? 'Speaker Questionnaire update confirmation' : 'Speaker Questionnaire confirmation';
+  const eyebrow = isResubmission ? 'Speaker Questionnaire update received' : 'Speaker Questionnaire received';
   const text = compactLines([
-    `Hello ${name.trim()},`,
+    `Hello ${cleanName},`,
     '',
-    'Thank you for completing the Speaker Questionnaire for the 2026 Global Gathering. We received your response.',
+    isResubmission
+      ? 'Thank you for updating your Speaker Questionnaire for the 2026 Global Gathering. We received your updated response for:'
+      : 'Thank you for completing the Speaker Questionnaire for the 2026 Global Gathering. We received your response for:',
     '',
-    `Session: ${sessionTitle?.trim() || 'Not provided'}`,
+    cleanSessionTitle,
+    '',
+    'Summary of your response:',
     formatConfirmation?.trim() ? `Format: ${formatConfirmation.trim()}` : '',
     recordingConfirmation?.trim() ? `Recording: ${recordingConfirmation.trim()}` : '',
     prerecordConfirmation?.trim() ? `Pre-recording: ${prerecordConfirmation.trim()}` : '',
@@ -38,7 +48,11 @@ function buildConfirmationEmail({
     '',
     'Questions? Reply to this email or contact globalgathering@cuanschutz.edu.',
     '',
-    'Global Gathering Team'
+    'Global Gathering Team',
+    'The Kempe Center for the Prevention and Treatment of Child Abuse & Neglect',
+    'University of Colorado Anschutz Medical Campus | Department of Pediatrics',
+    '13121 E. 17th Ave., 5th Floor, Box C221, Aurora, CO 80045',
+    'E: globalgathering@cuanschutz.edu | www.futureofchildwelfare.org'
   ]);
 
   const htmlRows = [
@@ -52,24 +66,48 @@ function buildConfirmationEmail({
   ].filter(([, value]) => value?.trim());
 
   const html = `
-    <div style="font-family: Arial, sans-serif; color: #1f2937; line-height: 1.5;">
-      <p>Hello ${escapeHtml(name.trim())},</p>
-      <p>Thank you for completing the Speaker Questionnaire for the 2026 Global Gathering. We received your response.</p>
-      <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 680px;">
-        ${htmlRows.map(([label, value]) => `
-          <tr>
-            <td style="vertical-align: top; padding: 8px 12px 8px 0; font-weight: bold; color: #162A53; width: 220px;">${escapeHtml(label)}</td>
-            <td style="vertical-align: top; padding: 8px 0; white-space: pre-wrap;">${escapeHtml(value.trim())}</td>
-          </tr>
-        `).join('')}
-      </table>
-      <p>Questions? Reply to this email or contact globalgathering@cuanschutz.edu.</p>
-      <p>Global Gathering Team</p>
+    <div style="margin:0; padding:32px 16px; background:#F5F7FA; font-family:Montserrat, Arial, sans-serif; color:#1f2937; line-height:1.5;">
+      <div style="max-width:680px; margin:0 auto;">
+        <div style="background:#ffffff; border:1px solid #d9e2ea; border-radius:8px; padding:28px;">
+          <p style="margin:0 0 8px 0; color:#46775D; font-size:12px; font-weight:bold; letter-spacing:0.04em; text-transform:uppercase;">${escapeHtml(eyebrow)}</p>
+          <h1 style="margin:0 0 14px 0; color:#122345; font-size:26px; line-height:1.25;">Thank you, ${escapeHtml(cleanName)}.</h1>
+          <p style="margin:0 0 18px 0; font-size:15px;">We received your ${escapeHtml(responseNoun)} for the Speaker Questionnaire for the 2026 Global Gathering.</p>
+          <div style="margin:0 0 22px 0; padding:14px 16px; background:#F5F7FA; border-left:4px solid #46775D; border-radius:6px;">
+            <p style="margin:0 0 4px 0; font-size:12px; color:#46775D; font-weight:bold; text-transform:uppercase; letter-spacing:0.04em;">Session</p>
+            <p style="margin:0; color:#122345; font-size:17px; font-weight:bold;">${escapeHtml(cleanSessionTitle)}</p>
+          </div>
+          <p style="margin:0 0 12px 0; color:#122345; font-size:15px; font-weight:bold;">Here is a copy of what we received:</p>
+          <div style="border:1px solid #d9e2ea; border-radius:8px; overflow:hidden;">
+            <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+              ${htmlRows.map(([label, value], index) => `
+                <tr>
+                  <td style="vertical-align: top; padding:12px 14px; font-weight:bold; color:#122345; width:190px; border-top:${index === 0 ? '0' : '1px solid #e5edf3'};">${escapeHtml(label)}</td>
+                  <td style="vertical-align: top; padding:12px 14px; white-space:pre-wrap; border-top:${index === 0 ? '0' : '1px solid #e5edf3'};">${escapeHtml(value.trim())}</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+          <p style="margin:22px 0 0 0;">Questions? Reply to this email or contact <a href="mailto:globalgathering@cuanschutz.edu" style="color:#0563C1; text-decoration:underline;">globalgathering@cuanschutz.edu</a>.</p>
+        </div>
+        <div style="margin-top:24px; padding-top:18px; border-top:1px solid #d9e2ea; font-family:Arial, sans-serif; color:#023890;">
+          <p style="margin:0 0 4px 0; font-size:12px; line-height:1.4; font-weight:bold; color:#023890;">Global Gathering Team</p>
+          <p style="margin:0; font-size:12px; line-height:1.4; color:#023890;">The Kempe Center for the Prevention and Treatment of Child Abuse &amp; Neglect</p>
+          <p style="margin:0; font-size:12px; line-height:1.4; color:#023890;">University of Colorado Anschutz Medical Campus | Department of Pediatrics</p>
+          <p style="margin:0; font-size:12px; line-height:1.4; color:#023890;">13121 E. 17th Ave., 5th Floor, Box C221, Aurora, CO 80045</p>
+          <p style="margin:0 0 12px 0; font-size:12px; line-height:1.4; color:#023890;">
+            <strong>E:</strong>
+            <a href="mailto:globalgathering@cuanschutz.edu" style="color:#0563C1; text-decoration:underline;">globalgathering@cuanschutz.edu</a>
+            <span style="color:#023890;"> | </span>
+            <a href="https://www.futureofchildwelfare.org/" style="color:#0563C1; text-decoration:underline;">www.futureofchildwelfare.org</a>
+          </p>
+          <img src="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/4c40728a45af4e0289e8075b9759c684.png" width="485" height="109" alt="2026 Global Gathering for the Future of Child Welfare" style="display:block; width:100%; max-width:485px; height:auto; border:0; outline:none; text-decoration:none;" />
+        </div>
+      </div>
     </div>
   `;
 
   return {
-    subject: `Speaker Questionnaire confirmation: ${sessionTitle?.trim() || '2026 Global Gathering'}`,
+    subject: `${subjectPrefix}: ${cleanSessionTitle}`,
     text,
     html
   };
@@ -126,6 +164,7 @@ export default async function handler(req, res) {
     recordingConfirmation,
     prerecordConfirmation,
     additionalNotes,
+    isResubmission,
     q1,
     q2,
     q3
@@ -181,7 +220,8 @@ export default async function handler(req, res) {
         formatConfirmation,
         recordingConfirmation,
         prerecordConfirmation,
-        additionalNotes: additionalNotes || q3 || ''
+        additionalNotes: additionalNotes || q3 || '',
+        isResubmission
       });
       if (!emailResult.sent) {
         return res.status(200).json({

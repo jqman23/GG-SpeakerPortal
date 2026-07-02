@@ -1,5 +1,10 @@
 const SESSION_DATA_URL = "/api/sessions";
 const SURVEY_SUBMISSION_KEY = "ggSpeakerSurveyLastSubmission";
+const CEU_GENERATE_LIMIT_KEY = "ggCeuGenerateLimit";
+const CEU_INITIAL_LIMIT = 3;
+const CEU_EXTRA_LIMIT = 2;
+const CEU_SHORT_WAIT_MS = 5 * 60 * 1000;
+const CEU_DAILY_WAIT_MS = 24 * 60 * 60 * 1000;
 // Toggle tabs here. Set enabled: false to hide a tab without editing markup.
 const TAB_CONFIG = [
   { id: "overview-tab", label: "Overview", sectionId: "overview", enabled: true },
@@ -35,6 +40,7 @@ const SPEAKER_INDEX = [];
 let selectedSurveySession = null;
 let latestSurveyResponse = null;
 let pendingOverviewSurveyLoad = false;
+let isResubmittingQuestionnaire = false;
 
 document.addEventListener("DOMContentLoaded", () => {
   renderTabs();
@@ -232,6 +238,8 @@ function radioGroup(name, options, required = true) {
 async function renderSurveyForSession(session, options = {}) {
   selectedSurveySession = session;
   latestSurveyResponse = null;
+  isResubmittingQuestionnaire = false;
+  updateQuestionnaireSubmitButton();
   document.getElementById("survey-session-id").value = session.id || "";
   clearSurveyResponseFields();
 
@@ -328,8 +336,15 @@ function clearSurveyResponseFields() {
   });
 }
 
+function updateQuestionnaireSubmitButton() {
+  const button = document.getElementById("survey-submit");
+  if (!button) return;
+  button.textContent = isResubmittingQuestionnaire ? "Resubmit Questionnaire" : "Submit Questionnaire";
+}
+
 function populateSurveyResponseFields(response) {
   if (!response) return;
+  isResubmittingQuestionnaire = true;
   document.getElementById("survey-name").value = response.speakerName || "";
   document.getElementById("survey-email").value = response.email || "";
   document.getElementById("survey-ceu-objectives").value = response.ceuObjectives || "";
@@ -338,6 +353,7 @@ function populateSurveyResponseFields(response) {
   setRadioValue("format-confirmation", response.formatConfirmation);
   setRadioValue("recording-confirmation", response.recordingConfirmation);
   setRadioValue("prerecord-confirmation", response.prerecordConfirmation);
+  updateQuestionnaireSubmitButton();
 }
 
 function formatSubmittedAt(value) {
@@ -419,6 +435,75 @@ function buildCeuGenerationContext(session) {
     (session.speakers || []).length ? `Presenter(s): ${session.speakers.map(speaker => speaker.name).filter(Boolean).join(", ")}` : "",
     session.ceuEligibility ? `CEU Eligibility: ${session.ceuEligibility}` : ""
   ].filter(Boolean).join("\n");
+}
+
+function getCeuGenerateState() {
+  const now = Date.now();
+  let state;
+  try {
+    state = JSON.parse(localStorage.getItem(CEU_GENERATE_LIMIT_KEY)) || {};
+  } catch (_) {
+    state = {};
+  }
+
+  if (state.dailyCooldownUntil && now >= state.dailyCooldownUntil) {
+    state = {};
+  }
+
+  return {
+    count: Number(state.count) || 0,
+    shortCooldownUntil: Number(state.shortCooldownUntil) || 0,
+    dailyCooldownUntil: Number(state.dailyCooldownUntil) || 0
+  };
+}
+
+function saveCeuGenerateState(state) {
+  localStorage.setItem(CEU_GENERATE_LIMIT_KEY, JSON.stringify(state));
+}
+
+function formatWaitTime(ms) {
+  const minutes = Math.ceil(ms / 60000);
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+  const hours = Math.ceil(ms / 3600000);
+  return `${hours} hour${hours === 1 ? "" : "s"}`;
+}
+
+function getCeuGenerateBlockMessage() {
+  const now = Date.now();
+  const state = getCeuGenerateState();
+
+  if (state.dailyCooldownUntil && now < state.dailyCooldownUntil) {
+    return `You have reached the CEU draft limit for now. Please try again in about ${formatWaitTime(state.dailyCooldownUntil - now)}.`;
+  }
+
+  if (state.count >= CEU_INITIAL_LIMIT && state.count < CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT && state.shortCooldownUntil && now < state.shortCooldownUntil) {
+    return `Please wait about ${formatWaitTime(state.shortCooldownUntil - now)} before generating more CEU drafts.`;
+  }
+
+  return "";
+}
+
+function recordCeuGenerateUse() {
+  const now = Date.now();
+  const state = getCeuGenerateState();
+  state.count += 1;
+
+  if (state.count === CEU_INITIAL_LIMIT) {
+    state.shortCooldownUntil = now + CEU_SHORT_WAIT_MS;
+  }
+
+  if (state.count >= CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT) {
+    state.dailyCooldownUntil = now + CEU_DAILY_WAIT_MS;
+  }
+
+  saveCeuGenerateState(state);
+  return state;
+}
+
+function updateCeuGenerateButtonLabel(button) {
+  if (!button) return;
+  const state = getCeuGenerateState();
+  button.textContent = state.count > 0 ? "Regenerate CEU materials" : "Help me draft CEU materials";
 }
 
 async function loadSessions() {
@@ -766,11 +851,14 @@ function bindSurvey() {
   const generateBtn = document.getElementById("survey-generate-ceu");
   const submitBtn = document.getElementById("survey-submit");
   const statusEl = document.getElementById("survey-status");
+  updateCeuGenerateButtonLabel(generateBtn);
 
   sessionInput.addEventListener("input", () => {
     const q = sessionInput.value.toLowerCase().trim();
     selectedSurveySession = null;
     latestSurveyResponse = null;
+    isResubmittingQuestionnaire = false;
+    updateQuestionnaireSubmitButton();
     document.getElementById("survey-session-id").value = "";
     document.getElementById("survey-session-summary").classList.add("hidden");
     document.getElementById("survey-existing-response").classList.add("hidden");
@@ -816,6 +904,14 @@ function bindSurvey() {
   generateBtn.addEventListener("click", async () => {
     if (!selectedSurveySession) return;
     const draftEl = document.getElementById("survey-ceu-draft");
+    const blockMessage = getCeuGenerateBlockMessage();
+    if (blockMessage) {
+      draftEl.textContent = blockMessage;
+      draftEl.classList.remove("hidden");
+      updateCeuGenerateButtonLabel(generateBtn);
+      return;
+    }
+
     draftEl.textContent = "Generating draft...";
     draftEl.classList.remove("hidden");
     generateBtn.disabled = true;
@@ -844,10 +940,17 @@ function bindSurvey() {
       } else {
         draftEl.textContent = `${data.output}\n\nThe draft could not be placed automatically. Please copy the useful parts into the boxes above.`;
       }
+      const state = recordCeuGenerateUse();
+      if (state.count === CEU_INITIAL_LIMIT) {
+        draftEl.textContent += " You can regenerate more drafts in about 5 minutes.";
+      } else if (state.count >= CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT) {
+        draftEl.textContent += " You have reached the CEU draft limit for now. Please try again in 24 hours.";
+      }
     } catch (err) {
       draftEl.textContent = `Unable to generate a draft right now: ${err.message}`;
     } finally {
       generateBtn.disabled = false;
+      updateCeuGenerateButtonLabel(generateBtn);
     }
   });
 
@@ -860,7 +963,8 @@ function bindSurvey() {
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = "Submitting...";
+    const wasResubmitting = isResubmittingQuestionnaire;
+    submitBtn.textContent = wasResubmitting ? "Resubmitting..." : "Submitting...";
     statusEl.className = "hidden p-4 rounded-lg text-sm font-medium";
 
     const body = {
@@ -874,7 +978,8 @@ function bindSurvey() {
       formatConfirmation: selectedRadioValue("format-confirmation"),
       recordingConfirmation: selectedRadioValue("recording-confirmation"),
       prerecordConfirmation: selectedRadioValue("prerecord-confirmation"),
-      additionalNotes: document.getElementById("survey-additional-notes").value
+      additionalNotes: document.getElementById("survey-additional-notes").value,
+      isResubmission: wasResubmitting
     };
 
     try {
@@ -895,23 +1000,26 @@ function bindSurvey() {
         document.getElementById("survey-existing-response").classList.add("hidden");
         document.getElementById("survey-conditional-fields").classList.add("hidden");
         document.getElementById("survey-ceu-draft").classList.add("hidden");
-        statusEl.textContent = data.warning || "Thank you — your Speaker Questionnaire response was submitted. A confirmation email has been sent.";
+        statusEl.textContent = data.warning || (wasResubmitting
+          ? "Thank you — your updated Speaker Questionnaire response was submitted. A confirmation email has been sent."
+          : "Thank you — your Speaker Questionnaire response was submitted. A confirmation email has been sent.");
         statusEl.className = data.warning
           ? "p-4 rounded-lg text-sm font-medium bg-yellow-50 text-yellow-800 border border-yellow-200"
           : "p-4 rounded-lg text-sm font-medium bg-green-50 text-green-800 border border-green-200";
         submitBtn.disabled = false;
-        submitBtn.textContent = "Submit Survey";
+        isResubmittingQuestionnaire = false;
+        updateQuestionnaireSubmitButton();
       } else {
         statusEl.textContent = data.error || "Something went wrong. Please try again.";
         statusEl.className = "p-4 rounded-lg text-sm font-medium bg-red-50 text-red-800 border border-red-200";
         submitBtn.disabled = false;
-        submitBtn.textContent = "Submit Survey";
+        updateQuestionnaireSubmitButton();
       }
     } catch (err) {
       statusEl.textContent = "Network error. Please check your connection and try again.";
       statusEl.className = "p-4 rounded-lg text-sm font-medium bg-red-50 text-red-800 border border-red-200";
       submitBtn.disabled = false;
-      submitBtn.textContent = "Submit Survey";
+      updateQuestionnaireSubmitButton();
     }
   });
 }
