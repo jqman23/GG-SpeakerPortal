@@ -21,10 +21,29 @@ function splitLegacyName(value) {
   return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
 }
 
+function formatSessionVideoFormat(value) {
+  const clean = String(value || '').trim();
+  const normalized = clean.toLowerCase();
+  if (!clean) return '';
+  if (normalized.includes('zoom')) return 'Zoom';
+  if (normalized.includes('embedded')) return 'Embedded';
+  return clean;
+}
+
+function formatSessionRecordingStatus(value) {
+  const clean = String(value || '').trim();
+  const normalized = clean.toLowerCase();
+  if (!clean) return '';
+  if (normalized.includes('not')) return 'Marked as not recorded';
+  return 'Marked to be recorded';
+}
+
 function buildConfirmationEmail({
   firstName,
   name,
   sessionTitle,
+  sessionVideoFormat,
+  sessionRecordingStatus,
   ceuObjectives,
   ceuQuestions,
   formatConfirmation,
@@ -36,6 +55,8 @@ function buildConfirmationEmail({
   const cleanName = (name || [firstName].filter(Boolean).join(" ")).trim();
   const salutationName = (firstName?.trim() || cleanName || "there").split(/\s+/)[0];
   const cleanSessionTitle = sessionTitle?.trim() || 'Not provided';
+  const cleanSessionVideoFormat = formatSessionVideoFormat(sessionVideoFormat) || formatConfirmation?.trim() || '';
+  const cleanSessionRecordingStatus = formatSessionRecordingStatus(sessionRecordingStatus) || recordingConfirmation?.trim() || '';
   const responseNoun = isResubmission ? 'updated response' : 'response';
   const subjectPrefix = isResubmission ? 'Speaker Questionnaire update confirmation' : 'Speaker Questionnaire confirmation';
   const eyebrow = isResubmission ? 'Speaker Questionnaire update received' : 'Speaker Questionnaire received';
@@ -49,8 +70,8 @@ function buildConfirmationEmail({
     `*${cleanSessionTitle}*`,
     '',
     'Summary of your response:',
-    formatConfirmation?.trim() ? `Format: ${formatConfirmation.trim()}` : '',
-    recordingConfirmation?.trim() ? `Recording: ${recordingConfirmation.trim()}` : '',
+    cleanSessionVideoFormat ? `Format: ${cleanSessionVideoFormat}` : '',
+    cleanSessionRecordingStatus ? `Recording: ${cleanSessionRecordingStatus}` : '',
     prerecordConfirmation?.trim() ? `Pre-recording: ${prerecordConfirmation.trim()}` : '',
     ceuObjectives?.trim() ? `CEU objectives:\n${ceuObjectives.trim()}` : '',
     ceuQuestions?.trim() ? `CEU questions:\n${ceuQuestions.trim()}` : '',
@@ -67,8 +88,8 @@ function buildConfirmationEmail({
 
   const htmlRows = [
     ['Session', sessionTitle],
-    ['Format', formatConfirmation],
-    ['Recording', recordingConfirmation],
+    ['Format', cleanSessionVideoFormat],
+    ['Recording', cleanSessionRecordingStatus],
     ['Pre-recording', prerecordConfirmation],
     ['CEU objectives', ceuObjectives],
     ['CEU questions', ceuQuestions],
@@ -76,7 +97,7 @@ function buildConfirmationEmail({
   ].filter(([, value]) => value?.trim());
 
   const html = `
-    <div style="margin:0; padding:32px 16px; background:#F5F7FA; font-family:Montserrat, Arial, sans-serif; color:#1f2937; line-height:1.5;">
+    <div style="margin:0; padding:32px 16px; background:#ffffff; font-family:Montserrat, Arial, sans-serif; color:#1f2937; line-height:1.5;">
       <div style="max-width:680px; margin:0 auto;">
         <div style="background:#ffffff; border:1px solid #d9e2ea; border-radius:8px; padding:28px;">
           <p style="margin:0 0 8px 0; color:#46775D; font-size:12px; font-weight:bold; letter-spacing:0.04em; text-transform:uppercase;">${escapeHtml(eyebrow)}</p>
@@ -193,6 +214,8 @@ export default async function handler(req, res) {
     sessionId,
     sessionCode,
     sessionTitle,
+    sessionVideoFormat,
+    sessionRecordingStatus,
     ceuObjectives,
     ceuQuestions,
     formatConfirmation,
@@ -256,6 +279,8 @@ export default async function handler(req, res) {
         name: cleanName,
         email,
         sessionTitle,
+        sessionVideoFormat,
+        sessionRecordingStatus,
         ceuObjectives,
         ceuQuestions,
         formatConfirmation,

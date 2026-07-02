@@ -1012,6 +1012,8 @@ function bindSurvey() {
       sessionId: selectedSurveySession.id || "",
       sessionCode: selectedSurveySession.code || "",
       sessionTitle: selectedSurveySession.title || "",
+      sessionVideoFormat: selectedSurveySession.videoFormat || "",
+      sessionRecordingStatus: selectedSurveySession.recordingStatus || "",
       ceuObjectives: isCeuEligible(selectedSurveySession) ? document.getElementById("survey-ceu-objectives").value : "",
       ceuQuestions: isCeuEligible(selectedSurveySession) ? document.getElementById("survey-ceu-questions").value : "",
       formatConfirmation: selectedRadioValue("format-confirmation"),
