@@ -131,10 +131,13 @@ function updateOverviewSurveyCta() {
   const heading = document.getElementById("overview-survey-cta-heading");
   const copy = document.getElementById("overview-survey-cta-copy");
   const button = document.getElementById("overview-survey-cta");
+  const icon = document.getElementById("overview-survey-complete-icon");
   if (!remembered?.sessionId || !heading || !copy || !button) return;
 
-  heading.textContent = "Thank you for completing the Speaker Questionnaire";
-  copy.textContent = `We received a Speaker Questionnaire response for ${remembered.sessionTitle || "your session"}. You have until August 7, 2026 to make any changes. Use the button below to review the latest saved response and submit updates if needed.`;
+  if (icon) icon.classList.remove("hidden");
+  if (icon) icon.classList.add("flex");
+  heading.textContent = "Speaker Questionnaire received";
+  copy.textContent = `Thank you. We have a response on file for ${remembered.sessionTitle || "your session"}. You have until August 7, 2026 to review or submit changes.`;
   button.textContent = "Review or update your Speaker Questionnaire";
 }
 
@@ -149,6 +152,11 @@ async function loadRememberedSurveyResponse() {
 
   const input = document.getElementById("survey-session-search");
   if (input) input.value = session.title || "";
+  const status = document.getElementById("survey-status");
+  if (status) {
+    status.textContent = "";
+    status.className = "hidden p-4 rounded-lg text-sm font-medium";
+  }
   await renderSurveyForSession(session, { loadLatestResponse: true });
 }
 
