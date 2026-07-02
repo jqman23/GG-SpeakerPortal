@@ -523,7 +523,7 @@ async function renderSurveyForSession(session, options = {}) {
   prerecordSection.classList.toggle("hidden", !hasPreRecordInterest(session));
   prerecordSection.innerHTML = hasPreRecordInterest(session) ? `
     <h3 class="font-bold text-[#162A53]">Pre-recording</h3>
-    <p class="text-sm text-gray-800">You previously expressed interest in pre-recording your session and having it shown during the Global Gathering in a simulated live format. Please confirm whether you formally plan to pre-record your session and having it played automatically. If we do not receive a response, we will assume you plan to present live.</p>
+    <p class="text-sm text-gray-800">You previously expressed interest in pre-recording your session and having it shown during the Global Gathering in a simulated live format. Please confirm whether you formally plan to pre-record your session and having it played automatically. If we do not receive a response, we will assume you plan to present live. If you plan to pre-record, please email us a copy of your presentation by September 4, 2026 to give us enough time to program it into the system.</p>
     ${radioGroup("prerecord-confirmation", [
       "Yes, I plan to pre-record my session and have it shown in a simulated live format.",
       "I would prefer to present live."
