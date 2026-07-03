@@ -12,7 +12,7 @@ const SESSION_FOLLOWUPS = [
   {
     matchTitle: "centering parents caregiver voice in child welfare evaluation",
     heading: "Interpretation planning",
-    copy: "You noted that this session may include parent/caregiver guest speakers from the Advisory Group cohort who may be Spanish speakers. Please share anything else we should know about interpretation needs for the guest speakers and audience. We will plan to follow up with you to talk through the best approach, likely using Zoom interpretation, and you are also welcome to start that conversation with us sooner.",
+    copy: "You noted that this session may include parent/caregiver guest speakers from the Advisory Group cohort who may be Spanish speakers. Please share anything else we should know about interpretation needs for the guest speakers and audience. We will plan to follow up with you to talk through the best approach, though please feel free to initiate the conversation by emailing us at globalgathering@cuanschutz.edu.",
     placeholder: "Share interpretation details, questions, or anything else the Global Gathering Team should know."
   },
   {
