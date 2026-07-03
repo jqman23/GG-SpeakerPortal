@@ -206,7 +206,7 @@ function updateOverviewSurveyCta() {
   if (icon) icon.classList.add("flex");
   heading.textContent = "Speaker Questionnaire received";
   const sessionTitle = remembered.sessionTitle || "your session";
-  copy.innerHTML = `Thank you. We have a response on file for <em>${escapeHtml(sessionTitle)}</em>. You have until August 7, 2026 to review or submit changes.`;
+  copy.innerHTML = `Thank you. We have a response on file for <em>${escapeHtml(sessionTitle)}</em>. You have until August 7, 2026 to review or submit changes. If you are presenting on another session, you may submit a new response.`;
   button.textContent = "Review or update your Speaker Questionnaire";
 }
 
