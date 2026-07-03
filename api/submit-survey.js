@@ -34,8 +34,8 @@ function formatSessionRecordingStatus(value) {
   const clean = String(value || '').trim();
   const normalized = clean.toLowerCase();
   if (!clean) return '';
-  if (normalized.includes('not')) return 'Marked as not recorded';
-  return 'Marked to be recorded';
+  if (normalized.includes('not')) return 'Not recorded';
+  return 'Recorded';
 }
 
 function buildConfirmationEmail({
@@ -105,7 +105,7 @@ function buildConfirmationEmail({
         <div style="background:#ffffff; border:1px solid #d9e2ea; border-radius:8px; padding:28px;">
           <p style="margin:0 0 8px 0; color:#46775D; font-size:12px; font-weight:bold; letter-spacing:0.04em; text-transform:uppercase;">${escapeHtml(eyebrow)}</p>
           <h1 style="margin:0 0 14px 0; color:#122345; font-size:26px; line-height:1.25;">Thank you, ${escapeHtml(salutationName)}.</h1>
-          <p style="margin:0 0 18px 0; font-size:15px;">We received your ${escapeHtml(responseNoun)} for the Speaker Questionnaire for the 2026 Global Gathering.</p>
+          <p style="margin:0 0 18px 0; font-size:15px;">We received your Speaker Questionnaire ${escapeHtml(responseNoun)} to the <strong><em>2026 Global Gathering for the Future of Child Welfare</em></strong>.</p>
           <div style="margin:0 0 22px 0; padding:14px 16px; background:#F5F7FA; border-left:4px solid #46775D; border-radius:6px;">
             <p style="margin:0 0 4px 0; font-size:12px; color:#46775D; font-weight:bold; text-transform:uppercase; letter-spacing:0.04em;">Session</p>
             <p style="margin:0; color:#122345; font-size:17px; font-weight:bold;">${escapeHtml(cleanSessionTitle)}</p>
