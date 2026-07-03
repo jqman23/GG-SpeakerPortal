@@ -7,7 +7,7 @@ const CEU_INITIAL_LIMIT = 3;
 const CEU_EXTRA_LIMIT = 2;
 const CEU_SHORT_WAIT_MS = 5 * 60 * 1000;
 const CEU_DAILY_WAIT_MS = 24 * 60 * 60 * 1000;
-const PRERECORD_YES_OPTION = "Yes, I plan to pre-record my session and have it shown in a simulated live format. I will send a copy of the recording to the Global Gathering Team by September 4, 2026.";
+const PRERECORD_YES_OPTION = "Yes, I plan to pre-record my session";
 const SESSION_FOLLOWUPS = [
   {
     matchTitle: "centering parents caregiver voice in child welfare evaluation",
