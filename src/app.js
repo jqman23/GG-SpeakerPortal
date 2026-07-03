@@ -468,6 +468,35 @@ function formatSessionTimeRange(startValue, endValue) {
   return `${startText}-${endText} MDT`;
 }
 
+function formatSessionDuration(session) {
+  const startValue = (session.start || "").split("|")[1];
+  const endValue = session.end || "";
+  const start = parseTimeParts(startValue);
+  const end = parseTimeParts(endValue);
+  if (!start || !end) return "";
+  const diff = (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute);
+  if (diff <= 0) return "";
+  const hours = Math.floor(diff / 60);
+  const minutes = diff % 60;
+  if (hours && minutes) return `${hours} hr ${minutes} min`;
+  if (hours) return `${hours} hr`;
+  return `${minutes} min`;
+}
+
+function formatPresentationType(rawType) {
+  const labels = {
+    "workshop": "Workshop",
+    "strategy": "Strategy Session",
+    "creative": "Creative Space",
+    "keynote": "Keynote",
+    "skill": "Skill Building Institute",
+    "skill-building-institutes": "Skill Building Institute",
+    "intl": "International Exchange",
+  };
+  const key = (rawType || "").toLowerCase().trim();
+  return labels[key] || rawType || "";
+}
+
 function isCeuEligible(session) {
   return normalize(session?.ceuEligibility || "") === "ceu eligible";
 }
@@ -861,6 +890,8 @@ async function renderSurveyForSession(session, options = {}) {
     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">Date/time:</dt><dd>${escapeHtml(formatSessionDateTime(session))}</dd></div>
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">CEU:</dt><dd>${escapeHtml(session.ceuEligibility || "Not listed")}</dd></div>
+      ${formatPresentationType(session.presentationType) ? `<div class="flex gap-1"><dt class="font-semibold text-gray-600">Session type:</dt><dd>${escapeHtml(formatPresentationType(session.presentationType))}</dd></div>` : ""}
+      ${formatSessionDuration(session) ? `<div class="flex gap-1"><dt class="font-semibold text-gray-600">Duration:</dt><dd>${escapeHtml(formatSessionDuration(session))}</dd></div>` : ""}
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">Recording:</dt><dd>${escapeHtml(session.recordingStatus || "Not listed")}</dd></div>
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">Format:</dt><dd>${escapeHtml(session.videoFormat || "Not listed")}</dd></div>
       ${session.preRecordInterest ? `<div class="flex gap-1"><dt class="font-semibold text-gray-600">Pre-recording interest:</dt><dd>${escapeHtml(session.preRecordInterest)}</dd></div>` : ""}
@@ -1361,6 +1392,8 @@ function renderResults(rows, statusEl, containerEl, mode) {
         <tr class="border-b">
           <th class="text-left py-2 pr-4 font-semibold">Title</th>
           ${mode === "speaker" ? '<th class="text-left py-2 pr-4 font-semibold">Speaker</th>' : ""}
+          <th class="text-left py-2 pr-4 font-semibold">Session Type</th>
+          <th class="text-left py-2 pr-4 font-semibold">Duration</th>
           <th class="text-left py-2 pr-4 font-semibold">Recording</th>
           <th class="text-left py-2 pr-4 font-semibold">CEU</th>
           <th class="text-left py-2 pr-4 font-semibold">Video Format</th>
@@ -1373,6 +1406,8 @@ function renderResults(rows, statusEl, containerEl, mode) {
             <tr class="border-b align-top">
               <td class="py-2 pr-4">${escapeHtml(s.title || "")}</td>
               ${mode === "speaker" ? `<td class="py-2 pr-4">${escapeHtml(row.speakerMatched || "")}</td>` : ""}
+              <td class="py-2 pr-4">${escapeHtml(formatPresentationType(s.presentationType))}</td>
+              <td class="py-2 pr-4">${escapeHtml(formatSessionDuration(s))}</td>
               <td class="py-2 pr-4">${escapeHtml(s.recordingStatus || "")}</td>
               <td class="py-2 pr-4">${escapeHtml(s.ceuEligibility || "")}</td>
               <td class="py-2 pr-4">${escapeHtml(s.videoFormat || "")}</td>
