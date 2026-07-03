@@ -42,8 +42,28 @@ function formatSessionRecordingStatus(value) {
   const clean = String(value || '').trim();
   const normalized = clean.toLowerCase();
   if (!clean) return '';
-  if (normalized.includes('not')) return 'Not recorded';
-  return 'Recorded';
+  if (
+    normalized.includes('not') ||
+    normalized === 'no' ||
+    normalized === 'false' ||
+    normalized === 'n/a' ||
+    normalized === 'na' ||
+    normalized.startsWith('no ') ||
+    normalized.includes('non-record') ||
+    normalized.includes('no recording') ||
+    normalized.includes('unrecorded')
+  ) {
+    return 'Not recorded';
+  }
+  if (
+    normalized === 'yes' ||
+    normalized === 'true' ||
+    normalized.includes('recorded') ||
+    normalized.includes('recording')
+  ) {
+    return 'Recorded';
+  }
+  return clean;
 }
 
 function formatConfirmedRecordingStatus(recordingConfirmation, sessionRecordingStatus) {
