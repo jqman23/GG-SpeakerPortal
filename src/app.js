@@ -96,6 +96,22 @@ document.addEventListener("DOMContentLoaded", () => {
       positionFormatComparisonModal();
     }
   });
+  document.addEventListener("mouseover", event => {
+    const infoButton = event.target.closest?.(".format-info-button");
+    if (infoButton) showFormatComparisonTooltip(infoButton);
+  });
+  document.addEventListener("focusin", event => {
+    const infoButton = event.target.closest?.(".format-info-button");
+    if (infoButton) showFormatComparisonTooltip(infoButton);
+  });
+  document.addEventListener("mouseout", event => {
+    const infoButton = event.target.closest?.(".format-info-button");
+    if (infoButton && !infoButton.contains(event.relatedTarget)) hideFormatComparisonTooltip();
+  });
+  document.addEventListener("focusout", event => {
+    const infoButton = event.target.closest?.(".format-info-button");
+    if (infoButton) hideFormatComparisonTooltip();
+  });
   window.addEventListener("message", event => {
     if (event.data && event.data.ggVisibleRange) {
       const normalizedRange = normalizeVisibleRange(event.data.ggVisibleRange);
@@ -531,6 +547,7 @@ function buildFormatComparisonModal() {
           <p class="mt-3 text-xs text-gray-600">The highlighted side shows the selected comparison view. Your questionnaire answer still confirms whether the currently listed format works for your session.</p>
         </div>
       </div>
+      <div id="format-comparison-tooltip" class="pointer-events-none fixed z-[70] hidden max-w-xs rounded-md bg-[#122345] px-3 py-2 text-left text-[13px] font-normal leading-5 text-white shadow-lg"></div>
     </div>
   `;
 }
@@ -541,12 +558,45 @@ function formatComparisonCellValue(label, value, note) {
     <span class="inline-flex items-center gap-1">
       ${escapeHtml(value)}
       ${note ? `
-      <button type="button" class="inline-flex h-4 w-4 flex-none items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-gray-700 leading-none" aria-label="${escapeHtml(detailLabel)}" title="${escapeHtml(note)}">
+      <button type="button" class="format-info-button inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-gray-200 text-[11px] font-bold text-gray-700 leading-none hover:bg-[#122345] hover:text-white focus:bg-[#122345] focus:text-white focus:outline-none focus:ring-2 focus:ring-[var(--survey-primary)]" aria-label="${escapeHtml(detailLabel)}" data-tooltip="${escapeHtml(note)}">
         i
       </button>
       ` : ""}
     </span>
   `;
+}
+
+function hideFormatComparisonTooltip() {
+  const tooltip = document.getElementById("format-comparison-tooltip");
+  if (!tooltip) return;
+  tooltip.classList.add("hidden");
+  tooltip.textContent = "";
+}
+
+function showFormatComparisonTooltip(button) {
+  const tooltip = document.getElementById("format-comparison-tooltip");
+  const panel = document.getElementById("format-comparison-panel");
+  const note = button?.dataset?.tooltip || "";
+  if (!tooltip || !panel || !note) return;
+
+  tooltip.textContent = note;
+  tooltip.classList.remove("hidden");
+
+  const gap = 8;
+  const buttonRect = button.getBoundingClientRect();
+  const panelRect = panel.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  const minLeft = Math.max(8, panelRect.left + 8);
+  const maxLeft = Math.min(window.innerWidth - tooltipRect.width - 8, panelRect.right - tooltipRect.width - 8);
+  const preferredLeft = buttonRect.left + buttonRect.width / 2 - tooltipRect.width / 2;
+  const left = Math.max(minLeft, Math.min(preferredLeft, maxLeft));
+  const belowTop = buttonRect.bottom + gap;
+  const aboveTop = buttonRect.top - tooltipRect.height - gap;
+  const maxBottom = Math.min(window.innerHeight - 8, panelRect.bottom - 8);
+  const top = belowTop + tooltipRect.height <= maxBottom ? belowTop : Math.max(8, aboveTop);
+
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
 }
 
 function renderFormatComparisonRows(mode) {
@@ -726,6 +776,7 @@ function closeFormatComparisonModal() {
   if (!modal) return;
   modal.classList.add("hidden");
   formatModalAnchor = null;
+  hideFormatComparisonTooltip();
   stopFormatModalPositionTracking();
   notifyParentFormatModalState(false);
 }
