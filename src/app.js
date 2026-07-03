@@ -180,6 +180,7 @@ function bindOverviewSurveyCta() {
   const newCta = document.getElementById("overview-survey-new");
   if (newCta) {
     newCta.addEventListener("click", () => {
+      resetSurveyForm();
       activateTab("survey");
     });
   }
@@ -651,6 +652,21 @@ function clearSurveyStatusMessage() {
   if (!statusEl) return;
   statusEl.className = "hidden p-4 rounded-lg text-sm font-medium";
   statusEl.textContent = "";
+}
+
+function resetSurveyForm() {
+  const form = document.getElementById("survey-form");
+  if (form) form.reset();
+  selectedSurveySession = null;
+  latestSurveyResponse = null;
+  isResubmittingQuestionnaire = false;
+  document.getElementById("survey-session-id").value = "";
+  document.getElementById("survey-session-summary").classList.add("hidden");
+  document.getElementById("survey-existing-response").classList.add("hidden");
+  document.getElementById("survey-conditional-fields").classList.add("hidden");
+  document.getElementById("survey-ceu-draft").classList.add("hidden");
+  clearSurveyStatusMessage();
+  updateQuestionnaireSubmitButton();
 }
 
 function updateQuestionnaireSubmitButton() {
