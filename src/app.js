@@ -505,18 +505,14 @@ function buildFormatComparisonModal() {
 }
 
 function formatComparisonCellValue(label, value, note) {
+  const detailLabel = note ? `${label} details: ${note}` : "";
   return `
     <span class="inline-flex items-center gap-1">
       ${escapeHtml(value)}
       ${note ? `
-      <span class="group relative inline-flex">
-        <button type="button" class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-gray-700 leading-none" aria-label="${escapeHtml(label)} details">
-          i
-        </button>
-        <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 hidden w-64 -translate-x-1/2 rounded-md bg-[#122345] px-3 py-2 text-left text-xs font-normal leading-5 text-white shadow-lg group-hover:block group-focus-within:block">
-          ${escapeHtml(note)}
-        </span>
-      </span>
+      <button type="button" class="inline-flex h-4 w-4 flex-none items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-gray-700 leading-none" aria-label="${escapeHtml(detailLabel)}" title="${escapeHtml(note)}">
+        i
+      </button>
       ` : ""}
     </span>
   `;
