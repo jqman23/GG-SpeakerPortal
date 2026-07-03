@@ -13,6 +13,12 @@ const SESSION_FOLLOWUPS = [
     heading: "Interpretation planning",
     copy: "You noted that this session may include parent/caregiver guest speakers from the Advisory Group cohort who may be Spanish speakers. Please share anything else we should know about interpretation needs for the guest speakers and audience. We will plan to follow up with you to talk through the best approach, likely using Zoom interpretation, and you are also welcome to start that conversation with us sooner.",
     placeholder: "Share interpretation details, questions, or anything else the Global Gathering Team should know."
+  },
+  {
+    matchTitle: "dealing with distress a worldwide universal challenge",
+    heading: "Language and interpretation confirmation",
+    copy: "You indicated that this session may need to be interpreted into English. We want to confirm that the session itself will be presented in English. If that is not correct, or if there are any language or interpretation details we should know, please share them below.",
+    placeholder: "Confirm the session language or share any interpretation details."
   }
 ];
 // Toggle tabs here. Set enabled: false to hide a tab without editing markup.
