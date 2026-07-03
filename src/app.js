@@ -697,7 +697,7 @@ async function checkExistingSurveyResponse(session) {
     box.innerHTML = `
       <p class="text-[#162A53] font-semibold mb-2">A questionnaire response already exists for this session.</p>
       <p class="text-gray-800 mb-3">Latest submitted by: ${escapeHtml(data.latest.speakerName || "another presenter")}. Total submissions: ${escapeHtml(String(data.count))}.${submittedAt ? ` Latest submission: ${escapeHtml(submittedAt)}.` : ""}</p>
-      <p class="text-gray-800 mb-3">Would you like to view and update that response? If you submit changes, they will be saved as a new submission while the previous response remains available in the history.</p>
+      <p class="text-gray-800 mb-3">Would you like to view and update that submission? If you resubmit, we will record your changes. You can make updates to this form until August 7, 2026.</p>
       <button id="load-existing-survey-response" type="button" class="px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Load latest response</button>
     `;
     box.classList.remove("hidden");
