@@ -38,6 +38,10 @@ function formatSessionRecordingStatus(value) {
   return 'Recorded';
 }
 
+function toBoolean(value) {
+  return value === true || value === 'true' || value === '1' || value === 1;
+}
+
 function buildConfirmationEmail({
   firstName,
   name,
@@ -46,6 +50,7 @@ function buildConfirmationEmail({
   sessionRecordingStatus,
   ceuObjectives,
   ceuQuestions,
+  ceuOptOut,
   formatConfirmation,
   recordingConfirmation,
   prerecordConfirmation,
@@ -75,6 +80,7 @@ function buildConfirmationEmail({
     cleanSessionRecordingStatus ? `Recording: ${cleanSessionRecordingStatus}` : '',
     prerecordConfirmation?.trim() ? `Pre-recording: ${prerecordConfirmation.trim()}` : '',
     sbiMaxParticipants?.toString().trim() ? `Maximum participants: ${sbiMaxParticipants.toString().trim()}` : '',
+    ceuOptOut ? 'CEU credit: Opted out' : '',
     ceuObjectives?.trim() ? `CEU objectives:\n${ceuObjectives.trim()}` : '',
     ceuQuestions?.trim() ? `CEU questions:\n${ceuQuestions.trim()}` : '',
     additionalNotes?.trim() ? `Questions or requests:\n${additionalNotes.trim()}` : '',
@@ -94,6 +100,7 @@ function buildConfirmationEmail({
     ['Recording', cleanSessionRecordingStatus],
     ['Pre-recording', prerecordConfirmation],
     ['Maximum participants', sbiMaxParticipants != null ? String(sbiMaxParticipants) : ''],
+    ['CEU credit', ceuOptOut ? 'Opted out' : ''],
     ['CEU objectives', ceuObjectives],
     ['CEU questions', ceuQuestions],
     ['Questions or requests', additionalNotes]
@@ -221,6 +228,7 @@ export default async function handler(req, res) {
     sessionRecordingStatus,
     ceuObjectives,
     ceuQuestions,
+    ceuOptOut,
     formatConfirmation,
     recordingConfirmation,
     prerecordConfirmation,
@@ -236,6 +244,7 @@ export default async function handler(req, res) {
   const cleanFirstName = firstName?.trim() || parsedLegacyName.firstName || "";
   const cleanLastName = lastName?.trim() || parsedLegacyName.lastName || "";
   const cleanName = [cleanFirstName, cleanLastName].filter(Boolean).join(' ') || name?.trim() || "";
+  const cleanCeuOptOut = toBoolean(ceuOptOut);
 
   if (!cleanFirstName || !cleanLastName || !email?.trim() || !sessionId?.trim()) {
     return res.status(400).json({ error: 'First name, last name, email, and session selection are required.' });
@@ -253,6 +262,7 @@ export default async function handler(req, res) {
         session_title,
         ceu_objectives,
         ceu_questions,
+        ceu_opt_out,
         format_confirmation,
         recording_confirmation,
         prerecord_confirmation,
@@ -267,8 +277,9 @@ export default async function handler(req, res) {
         ${sessionId.trim()},
         ${sessionCode?.trim() || null},
         ${sessionTitle?.trim() || null},
-        ${ceuObjectives?.trim() || null},
-        ${ceuQuestions?.trim() || null},
+        ${cleanCeuOptOut ? null : ceuObjectives?.trim() || null},
+        ${cleanCeuOptOut ? null : ceuQuestions?.trim() || null},
+        ${cleanCeuOptOut},
         ${formatConfirmation?.trim() || null},
         ${recordingConfirmation?.trim() || null},
         ${prerecordConfirmation?.trim() || null},
@@ -287,8 +298,9 @@ export default async function handler(req, res) {
         sessionTitle,
         sessionVideoFormat,
         sessionRecordingStatus,
-        ceuObjectives,
-        ceuQuestions,
+        ceuObjectives: cleanCeuOptOut ? '' : ceuObjectives,
+        ceuQuestions: cleanCeuOptOut ? '' : ceuQuestions,
+        ceuOptOut: cleanCeuOptOut,
         formatConfirmation,
         recordingConfirmation,
         prerecordConfirmation,

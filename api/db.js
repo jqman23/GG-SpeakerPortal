@@ -22,6 +22,7 @@ export async function ensureSchema(sql) {
   await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS session_title TEXT`;
   await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS ceu_objectives TEXT`;
   await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS ceu_questions TEXT`;
+  await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS ceu_opt_out BOOLEAN DEFAULT FALSE`;
   await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS format_confirmation TEXT`;
   await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS recording_confirmation TEXT`;
   await sql`ALTER TABLE survey_responses ADD COLUMN IF NOT EXISTS prerecord_confirmation TEXT`;

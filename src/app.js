@@ -272,6 +272,7 @@ function buildSurveyDraft() {
     sessionSearch: document.getElementById("survey-session-search")?.value || "",
     ceuObjectives: document.getElementById("survey-ceu-objectives")?.value || "",
     ceuQuestions: document.getElementById("survey-ceu-questions")?.value || "",
+    ceuOptOut: document.getElementById("survey-ceu-opt-out")?.checked || false,
     formatConfirmation: selectedRadioValue("format-confirmation"),
     recordingConfirmation: selectedRadioValue("recording-confirmation"),
     prerecordConfirmation: selectedRadioValue("prerecord-confirmation"),
@@ -292,6 +293,7 @@ function saveSurveyDraft() {
     draft.sessionSearch,
     draft.ceuObjectives,
     draft.ceuQuestions,
+    draft.ceuOptOut ? "yes" : "",
     draft.formatConfirmation,
     draft.recordingConfirmation,
     draft.prerecordConfirmation,
@@ -317,6 +319,7 @@ function applySurveyDraftFields(draft) {
   document.getElementById("survey-email").value = draft.email || "";
   document.getElementById("survey-ceu-objectives").value = draft.ceuObjectives || "";
   document.getElementById("survey-ceu-questions").value = draft.ceuQuestions || "";
+  document.getElementById("survey-ceu-opt-out").checked = !!draft.ceuOptOut;
   document.getElementById("survey-additional-notes").value = draft.additionalNotes || "";
   document.getElementById("survey-sbi-max-participants").value = draft.sbiMaxParticipants || "";
   setRadioValue("format-confirmation", draft.formatConfirmation);
@@ -324,6 +327,7 @@ function applySurveyDraftFields(draft) {
   setRadioValue("prerecord-confirmation", draft.prerecordConfirmation);
   isResubmittingQuestionnaire = !!draft.isResubmitting;
   updateQuestionnaireSubmitButton();
+  updateCeuOptOutState();
 }
 
 async function restoreSavedSurveyDraft() {
@@ -444,6 +448,38 @@ function formatSessionTimeRange(startValue, endValue) {
 
 function isCeuEligible(session) {
   return normalize(session?.ceuEligibility || "") === "ceu eligible";
+}
+
+function isCeuOptedOut() {
+  return !!document.getElementById("survey-ceu-opt-out")?.checked;
+}
+
+function updateCeuOptOutState() {
+  const optedOut = isCeuOptedOut();
+  const objectivesEl = document.getElementById("survey-ceu-objectives");
+  const questionsEl = document.getElementById("survey-ceu-questions");
+  const generateBtn = document.getElementById("survey-generate-ceu");
+  const draftEl = document.getElementById("survey-ceu-draft");
+  const shouldRequireCeu = isCeuEligible(selectedSurveySession) && !optedOut;
+
+  if (objectivesEl) {
+    objectivesEl.required = shouldRequireCeu;
+    objectivesEl.disabled = optedOut;
+    objectivesEl.classList.toggle("bg-gray-100", optedOut);
+  }
+  if (questionsEl) {
+    questionsEl.required = shouldRequireCeu;
+    questionsEl.disabled = optedOut;
+    questionsEl.classList.toggle("bg-gray-100", optedOut);
+  }
+  if (generateBtn) {
+    generateBtn.disabled = optedOut;
+    generateBtn.classList.toggle("opacity-50", optedOut);
+    generateBtn.classList.toggle("cursor-not-allowed", optedOut);
+  }
+  if (draftEl && optedOut) {
+    draftEl.classList.add("hidden");
+  }
 }
 
 function isKeynote(session) {
@@ -810,8 +846,7 @@ async function renderSurveyForSession(session, options = {}) {
 
   const ceuSection = document.getElementById("survey-ceu-section");
   ceuSection.classList.toggle("hidden", !isCeuEligible(session));
-  document.getElementById("survey-ceu-objectives").required = isCeuEligible(session);
-  document.getElementById("survey-ceu-questions").required = isCeuEligible(session);
+  updateCeuOptOutState();
 
   const formatSection = document.getElementById("survey-format-section");
   const feature = (session.videoFormat || "").trim();
@@ -909,11 +944,13 @@ function setRadioValue(name, value) {
 function clearSurveyResponseFields() {
   document.getElementById("survey-ceu-objectives").value = "";
   document.getElementById("survey-ceu-questions").value = "";
+  document.getElementById("survey-ceu-opt-out").checked = false;
   document.getElementById("survey-additional-notes").value = "";
   document.getElementById("survey-sbi-max-participants").value = "";
   document.querySelectorAll('input[name="format-confirmation"], input[name="recording-confirmation"], input[name="prerecord-confirmation"]').forEach(radio => {
     radio.checked = false;
   });
+  updateCeuOptOutState();
 }
 
 function clearSurveyStatusMessage() {
@@ -955,12 +992,14 @@ function populateSurveyResponseFields(response) {
   document.getElementById("survey-email").value = response.email || "";
   document.getElementById("survey-ceu-objectives").value = response.ceuObjectives || "";
   document.getElementById("survey-ceu-questions").value = response.ceuQuestions || "";
+  document.getElementById("survey-ceu-opt-out").checked = !!response.ceuOptOut;
   document.getElementById("survey-additional-notes").value = response.additionalNotes || "";
   document.getElementById("survey-sbi-max-participants").value = response.sbiMaxParticipants || "";
   setRadioValue("format-confirmation", response.formatConfirmation);
   setRadioValue("recording-confirmation", response.recordingConfirmation);
   setRadioValue("prerecord-confirmation", response.prerecordConfirmation);
   updateQuestionnaireSubmitButton();
+  updateCeuOptOutState();
   saveSurveyDraft();
 }
 
@@ -1476,6 +1515,7 @@ function bindSurvey() {
   });
 
   form.addEventListener("change", () => {
+    updateCeuOptOutState();
     saveSurveyDraft();
   });
 
@@ -1535,6 +1575,7 @@ function bindSurvey() {
 
   generateBtn.addEventListener("click", async () => {
     if (!selectedSurveySession) return;
+    if (isCeuOptedOut()) return;
     const draftEl = document.getElementById("survey-ceu-draft");
     const blockMessage = getCeuGenerateBlockMessage();
     if (blockMessage) {
@@ -1612,8 +1653,9 @@ function bindSurvey() {
       sessionTitle: selectedSurveySession.title || "",
       sessionVideoFormat: selectedSurveySession.videoFormat || "",
       sessionRecordingStatus: selectedSurveySession.recordingStatus || "",
-      ceuObjectives: isCeuEligible(selectedSurveySession) ? document.getElementById("survey-ceu-objectives").value : "",
-      ceuQuestions: isCeuEligible(selectedSurveySession) ? document.getElementById("survey-ceu-questions").value : "",
+      ceuObjectives: isCeuEligible(selectedSurveySession) && !isCeuOptedOut() ? document.getElementById("survey-ceu-objectives").value : "",
+      ceuQuestions: isCeuEligible(selectedSurveySession) && !isCeuOptedOut() ? document.getElementById("survey-ceu-questions").value : "",
+      ceuOptOut: isCeuEligible(selectedSurveySession) ? isCeuOptedOut() : false,
       formatConfirmation: selectedRadioValue("format-confirmation"),
       recordingConfirmation: selectedRadioValue("recording-confirmation"),
       prerecordConfirmation: selectedRadioValue("prerecord-confirmation"),
