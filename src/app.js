@@ -554,7 +554,7 @@ async function renderSurveyForSession(session, options = {}) {
       ? "Your session is currently programmed as a Zoom session. Zoom supports breakout rooms, virtual backgrounds, transcript generation, and other Zoom-related features."
       : "Our records show this session is planned as Embedded. Embedded sessions live inside Attendee Hub and support native polling, Q&A, and Chat features. Only blurred backgrounds are available. Participants must request permission before coming on video and unmuting.";
     formatSection.innerHTML = `
-      <h3 class="font-bold text-[#162A53]">Session format confirmation</h3>
+      <h3 class="font-bold text-[#162A53]">Session format confirmation *</h3>
       <p class="text-sm text-gray-800">${escapeHtml(explanation)}</p>
       <div class="flex flex-wrap items-center gap-3">
         <button type="button" id="format-comparison-open" class="inline-flex items-center gap-2 text-sm font-semibold text-[var(--survey-primary)] hover:text-[var(--survey-primary-dark)]">
@@ -586,7 +586,7 @@ async function renderSurveyForSession(session, options = {}) {
       ? "Our records show this session is marked as not recorded."
       : "Your session is set to be recorded. If you choose to have your session recorded, you can request a copy of the video file afterwards.";
     recordingSection.innerHTML = `
-      <h3 class="font-bold text-[#162A53]">Recording confirmation</h3>
+      <h3 class="font-bold text-[#162A53]">Recording confirmation *</h3>
       <p class="text-sm text-gray-800">${escapeHtml(recordingText)}</p>
       ${radioGroup("recording-confirmation", getRecordingPreferenceOptions(session.recordingStatus))}
     `;
@@ -597,7 +597,7 @@ async function renderSurveyForSession(session, options = {}) {
   const prerecordSection = document.getElementById("survey-prerecord-section");
   prerecordSection.classList.toggle("hidden", !hasPreRecordInterest(session));
   prerecordSection.innerHTML = hasPreRecordInterest(session) ? `
-    <h3 class="font-bold text-[#162A53]">Pre-recording</h3>
+    <h3 class="font-bold text-[#162A53]">Pre-recording *</h3>
     <p class="text-sm text-gray-800">You previously expressed interest in pre-recording your session and having it shown during the Global Gathering in a simulated live format. Please confirm whether you formally plan to pre-record your session and having it played automatically. If we do not receive a response, we will assume you plan to present live. If you plan to pre-record, please email us a copy of your presentation by September 4, 2026 to give us enough time to program it into the system.</p>
     ${radioGroup("prerecord-confirmation", [
       "Yes, I plan to pre-record my session and have it shown in a simulated live format.",
