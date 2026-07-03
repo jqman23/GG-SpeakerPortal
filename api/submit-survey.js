@@ -251,8 +251,7 @@ function buildNotificationEmail({
     `Email: ${email}`,
     `Session: ${cleanSession}`,
     submittedAt ? `Submitted: ${submittedAt}` : '',
-    '',
-    'Reply to this email to respond directly to the speaker.'
+    ''
   ]);
 
   const html = `
@@ -287,7 +286,6 @@ function buildNotificationEmail({
             </tr>` : ''}
           </table>
 
-          <p style="margin:0; font-size:14px; color:#374151;">Hit <strong>Reply</strong> to respond directly to ${escapeHtml(cleanName.split(' ')[0])} — they will see this full message.</p>
         </div>
       </div>
     </div>
