@@ -338,9 +338,9 @@ function buildFormatComparisonRows() {
 
 function buildFormatComparisonModal() {
   return `
-    <div id="format-comparison-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+    <div id="format-comparison-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-8 overflow-y-auto">
       <div class="absolute inset-0 bg-black/40" data-close-format-modal></div>
-      <div class="relative z-10 w-full max-w-4xl rounded-xl bg-white shadow-2xl border border-gray-200">
+      <div class="relative z-10 w-full max-w-4xl max-h-full overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
         <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
           <div>
             <p class="text-xs font-bold tracking-[0.08em] text-[var(--survey-primary)] uppercase">Compare formats</p>
