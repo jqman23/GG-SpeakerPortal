@@ -338,7 +338,7 @@ function buildFormatComparisonRows() {
 
 function buildFormatComparisonModal() {
   return `
-    <div id="format-comparison-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-8 overflow-y-auto">
+    <div id="format-comparison-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-4">
       <div class="absolute inset-0 bg-black/40" data-close-format-modal></div>
       <div class="relative z-10 w-full max-w-4xl max-h-full overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
         <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
@@ -367,8 +367,18 @@ function buildFormatComparisonModal() {
               <thead class="bg-gray-50">
                 <tr>
                   <th class="rounded-tl-lg px-4 py-3 text-left font-semibold text-[#122345]">Feature</th>
-                  <th class="px-4 py-3 text-left font-semibold text-[#122345]">Zoom</th>
-                  <th class="rounded-tr-lg px-4 py-3 text-left font-semibold text-[#122345]">Embedded</th>
+                  <th class="px-4 py-3 text-left font-semibold text-[#122345]">
+                    <span class="inline-flex items-center gap-2">
+                      <img src="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/bd24b84857c14ef4b86468396df75280.png" alt="" class="h-5 w-5" />
+                      Zoom
+                    </span>
+                  </th>
+                  <th class="rounded-tr-lg px-4 py-3 text-left font-semibold text-[#122345]">
+                    <span class="inline-flex items-center gap-2">
+                      <img src="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/affeaea0d0264febbb47bca747a38e4d.png" alt="" class="h-5 w-5" />
+                      Embedded
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody id="format-comparison-rows"></tbody>
