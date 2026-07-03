@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const openComparisonLink = event.target.closest?.("[data-open-comparison]");
     if (openComparisonLink) {
       event.preventDefault();
-      openFormatComparisonModal("zoom");
+      openFormatComparisonModal("zoom", openComparisonLink);
     }
     const expandAllFaqs = event.target.closest?.("[data-faq-expand-all]");
     if (expandAllFaqs) {
@@ -96,8 +96,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   window.addEventListener("message", event => {
     if (event.data && event.data.ggVisibleRange) {
-      parentVisibleRange = event.data.ggVisibleRange;
-      positionFormatComparisonModal();
+      const normalizedRange = normalizeVisibleRange(event.data.ggVisibleRange);
+      if (normalizedRange) {
+        parentVisibleRange = normalizedRange;
+        positionFormatComparisonModal();
+      }
     }
   });
   window.addEventListener("resize", () => positionFormatComparisonModal());
@@ -358,9 +361,9 @@ function buildFormatComparisonRows() {
 
 function buildFormatComparisonModal() {
   return `
-    <div id="format-comparison-modal" class="fixed inset-0 z-50 hidden">
+    <div id="format-comparison-modal" class="absolute left-0 right-0 z-50 hidden">
       <div class="absolute inset-0 bg-black/40" data-close-format-modal></div>
-      <div id="format-comparison-panel" class="fixed left-1/2 -translate-x-1/2 z-10 w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
+      <div id="format-comparison-panel" class="absolute left-1/2 -translate-x-1/2 z-10 w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
         <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
           <div>
             <p class="text-xs font-bold tracking-[0.08em] text-[var(--survey-primary)] uppercase">Compare formats</p>
@@ -446,6 +449,10 @@ function renderFormatComparisonRows(mode) {
 }
 
 let parentVisibleRange = null;
+let fallbackVisibleRange = null;
+let formatModalAnchor = null;
+let formatModalPositionFrame = 0;
+let formatModalPositionTick = 0;
 
 function isEmbeddedInParent() {
   try {
@@ -460,13 +467,64 @@ function requestParentVisibleRange() {
   window.parent.postMessage({ ggRequestVisibleRange: true }, "*");
 }
 
+function notifyParentFormatModalState(isOpen) {
+  if (!isEmbeddedInParent()) return;
+  window.parent.postMessage({ ggFormatModalOpen: isOpen }, "*");
+}
+
+function normalizeVisibleRange(range) {
+  const top = Number(range?.top);
+  const bottom = Number(range?.bottom);
+  if (!Number.isFinite(top) || !Number.isFinite(bottom)) return null;
+  const normalizedTop = Math.max(0, top);
+  const normalizedBottom = Math.max(normalizedTop, bottom);
+  if (normalizedBottom - normalizedTop < 20) return null;
+  return { top: normalizedTop, bottom: normalizedBottom };
+}
+
+function buildFallbackVisibleRange(anchorEl) {
+  const anchorRect = anchorEl?.getBoundingClientRect?.();
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 900;
+  const estimatedHeight = Math.min(900, Math.max(520, viewportHeight * 0.75));
+
+  if (!anchorRect) return { top: 0, bottom: Math.min(viewportHeight, estimatedHeight) };
+
+  const anchorCenter = anchorRect.top + anchorRect.height / 2;
+  const top = Math.max(0, anchorCenter - estimatedHeight / 2);
+  return {
+    top,
+    bottom: Math.min(viewportHeight, top + estimatedHeight)
+  };
+}
+
+function getAnchorCenterY(anchorEl) {
+  const anchorRect = anchorEl?.getBoundingClientRect?.();
+  if (!anchorRect) return null;
+  const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+  return scrollTop + anchorRect.top + anchorRect.height / 2;
+}
+
 function getVisibleRange() {
   if (isEmbeddedInParent() && parentVisibleRange) {
     return parentVisibleRange;
   }
-  // Not embedded: the panel is position:fixed, so its containing block is
-  // the viewport itself (0 to innerHeight), regardless of scroll position.
-  return { top: 0, bottom: window.innerHeight };
+  if (isEmbeddedInParent() && fallbackVisibleRange) {
+    return fallbackVisibleRange;
+  }
+  const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+  return { top: scrollTop, bottom: scrollTop + window.innerHeight };
+}
+
+function getDocumentHeight() {
+  const body = document.body;
+  const html = document.documentElement;
+  return Math.max(
+    body?.scrollHeight || 0,
+    body?.offsetHeight || 0,
+    html?.clientHeight || 0,
+    html?.scrollHeight || 0,
+    html?.offsetHeight || 0
+  );
 }
 
 function positionFormatComparisonModal() {
@@ -477,21 +535,58 @@ function positionFormatComparisonModal() {
   const margin = 16;
   const range = getVisibleRange();
   const rangeTop = Math.max(0, range.top);
-  const rangeHeight = Math.max(200, range.bottom - range.top);
+  const rangeHeight = Math.max(200, range.bottom - rangeTop);
+  const documentHeight = Math.max(getDocumentHeight(), rangeTop + rangeHeight);
+  const anchorCenterY = getAnchorCenterY(formatModalAnchor);
 
+  modal.style.top = "0px";
+  modal.style.height = `${documentHeight}px`;
   panel.style.maxHeight = `${Math.max(200, rangeHeight - margin * 2)}px`;
 
   const panelHeight = panel.offsetHeight;
-  let top = rangeTop + Math.max(margin, (rangeHeight - panelHeight) / 2);
+  let top = anchorCenterY == null
+    ? rangeTop + Math.max(margin, (rangeHeight - panelHeight) / 2)
+    : anchorCenterY - panelHeight / 2;
   top = Math.min(top, rangeTop + rangeHeight - panelHeight - margin);
   top = Math.max(top, rangeTop + margin);
   panel.style.top = `${top}px`;
 }
 
-function openFormatComparisonModal(initialMode) {
+function startFormatModalPositionTracking() {
+  if (formatModalPositionFrame) return;
+
+  const tick = () => {
+    const modal = document.getElementById("format-comparison-modal");
+    if (!modal || modal.classList.contains("hidden")) {
+      formatModalPositionFrame = 0;
+      formatModalPositionTick = 0;
+      return;
+    }
+
+    if (formatModalPositionTick % 6 === 0) {
+      requestParentVisibleRange();
+    }
+    positionFormatComparisonModal();
+    formatModalPositionTick += 1;
+    formatModalPositionFrame = window.requestAnimationFrame(tick);
+  };
+
+  formatModalPositionFrame = window.requestAnimationFrame(tick);
+}
+
+function stopFormatModalPositionTracking() {
+  if (!formatModalPositionFrame) return;
+  window.cancelAnimationFrame(formatModalPositionFrame);
+  formatModalPositionFrame = 0;
+  formatModalPositionTick = 0;
+}
+
+function openFormatComparisonModal(initialMode, anchorEl = null) {
   const modal = document.getElementById("format-comparison-modal");
   if (!modal) return;
   const activeMode = initialMode === "embedded" ? "embedded" : "zoom";
+  formatModalAnchor = anchorEl;
+  fallbackVisibleRange = buildFallbackVisibleRange(anchorEl);
   modal.classList.remove("hidden");
   renderFormatComparisonRows(activeMode);
   modal.dataset.mode = activeMode;
@@ -504,13 +599,18 @@ function openFormatComparisonModal(initialMode) {
   });
 
   requestParentVisibleRange();
+  notifyParentFormatModalState(true);
   positionFormatComparisonModal();
+  startFormatModalPositionTracking();
 }
 
 function closeFormatComparisonModal() {
   const modal = document.getElementById("format-comparison-modal");
   if (!modal) return;
   modal.classList.add("hidden");
+  formatModalAnchor = null;
+  stopFormatModalPositionTracking();
+  notifyParentFormatModalState(false);
 }
 
 async function renderSurveyForSession(session, options = {}) {
@@ -573,7 +673,7 @@ async function renderSurveyForSession(session, options = {}) {
     `;
     const openFormatButton = document.getElementById("format-comparison-open");
     if (openFormatButton) {
-      openFormatButton.addEventListener("click", () => openFormatComparisonModal(currentMode));
+      openFormatButton.addEventListener("click", () => openFormatComparisonModal(currentMode, openFormatButton));
     }
   } else {
     formatSection.innerHTML = "";
