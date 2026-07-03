@@ -1,5 +1,6 @@
 const SESSION_DATA_URL = "/api/sessions";
 const SURVEY_SUBMISSION_KEY = "ggSpeakerSurveyLastSubmission";
+const SURVEY_DRAFT_KEY = "ggSpeakerSurveyDraft";
 const CEU_GENERATE_LIMIT_KEY = "ggCeuGenerateLimit";
 const CEU_INITIAL_LIMIT = 3;
 const CEU_EXTRA_LIMIT = 2;
@@ -204,6 +205,95 @@ function rememberSurveySubmission(session) {
     sessionTitle: session.title || "",
     submittedAt: new Date().toISOString()
   }));
+}
+
+function getSavedSurveyDraft() {
+  try {
+    return JSON.parse(localStorage.getItem(SURVEY_DRAFT_KEY)) || null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function clearSavedSurveyDraft() {
+  localStorage.removeItem(SURVEY_DRAFT_KEY);
+}
+
+function buildSurveyDraft() {
+  return {
+    firstName: document.getElementById("survey-first-name")?.value || "",
+    lastName: document.getElementById("survey-last-name")?.value || "",
+    email: document.getElementById("survey-email")?.value || "",
+    sessionId: selectedSurveySession?.id || "",
+    sessionSearch: document.getElementById("survey-session-search")?.value || "",
+    ceuObjectives: document.getElementById("survey-ceu-objectives")?.value || "",
+    ceuQuestions: document.getElementById("survey-ceu-questions")?.value || "",
+    formatConfirmation: selectedRadioValue("format-confirmation"),
+    recordingConfirmation: selectedRadioValue("recording-confirmation"),
+    prerecordConfirmation: selectedRadioValue("prerecord-confirmation"),
+    sbiMaxParticipants: document.getElementById("survey-sbi-max-participants")?.value || "",
+    additionalNotes: document.getElementById("survey-additional-notes")?.value || "",
+    isResubmitting: isResubmittingQuestionnaire,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function saveSurveyDraft() {
+  const draft = buildSurveyDraft();
+  const hasDraftContent = [
+    draft.firstName,
+    draft.lastName,
+    draft.email,
+    draft.sessionId,
+    draft.sessionSearch,
+    draft.ceuObjectives,
+    draft.ceuQuestions,
+    draft.formatConfirmation,
+    draft.recordingConfirmation,
+    draft.prerecordConfirmation,
+    draft.sbiMaxParticipants,
+    draft.additionalNotes
+  ].some(value => String(value || "").trim());
+
+  if (!hasDraftContent) {
+    clearSavedSurveyDraft();
+    return;
+  }
+
+  localStorage.setItem(SURVEY_DRAFT_KEY, JSON.stringify(draft));
+}
+
+function applySurveyDraftFields(draft) {
+  if (!draft) return;
+  document.getElementById("survey-first-name").value = draft.firstName || "";
+  document.getElementById("survey-last-name").value = draft.lastName || "";
+  document.getElementById("survey-email").value = draft.email || "";
+  document.getElementById("survey-ceu-objectives").value = draft.ceuObjectives || "";
+  document.getElementById("survey-ceu-questions").value = draft.ceuQuestions || "";
+  document.getElementById("survey-additional-notes").value = draft.additionalNotes || "";
+  document.getElementById("survey-sbi-max-participants").value = draft.sbiMaxParticipants || "";
+  setRadioValue("format-confirmation", draft.formatConfirmation);
+  setRadioValue("recording-confirmation", draft.recordingConfirmation);
+  setRadioValue("prerecord-confirmation", draft.prerecordConfirmation);
+  isResubmittingQuestionnaire = !!draft.isResubmitting;
+  updateQuestionnaireSubmitButton();
+}
+
+async function restoreSavedSurveyDraft() {
+  const draft = getSavedSurveyDraft();
+  if (!draft) return;
+
+  const sessionInput = document.getElementById("survey-session-search");
+  if (sessionInput) sessionInput.value = draft.sessionSearch || "";
+
+  const session = draft.sessionId ? sessions.find(s => s.id === draft.sessionId) : null;
+  if (session) {
+    if (sessionInput) sessionInput.value = session.title || draft.sessionSearch || "";
+    await renderSurveyForSession(session, { skipFieldClear: true });
+  }
+
+  applySurveyDraftFields(draft);
+  clearSurveyStatusMessage();
 }
 
 function updateOverviewSurveyCta() {
@@ -620,7 +710,7 @@ async function renderSurveyForSession(session, options = {}) {
   updateQuestionnaireSubmitButton();
   updateCeuGenerateButtonLabel(document.getElementById("survey-generate-ceu"));
   document.getElementById("survey-session-id").value = session.id || "";
-  clearSurveyResponseFields();
+  if (!options.skipFieldClear) clearSurveyResponseFields();
   clearSurveyStatusMessage();
 
   const summary = document.getElementById("survey-session-summary");
@@ -742,6 +832,7 @@ function clearSurveyResponseFields() {
   document.getElementById("survey-ceu-objectives").value = "";
   document.getElementById("survey-ceu-questions").value = "";
   document.getElementById("survey-additional-notes").value = "";
+  document.getElementById("survey-sbi-max-participants").value = "";
   document.querySelectorAll('input[name="format-confirmation"], input[name="recording-confirmation"], input[name="prerecord-confirmation"]').forEach(radio => {
     radio.checked = false;
   });
@@ -757,6 +848,7 @@ function clearSurveyStatusMessage() {
 function resetSurveyForm() {
   const form = document.getElementById("survey-form");
   if (form) form.reset();
+  clearSavedSurveyDraft();
   selectedSurveySession = null;
   latestSurveyResponse = null;
   isResubmittingQuestionnaire = false;
@@ -791,6 +883,7 @@ function populateSurveyResponseFields(response) {
   setRadioValue("recording-confirmation", response.recordingConfirmation);
   setRadioValue("prerecord-confirmation", response.prerecordConfirmation);
   updateQuestionnaireSubmitButton();
+  saveSurveyDraft();
 }
 
 function formatSubmittedAt(value) {
@@ -963,7 +1056,9 @@ async function loadSessions() {
     updateOverviewSurveyCta();
     if (pendingOverviewSurveyLoad) {
       pendingOverviewSurveyLoad = false;
-      loadRememberedSurveyResponse();
+      await loadRememberedSurveyResponse();
+    } else {
+      await restoreSavedSurveyDraft();
     }
   } catch (err) {
     console.error("Error loading sessions:", err);
@@ -1298,6 +1393,14 @@ function bindSurvey() {
   const statusEl = document.getElementById("survey-status");
   updateCeuGenerateButtonLabel(generateBtn);
 
+  form.addEventListener("input", () => {
+    saveSurveyDraft();
+  });
+
+  form.addEventListener("change", () => {
+    saveSurveyDraft();
+  });
+
   sessionInput.addEventListener("input", () => {
     const q = sessionInput.value.toLowerCase().trim();
     selectedSurveySession = null;
@@ -1334,10 +1437,11 @@ function bindSurvey() {
         <div class="text-xs font-semibold text-[#162A53]">${escapeHtml(formatSessionDateTime(session))}</div>
         ${speakerNames ? `<div class="text-xs text-gray-600">${escapeHtml(speakerNames)}</div>` : ""}
       `;
-      div.addEventListener("click", () => {
+      div.addEventListener("click", async () => {
         sessionInput.value = session.title || "";
         suggestionsBox.classList.add("hidden");
-        renderSurveyForSession(session);
+        await renderSurveyForSession(session);
+        saveSurveyDraft();
       });
       suggestionsBox.appendChild(div);
     });
@@ -1382,6 +1486,7 @@ function bindSurvey() {
 
       if (parsed.objectives) objectivesEl.value = parsed.objectives;
       if (parsed.questions) questionsEl.value = parsed.questions;
+      saveSurveyDraft();
 
       ceuDraftGeneratedSessionId = selectedSurveySession.id;
 
@@ -1446,6 +1551,7 @@ function bindSurvey() {
 
       if (res.ok) {
         rememberSurveySubmission(selectedSurveySession);
+        clearSavedSurveyDraft();
         updateOverviewSurveyCta();
         form.reset();
         selectedSurveySession = null;
