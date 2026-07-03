@@ -224,6 +224,106 @@ function buildConfirmationEmail({
   };
 }
 
+const NOTIFICATION_TO = 'globalgathering@cuanschutz.edu';
+
+function buildNotificationEmail({
+  name,
+  email,
+  sessionTitle,
+  additionalNotes,
+  submittedAt,
+  isResubmission
+}) {
+  const cleanName = (name || '').trim() || 'Unknown speaker';
+  const cleanSession = (sessionTitle || '').trim() || 'Unknown session';
+  const cleanNotes = (additionalNotes || '').trim();
+  const verb = isResubmission ? 'updated' : 'submitted';
+  const subject = `Speaker note: ${cleanName} – ${cleanSession}`;
+
+  const text = compactLines([
+    `${cleanName} ${verb} their Speaker Questionnaire and included the following note:`,
+    '',
+    '---',
+    cleanNotes,
+    '---',
+    '',
+    `Speaker: ${cleanName}`,
+    `Email: ${email}`,
+    `Session: ${cleanSession}`,
+    submittedAt ? `Submitted: ${submittedAt}` : '',
+    '',
+    'Reply to this email to respond directly to the speaker.'
+  ]);
+
+  const html = `
+    <div style="margin:0; padding:32px 16px; background:#ffffff; font-family:Montserrat, Arial, sans-serif; color:#1f2937; line-height:1.5;">
+      <div style="max-width:680px; margin:0 auto;">
+        <div style="background:#ffffff; border:1px solid #d9e2ea; border-radius:8px; padding:28px;">
+          <p style="margin:0 0 6px 0; color:#46775D; font-size:12px; font-weight:bold; letter-spacing:0.04em; text-transform:uppercase;">Speaker Questionnaire Note</p>
+          <h1 style="margin:0 0 18px 0; color:#122345; font-size:22px; line-height:1.3;">${escapeHtml(cleanName)} ${escapeHtml(verb)} their questionnaire and left a note.</h1>
+
+          <div style="margin:0 0 22px 0; padding:16px 18px; background:#FFF8E1; border-left:4px solid #F59E0B; border-radius:6px;">
+            <p style="margin:0 0 6px 0; font-size:11px; font-weight:bold; letter-spacing:0.05em; text-transform:uppercase; color:#92400E;">Their note</p>
+            <p style="margin:0; font-size:15px; white-space:pre-wrap; color:#1f2937;">${escapeHtml(cleanNotes)}</p>
+          </div>
+
+          <table cellpadding="0" cellspacing="0" style="border-collapse:collapse; width:100%; border:1px solid #d9e2ea; border-radius:8px; overflow:hidden; margin:0 0 22px 0;">
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; width:130px; vertical-align:top; border-bottom:1px solid #e5edf3;">Speaker</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;">${escapeHtml(cleanName)}</td>
+            </tr>
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top; border-bottom:1px solid #e5edf3;">Email</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;"><a href="mailto:${escapeHtml(email)}" style="color:#0563C1;">${escapeHtml(email)}</a></td>
+            </tr>
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top; border-bottom:1px solid #e5edf3;">Session</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;"><em>${escapeHtml(cleanSession)}</em></td>
+            </tr>
+            ${submittedAt ? `
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top;">Submitted</td>
+              <td style="padding:11px 14px; vertical-align:top;">${escapeHtml(submittedAt)}</td>
+            </tr>` : ''}
+          </table>
+
+          <p style="margin:0; font-size:14px; color:#374151;">Hit <strong>Reply</strong> to respond directly to ${escapeHtml(cleanName.split(' ')[0])} — they will see this full message.</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return { subject, text, html };
+}
+
+async function sendNotificationEmail(response) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.SURVEY_CONFIRMATION_FROM;
+  if (!apiKey || !from) return;
+
+  const email = buildNotificationEmail(response);
+  const resendResponse = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from,
+      to: NOTIFICATION_TO,
+      reply_to: response.email.trim(),
+      subject: email.subject,
+      text: email.text,
+      html: email.html
+    })
+  });
+
+  if (!resendResponse.ok) {
+    const details = await resendResponse.text();
+    throw new Error(`Resend notification error ${resendResponse.status}: ${details}`);
+  }
+}
+
 async function sendConfirmationEmail(response) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.SURVEY_CONFIRMATION_FROM;
@@ -346,6 +446,23 @@ export default async function handler(req, res) {
       )
     `;
 
+    const cleanAdditionalNotes = (additionalNotes || q3 || '').trim();
+
+    if (cleanAdditionalNotes) {
+      try {
+        await sendNotificationEmail({
+          name: cleanName,
+          email,
+          sessionTitle,
+          additionalNotes: cleanAdditionalNotes,
+          submittedAt: new Date().toLocaleString('en-US', { timeZone: 'America/Denver', dateStyle: 'long', timeStyle: 'short' }) + ' MDT',
+          isResubmission
+        });
+      } catch (notifyErr) {
+        console.error('Notification email error:', notifyErr);
+      }
+    }
+
     try {
       const emailResult = await sendConfirmationEmail({
         firstName: cleanFirstName,
@@ -364,7 +481,7 @@ export default async function handler(req, res) {
         prerecordConfirmation,
         prerecordLiveSupport,
         sbiMaxParticipants,
-        additionalNotes: additionalNotes || q3 || '',
+        additionalNotes: cleanAdditionalNotes,
         isResubmission
       });
       if (!emailResult.sent) {
