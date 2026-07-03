@@ -7,6 +7,14 @@ const CEU_INITIAL_LIMIT = 3;
 const CEU_EXTRA_LIMIT = 2;
 const CEU_SHORT_WAIT_MS = 5 * 60 * 1000;
 const CEU_DAILY_WAIT_MS = 24 * 60 * 60 * 1000;
+const SESSION_FOLLOWUPS = [
+  {
+    matchTitle: "centering parents caregiver voice in child welfare evaluation",
+    heading: "Interpretation planning",
+    copy: "You noted that this session may include parent/caregiver guest speakers from the Advisory Group cohort who may be Spanish speakers. Please share anything else we should know about interpretation needs for the guest speakers and audience. We will plan to follow up with you to talk through the best approach, likely using Zoom interpretation, and you are also welcome to start that conversation with us sooner.",
+    placeholder: "Share interpretation details, questions, or anything else the Global Gathering Team should know."
+  }
+];
 // Toggle tabs here. Set enabled: false to hide a tab without editing markup.
 const TAB_CONFIG = [
   { id: "overview-tab", label: "Overview", sectionId: "overview", enabled: true },
@@ -273,6 +281,7 @@ function buildSurveyDraft() {
     ceuObjectives: document.getElementById("survey-ceu-objectives")?.value || "",
     ceuQuestions: document.getElementById("survey-ceu-questions")?.value || "",
     ceuOptOut: document.getElementById("survey-ceu-opt-out")?.checked || false,
+    sessionFollowupResponse: document.getElementById("survey-session-followup-response")?.value || "",
     formatConfirmation: selectedRadioValue("format-confirmation"),
     recordingConfirmation: selectedRadioValue("recording-confirmation"),
     prerecordConfirmation: selectedRadioValue("prerecord-confirmation"),
@@ -294,6 +303,7 @@ function saveSurveyDraft() {
     draft.ceuObjectives,
     draft.ceuQuestions,
     draft.ceuOptOut ? "yes" : "",
+    draft.sessionFollowupResponse,
     draft.formatConfirmation,
     draft.recordingConfirmation,
     draft.prerecordConfirmation,
@@ -320,6 +330,7 @@ function applySurveyDraftFields(draft) {
   document.getElementById("survey-ceu-objectives").value = draft.ceuObjectives || "";
   document.getElementById("survey-ceu-questions").value = draft.ceuQuestions || "";
   document.getElementById("survey-ceu-opt-out").checked = !!draft.ceuOptOut;
+  document.getElementById("survey-session-followup-response").value = draft.sessionFollowupResponse || "";
   document.getElementById("survey-additional-notes").value = draft.additionalNotes || "";
   document.getElementById("survey-sbi-max-participants").value = draft.sbiMaxParticipants || "";
   setRadioValue("format-confirmation", draft.formatConfirmation);
@@ -448,6 +459,11 @@ function formatSessionTimeRange(startValue, endValue) {
 
 function isCeuEligible(session) {
   return normalize(session?.ceuEligibility || "") === "ceu eligible";
+}
+
+function getSessionFollowup(session) {
+  const title = normalize(session?.title || "");
+  return SESSION_FOLLOWUPS.find(followup => title.includes(followup.matchTitle)) || null;
 }
 
 function isCeuOptedOut() {
@@ -917,6 +933,23 @@ async function renderSurveyForSession(session, options = {}) {
     document.getElementById("survey-sbi-max-participants").value = "";
   }
 
+  const followup = getSessionFollowup(session);
+  const followupSection = document.getElementById("survey-session-followup-section");
+  const followupHeading = document.getElementById("survey-session-followup-heading");
+  const followupCopy = document.getElementById("survey-session-followup-copy");
+  const followupResponse = document.getElementById("survey-session-followup-response");
+  followupSection.classList.toggle("hidden", !followup);
+  if (followup) {
+    followupHeading.textContent = followup.heading;
+    followupCopy.textContent = followup.copy;
+    followupResponse.placeholder = followup.placeholder;
+  } else {
+    followupHeading.textContent = "";
+    followupCopy.textContent = "";
+    followupResponse.value = "";
+    followupResponse.placeholder = "";
+  }
+
   const response = await checkExistingSurveyResponse(session);
   if (options.loadLatestResponse && response) {
     populateSurveyResponseFields(response);
@@ -945,6 +978,7 @@ function clearSurveyResponseFields() {
   document.getElementById("survey-ceu-objectives").value = "";
   document.getElementById("survey-ceu-questions").value = "";
   document.getElementById("survey-ceu-opt-out").checked = false;
+  document.getElementById("survey-session-followup-response").value = "";
   document.getElementById("survey-additional-notes").value = "";
   document.getElementById("survey-sbi-max-participants").value = "";
   document.querySelectorAll('input[name="format-confirmation"], input[name="recording-confirmation"], input[name="prerecord-confirmation"]').forEach(radio => {
@@ -993,6 +1027,7 @@ function populateSurveyResponseFields(response) {
   document.getElementById("survey-ceu-objectives").value = response.ceuObjectives || "";
   document.getElementById("survey-ceu-questions").value = response.ceuQuestions || "";
   document.getElementById("survey-ceu-opt-out").checked = !!response.ceuOptOut;
+  document.getElementById("survey-session-followup-response").value = response.sessionFollowupResponse || "";
   document.getElementById("survey-additional-notes").value = response.additionalNotes || "";
   document.getElementById("survey-sbi-max-participants").value = response.sbiMaxParticipants || "";
   setRadioValue("format-confirmation", response.formatConfirmation);
@@ -1656,6 +1691,8 @@ function bindSurvey() {
       ceuObjectives: isCeuEligible(selectedSurveySession) && !isCeuOptedOut() ? document.getElementById("survey-ceu-objectives").value : "",
       ceuQuestions: isCeuEligible(selectedSurveySession) && !isCeuOptedOut() ? document.getElementById("survey-ceu-questions").value : "",
       ceuOptOut: isCeuEligible(selectedSurveySession) ? isCeuOptedOut() : false,
+      sessionFollowupPrompt: getSessionFollowup(selectedSurveySession)?.heading || "",
+      sessionFollowupResponse: getSessionFollowup(selectedSurveySession) ? document.getElementById("survey-session-followup-response").value : "",
       formatConfirmation: selectedRadioValue("format-confirmation"),
       recordingConfirmation: selectedRadioValue("recording-confirmation"),
       prerecordConfirmation: selectedRadioValue("prerecord-confirmation"),
