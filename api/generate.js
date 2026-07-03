@@ -1,6 +1,65 @@
 const API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-const SYSTEM_PROMPT = `Generate exactly three knowledge-check questions and exactly three measurable learning objectives for a CEU-eligible session at A Global Gathering for the Future of Child Welfare. Use only the session title, description, and context provided. Do not invent facts or ask about the event itself. Knowledge-check questions must test the session content, concepts, practices, or takeaways directly. Do not write meta questions about what the session says, covers, discusses, teaches, focuses on, or includes. Avoid True/False stems such as "This session will cover..." or "The session says..." Instead, write content-based stems such as "Trauma-informed practice includes..." or "A useful strategy for..." Make the questions simple, single-answer, and easy to edit. True/False questions are acceptable only when they assess a content claim directly. Objectives should begin with measurable verbs such as describe, identify, explain, apply, compare, or reflect on. Use plain text only. Output with exactly two headers: "Suggested Knowledge-Check Questions:" and "Suggested Measurable Objectives:"`;
+const SYSTEM_PROMPT = `Generate exactly three True/False knowledge-check questions and exactly three measurable learning objectives for a CEU-eligible session at A Global Gathering for the Future of Child Welfare. Use only the session title, description, and context provided. Do not invent facts or ask about the event itself. Each knowledge-check question must be a direct content claim that participants can judge as true or false after attending the session, with the answer shown. The questions should assess concepts, practices, implications, or takeaways from the session topic itself, not whether the session mentions, covers, teaches, or discusses something. Do not generate open-ended, short-answer, fill-in-the-blank, or multiple-choice questions. Make the questions simple, single-answer, and easy to edit. Objectives should begin with measurable verbs such as describe, identify, explain, apply, compare, or reflect on. Use plain text only. Output with exactly two headers: "Suggested Knowledge-Check Questions:" and "Suggested Measurable Objectives:"`;
+const QUESTIONS_HEADER = "Suggested Knowledge-Check Questions:";
+const OBJECTIVES_HEADER = "Suggested Measurable Objectives:";
+
+function buildUserPrompt(title, description, extra = "") {
+  return (
+    `Session Title: ${title.trim()}\n` +
+    `Description: ${description.trim()}\n` +
+    `Relevant Session Context:\n${extra.trim() || "None provided."}`
+  );
+}
+
+function extractKnowledgeQuestions(output) {
+  const text = String(output || "");
+  const questionsIndex = text.toLowerCase().indexOf(QUESTIONS_HEADER.toLowerCase());
+  const objectivesIndex = text.toLowerCase().indexOf(OBJECTIVES_HEADER.toLowerCase());
+  if (questionsIndex < 0 || objectivesIndex < 0 || objectivesIndex <= questionsIndex) return [];
+
+  return text
+    .slice(questionsIndex + QUESTIONS_HEADER.length, objectivesIndex)
+    .split("\n")
+    .map(line => line.trim())
+    .filter(Boolean);
+}
+
+function questionsAreTrueFalse(output) {
+  const questions = extractKnowledgeQuestions(output);
+  if (questions.length !== 3) return false;
+  return questions.every(question => {
+    const clean = question.replace(/^\s*(?:[-*]|\d+[.)])\s*/, "");
+    return /^(?:true or false|t\/f)\s*:/i.test(clean) && /\banswer:\s*(?:true|false)\b/i.test(clean);
+  });
+}
+
+async function requestDraft(apiKey, messages) {
+  const groqRes = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages,
+      temperature: 0.4,
+      max_tokens: 500
+    })
+  });
+
+  const bodyText = await groqRes.text();
+  if (!groqRes.ok) {
+    const error = new Error(`Groq error ${groqRes.status}: ${groqRes.statusText}`);
+    error.status = groqRes.status;
+    error.details = bodyText;
+    throw error;
+  }
+
+  const data = JSON.parse(bodyText);
+  return data.choices?.[0]?.message?.content?.trim() || "No response.";
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -18,48 +77,32 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Session title and description are required." });
   }
 
-  const payload = {
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      {
-        role: "system",
-        content: SYSTEM_PROMPT
-      },
-      {
-        role: "user",
-        content:
-          `Session Title: ${title.trim()}\n` +
-          `Description: ${description.trim()}\n` +
-          `Relevant Session Context:\n${extra.trim() || "None provided."}`
-      }
-    ],
-    temperature: 0.7,
-    max_tokens: 500
-  };
-
   try {
-    const groqRes = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify(payload)
-    });
+    const userPrompt = buildUserPrompt(title, description, extra);
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userPrompt }
+    ];
 
-    const bodyText = await groqRes.text();
-    if (!groqRes.ok) {
-      return res.status(groqRes.status).json({
-        error: `Groq error ${groqRes.status}: ${groqRes.statusText}`,
-        details: bodyText
-      });
+    let output = await requestDraft(apiKey, messages);
+    if (!questionsAreTrueFalse(output)) {
+      output = await requestDraft(apiKey, [
+        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: `${userPrompt}\n\nRegenerate the full response. The three knowledge-check questions MUST each start with "True or False:" and MUST each include "Answer: True" or "Answer: False". Do not include any open-ended questions.`
+        }
+      ]);
     }
 
-    const data = JSON.parse(bodyText);
-    return res.status(200).json({
-      output: data.choices?.[0]?.message?.content?.trim() || "No response."
-    });
+    return res.status(200).json({ output });
   } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({
+        error: `Groq error ${error.status}: ${error.message.split(": ").slice(1).join(": ")}`,
+        details: error.details
+      });
+    }
     return res.status(500).json({ error: `Network error: ${error.message}` });
   }
 }
