@@ -1,6 +1,7 @@
 const SESSION_DATA_URL = "/api/sessions";
 const SURVEY_SUBMISSION_KEY = "ggSpeakerSurveyLastSubmission";
 const SURVEY_DRAFT_KEY = "ggSpeakerSurveyDraft";
+const SURVEY_SESSION_DRAFTS_KEY = "ggSpeakerSurveySessionDrafts";
 const CEU_GENERATE_LIMIT_KEY = "ggCeuGenerateLimit";
 const CEU_INITIAL_LIMIT = 3;
 const CEU_EXTRA_LIMIT = 2;
@@ -219,6 +220,33 @@ function clearSavedSurveyDraft() {
   localStorage.removeItem(SURVEY_DRAFT_KEY);
 }
 
+function getSavedSurveySessionDrafts() {
+  try {
+    return JSON.parse(localStorage.getItem(SURVEY_SESSION_DRAFTS_KEY)) || {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function saveSurveySessionDraft(sessionId, draft) {
+  if (!sessionId || !draft) return;
+  const drafts = getSavedSurveySessionDrafts();
+  drafts[sessionId] = draft;
+  localStorage.setItem(SURVEY_SESSION_DRAFTS_KEY, JSON.stringify(drafts));
+}
+
+function getSavedSurveySessionDraft(sessionId) {
+  if (!sessionId) return null;
+  return getSavedSurveySessionDrafts()[sessionId] || null;
+}
+
+function clearSavedSurveySessionDraft(sessionId) {
+  if (!sessionId) return;
+  const drafts = getSavedSurveySessionDrafts();
+  delete drafts[sessionId];
+  localStorage.setItem(SURVEY_SESSION_DRAFTS_KEY, JSON.stringify(drafts));
+}
+
 function buildSurveyDraft() {
   return {
     firstName: document.getElementById("survey-first-name")?.value || "",
@@ -261,6 +289,9 @@ function saveSurveyDraft() {
   }
 
   localStorage.setItem(SURVEY_DRAFT_KEY, JSON.stringify(draft));
+  if (draft.sessionId) {
+    saveSurveySessionDraft(draft.sessionId, draft);
+  }
 }
 
 function applySurveyDraftFields(draft) {
@@ -1399,6 +1430,7 @@ function bindSurvey() {
 
   sessionInput.addEventListener("input", () => {
     const q = sessionInput.value.toLowerCase().trim();
+    saveSurveyDraft();
     selectedSurveySession = null;
     latestSurveyResponse = null;
     isResubmittingQuestionnaire = false;
@@ -1437,6 +1469,8 @@ function bindSurvey() {
         sessionInput.value = session.title || "";
         suggestionsBox.classList.add("hidden");
         await renderSurveyForSession(session);
+        const sessionDraft = getSavedSurveySessionDraft(session.id);
+        if (sessionDraft) applySurveyDraftFields(sessionDraft);
         saveSurveyDraft();
       });
       suggestionsBox.appendChild(div);
@@ -1547,6 +1581,7 @@ function bindSurvey() {
 
       if (res.ok) {
         rememberSurveySubmission(selectedSurveySession);
+        clearSavedSurveySessionDraft(selectedSurveySession?.id);
         clearSavedSurveyDraft();
         updateOverviewSurveyCta();
         form.reset();
