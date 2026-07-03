@@ -30,12 +30,32 @@ function formatSessionVideoFormat(value) {
   return clean;
 }
 
+function formatConfirmedVideoFormat(formatConfirmation, sessionVideoFormat) {
+  const cleanConfirmation = String(formatConfirmation || '').trim();
+  const normalizedConfirmation = cleanConfirmation.toLowerCase();
+  if (normalizedConfirmation.includes('zoom')) return 'Zoom';
+  if (normalizedConfirmation.includes('embedded')) return 'Embedded';
+  return formatSessionVideoFormat(sessionVideoFormat);
+}
+
 function formatSessionRecordingStatus(value) {
   const clean = String(value || '').trim();
   const normalized = clean.toLowerCase();
   if (!clean) return '';
   if (normalized.includes('not')) return 'Not recorded';
   return 'Recorded';
+}
+
+function formatConfirmedRecordingStatus(recordingConfirmation, sessionRecordingStatus) {
+  const cleanConfirmation = String(recordingConfirmation || '').trim();
+  const normalizedConfirmation = cleanConfirmation.toLowerCase();
+  if (normalizedConfirmation) {
+    if (normalizedConfirmation.includes('not record') || normalizedConfirmation.includes('not be recorded') || normalizedConfirmation.includes('do not record')) {
+      return 'Not recorded';
+    }
+    if (normalizedConfirmation.includes('record')) return 'Recorded';
+  }
+  return formatSessionRecordingStatus(sessionRecordingStatus);
 }
 
 function toBoolean(value) {
@@ -61,8 +81,8 @@ function buildConfirmationEmail({
   const cleanName = (name || [firstName].filter(Boolean).join(" ")).trim();
   const salutationName = (firstName?.trim() || cleanName || "there").split(/\s+/)[0];
   const cleanSessionTitle = sessionTitle?.trim() || 'Not provided';
-  const cleanSessionVideoFormat = formatConfirmation?.trim() || formatSessionVideoFormat(sessionVideoFormat) || '';
-  const cleanSessionRecordingStatus = recordingConfirmation?.trim() || formatSessionRecordingStatus(sessionRecordingStatus) || '';
+  const cleanSessionVideoFormat = formatConfirmedVideoFormat(formatConfirmation, sessionVideoFormat) || '';
+  const cleanSessionRecordingStatus = formatConfirmedRecordingStatus(recordingConfirmation, sessionRecordingStatus) || '';
   const responseNoun = isResubmission ? 'updated response' : 'response';
   const subjectPrefix = isResubmission ? 'Speaker Questionnaire update confirmation' : 'Speaker Questionnaire confirmation';
   const eyebrow = isResubmission ? 'Speaker Questionnaire update received' : 'Speaker Questionnaire received';
