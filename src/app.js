@@ -450,7 +450,6 @@ function renderFormatComparisonRows(mode) {
 
 let parentVisibleRange = null;
 let fallbackVisibleRange = null;
-let formatModalAnchor = null;
 let formatModalPositionFrame = 0;
 let formatModalPositionTick = 0;
 
@@ -497,13 +496,6 @@ function buildFallbackVisibleRange(anchorEl) {
   };
 }
 
-function getAnchorCenterY(anchorEl) {
-  const anchorRect = anchorEl?.getBoundingClientRect?.();
-  if (!anchorRect) return null;
-  const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-  return scrollTop + anchorRect.top + anchorRect.height / 2;
-}
-
 function getVisibleRange() {
   if (isEmbeddedInParent() && parentVisibleRange) {
     return parentVisibleRange;
@@ -537,16 +529,13 @@ function positionFormatComparisonModal() {
   const rangeTop = Math.max(0, range.top);
   const rangeHeight = Math.max(200, range.bottom - rangeTop);
   const documentHeight = Math.max(getDocumentHeight(), rangeTop + rangeHeight);
-  const anchorCenterY = getAnchorCenterY(formatModalAnchor);
 
   modal.style.top = "0px";
   modal.style.height = `${documentHeight}px`;
   panel.style.maxHeight = `${Math.max(200, rangeHeight - margin * 2)}px`;
 
   const panelHeight = panel.offsetHeight;
-  let top = anchorCenterY == null
-    ? rangeTop + Math.max(margin, (rangeHeight - panelHeight) / 2)
-    : anchorCenterY - panelHeight / 2;
+  let top = rangeTop + Math.max(margin, (rangeHeight - panelHeight) / 2);
   top = Math.min(top, rangeTop + rangeHeight - panelHeight - margin);
   top = Math.max(top, rangeTop + margin);
   panel.style.top = `${top}px`;
@@ -585,7 +574,6 @@ function openFormatComparisonModal(initialMode, anchorEl = null) {
   const modal = document.getElementById("format-comparison-modal");
   if (!modal) return;
   const activeMode = initialMode === "embedded" ? "embedded" : "zoom";
-  formatModalAnchor = anchorEl;
   fallbackVisibleRange = buildFallbackVisibleRange(anchorEl);
   modal.classList.remove("hidden");
   renderFormatComparisonRows(activeMode);
@@ -608,7 +596,6 @@ function closeFormatComparisonModal() {
   const modal = document.getElementById("format-comparison-modal");
   if (!modal) return;
   modal.classList.add("hidden");
-  formatModalAnchor = null;
   stopFormatModalPositionTracking();
   notifyParentFormatModalState(false);
 }
