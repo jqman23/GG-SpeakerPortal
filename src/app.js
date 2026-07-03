@@ -346,9 +346,9 @@ function buildFormatComparisonRows() {
 
 function buildFormatComparisonModal() {
   return `
-    <div id="format-comparison-modal" class="absolute top-0 left-0 w-full z-50 hidden">
+    <div id="format-comparison-modal" class="fixed inset-0 z-50 hidden">
       <div class="absolute inset-0 bg-black/40" data-close-format-modal></div>
-      <div id="format-comparison-panel" class="absolute left-1/2 -translate-x-1/2 z-10 w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
+      <div id="format-comparison-panel" class="fixed left-1/2 -translate-x-1/2 z-10 w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
         <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
           <div>
             <p class="text-xs font-bold tracking-[0.08em] text-[var(--survey-primary)] uppercase">Compare formats</p>
@@ -452,20 +452,15 @@ function getVisibleRange() {
   if (isEmbeddedInParent() && parentVisibleRange) {
     return parentVisibleRange;
   }
-  return { top: window.scrollY, bottom: window.scrollY + window.innerHeight };
-}
-
-function getDocumentHeight() {
-  const doc = document.documentElement;
-  return Math.max(doc.scrollHeight, doc.offsetHeight, document.body.scrollHeight, document.body.offsetHeight);
+  // Not embedded: the panel is position:fixed, so its containing block is
+  // the viewport itself (0 to innerHeight), regardless of scroll position.
+  return { top: 0, bottom: window.innerHeight };
 }
 
 function positionFormatComparisonModal() {
   const modal = document.getElementById("format-comparison-modal");
   const panel = document.getElementById("format-comparison-panel");
   if (!modal || !panel || modal.classList.contains("hidden")) return;
-
-  modal.style.height = `${getDocumentHeight()}px`;
 
   const margin = 16;
   const range = getVisibleRange();
