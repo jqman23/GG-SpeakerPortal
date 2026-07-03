@@ -91,8 +91,16 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.classList.toggle("text-[#122345]", isActive);
         btn.classList.toggle("text-gray-600", !isActive);
       });
+      positionFormatComparisonModal();
     }
   });
+  window.addEventListener("message", event => {
+    if (event.data && event.data.ggVisibleRange) {
+      parentVisibleRange = event.data.ggVisibleRange;
+      positionFormatComparisonModal();
+    }
+  });
+  window.addEventListener("resize", () => positionFormatComparisonModal());
   renderTabs();
   bindOverviewSurveyCta();
   bindLookup();
@@ -338,9 +346,9 @@ function buildFormatComparisonRows() {
 
 function buildFormatComparisonModal() {
   return `
-    <div id="format-comparison-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-4">
+    <div id="format-comparison-modal" class="absolute top-0 left-0 w-full z-50 hidden">
       <div class="absolute inset-0 bg-black/40" data-close-format-modal></div>
-      <div class="relative z-10 w-full max-w-4xl max-h-full overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
+      <div id="format-comparison-panel" class="absolute left-1/2 -translate-x-1/2 z-10 w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
         <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
           <div>
             <p class="text-xs font-bold tracking-[0.08em] text-[var(--survey-primary)] uppercase">Compare formats</p>
@@ -425,12 +433,59 @@ function renderFormatComparisonRows(mode) {
   }).join("");
 }
 
+let parentVisibleRange = null;
+
+function isEmbeddedInParent() {
+  try {
+    return !!window.parent && window.parent !== window;
+  } catch (_) {
+    return false;
+  }
+}
+
+function requestParentVisibleRange() {
+  if (!isEmbeddedInParent()) return;
+  window.parent.postMessage({ ggRequestVisibleRange: true }, "*");
+}
+
+function getVisibleRange() {
+  if (isEmbeddedInParent() && parentVisibleRange) {
+    return parentVisibleRange;
+  }
+  return { top: window.scrollY, bottom: window.scrollY + window.innerHeight };
+}
+
+function getDocumentHeight() {
+  const doc = document.documentElement;
+  return Math.max(doc.scrollHeight, doc.offsetHeight, document.body.scrollHeight, document.body.offsetHeight);
+}
+
+function positionFormatComparisonModal() {
+  const modal = document.getElementById("format-comparison-modal");
+  const panel = document.getElementById("format-comparison-panel");
+  if (!modal || !panel || modal.classList.contains("hidden")) return;
+
+  modal.style.height = `${getDocumentHeight()}px`;
+
+  const margin = 16;
+  const range = getVisibleRange();
+  const rangeTop = Math.max(0, range.top);
+  const rangeHeight = Math.max(200, range.bottom - range.top);
+
+  panel.style.maxHeight = `${Math.max(200, rangeHeight - margin * 2)}px`;
+
+  const panelHeight = panel.offsetHeight;
+  let top = rangeTop + Math.max(margin, (rangeHeight - panelHeight) / 2);
+  top = Math.min(top, rangeTop + rangeHeight - panelHeight - margin);
+  top = Math.max(top, rangeTop + margin);
+  panel.style.top = `${top}px`;
+}
+
 function openFormatComparisonModal(initialMode) {
   const modal = document.getElementById("format-comparison-modal");
   if (!modal) return;
   const activeMode = initialMode === "embedded" ? "embedded" : "zoom";
   modal.classList.remove("hidden");
-  modal.classList.add("flex");
   renderFormatComparisonRows(activeMode);
   modal.dataset.mode = activeMode;
 
@@ -440,13 +495,15 @@ function openFormatComparisonModal(initialMode) {
     btn.classList.toggle("text-[#122345]", btn.dataset.formatMode === activeMode);
     btn.classList.toggle("text-gray-600", btn.dataset.formatMode !== activeMode);
   });
+
+  requestParentVisibleRange();
+  positionFormatComparisonModal();
 }
 
 function closeFormatComparisonModal() {
   const modal = document.getElementById("format-comparison-modal");
   if (!modal) return;
   modal.classList.add("hidden");
-  modal.classList.remove("flex");
 }
 
 async function renderSurveyForSession(session, options = {}) {
@@ -462,7 +519,7 @@ async function renderSurveyForSession(session, options = {}) {
   const summary = document.getElementById("survey-session-summary");
   summary.innerHTML = `
     <h3 class="font-bold text-[#162A53] mb-2">Session selected</h3>
-    <p class="font-semibold text-sm text-gray-900 mb-2">${escapeHtml(session.title || "Not listed")}</p>
+    <p class="font-semibold text-sm text-gray-900 mb-2"><em>${escapeHtml(session.title || "Not listed")}</em></p>
     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">Date/time:</dt><dd>${escapeHtml(formatSessionDateTime(session))}</dd></div>
       <div class="flex gap-1"><dt class="font-semibold text-gray-600">CEU:</dt><dd>${escapeHtml(session.ceuEligibility || "Not listed")}</dd></div>
@@ -488,7 +545,7 @@ async function renderSurveyForSession(session, options = {}) {
   if (showFormat) {
     const currentMode = normalize(feature) === "embedded" ? "embedded" : "zoom";
     const explanation = normalize(feature) === "zoom"
-      ? "Our records show this session is planned for Zoom. Zoom supports breakout rooms, waiting rooms, full virtual backgrounds, transcripts, and more direct participant audio/video control, with chat used for questions."
+      ? "Your session is currently programmed as a Zoom session. Zoom supports breakout rooms, virtual backgrounds, transcript generation, and other Zoom-related features."
       : "Our records show this session is planned as Embedded. Embedded sessions live inside Attendee Hub and support native polling, Q&A, and Chat features. Only blurred backgrounds are available. Participants must request permission before coming on video and unmuting.";
     formatSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Session format confirmation</h3>
@@ -521,7 +578,7 @@ async function renderSurveyForSession(session, options = {}) {
   if (showRecording) {
     const recordingText = normalize(session.recordingStatus || "").includes("not")
       ? "Our records show this session is marked as not recorded."
-      : "Our records show this session is marked to be recorded. If you choose to have your session recorded, you can request a copy of the video file afterwards.";
+      : "Your session is set to be recorded. If you choose to have your session recorded, you can request a copy of the video file afterwards.";
     recordingSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Recording confirmation</h3>
       <p class="text-sm text-gray-800">${escapeHtml(recordingText)}</p>
