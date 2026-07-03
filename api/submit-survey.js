@@ -56,8 +56,8 @@ function buildConfirmationEmail({
   const cleanName = (name || [firstName].filter(Boolean).join(" ")).trim();
   const salutationName = (firstName?.trim() || cleanName || "there").split(/\s+/)[0];
   const cleanSessionTitle = sessionTitle?.trim() || 'Not provided';
-  const cleanSessionVideoFormat = formatSessionVideoFormat(sessionVideoFormat) || formatConfirmation?.trim() || '';
-  const cleanSessionRecordingStatus = formatSessionRecordingStatus(sessionRecordingStatus) || recordingConfirmation?.trim() || '';
+  const cleanSessionVideoFormat = formatConfirmation?.trim() || formatSessionVideoFormat(sessionVideoFormat) || '';
+  const cleanSessionRecordingStatus = recordingConfirmation?.trim() || formatSessionRecordingStatus(sessionRecordingStatus) || '';
   const responseNoun = isResubmission ? 'updated response' : 'response';
   const subjectPrefix = isResubmission ? 'Speaker Questionnaire update confirmation' : 'Speaker Questionnaire confirmation';
   const eyebrow = isResubmission ? 'Speaker Questionnaire update received' : 'Speaker Questionnaire received';
