@@ -7,6 +7,7 @@ const CEU_INITIAL_LIMIT = 3;
 const CEU_EXTRA_LIMIT = 2;
 const CEU_SHORT_WAIT_MS = 5 * 60 * 1000;
 const CEU_DAILY_WAIT_MS = 24 * 60 * 60 * 1000;
+const PRERECORD_YES_OPTION = "Yes, I plan to pre-record my session and have it shown in a simulated live format. I will send a copy of the recording to the Global Gathering Team by September 4, 2026.";
 const SESSION_FOLLOWUPS = [
   {
     matchTitle: "centering parents caregiver voice in child welfare evaluation",
@@ -288,6 +289,7 @@ function buildSurveyDraft() {
     ceuQuestions: document.getElementById("survey-ceu-questions")?.value || "",
     ceuOptOut: document.getElementById("survey-ceu-opt-out")?.checked || false,
     sessionFollowupResponse: document.getElementById("survey-session-followup-response")?.value || "",
+    prerecordLiveSupport: document.getElementById("survey-prerecord-live-support")?.value || "",
     formatConfirmation: selectedRadioValue("format-confirmation"),
     recordingConfirmation: selectedRadioValue("recording-confirmation"),
     prerecordConfirmation: selectedRadioValue("prerecord-confirmation"),
@@ -310,6 +312,7 @@ function saveSurveyDraft() {
     draft.ceuQuestions,
     draft.ceuOptOut ? "yes" : "",
     draft.sessionFollowupResponse,
+    draft.prerecordLiveSupport,
     draft.formatConfirmation,
     draft.recordingConfirmation,
     draft.prerecordConfirmation,
@@ -337,6 +340,7 @@ function applySurveyDraftFields(draft) {
   document.getElementById("survey-ceu-questions").value = draft.ceuQuestions || "";
   document.getElementById("survey-ceu-opt-out").checked = !!draft.ceuOptOut;
   document.getElementById("survey-session-followup-response").value = draft.sessionFollowupResponse || "";
+  document.getElementById("survey-prerecord-live-support").value = draft.prerecordLiveSupport || "";
   document.getElementById("survey-additional-notes").value = draft.additionalNotes || "";
   document.getElementById("survey-sbi-max-participants").value = draft.sbiMaxParticipants || "";
   setRadioValue("format-confirmation", draft.formatConfirmation);
@@ -345,6 +349,7 @@ function applySurveyDraftFields(draft) {
   isResubmittingQuestionnaire = !!draft.isResubmitting;
   updateQuestionnaireSubmitButton();
   updateCeuOptOutState();
+  updatePrerecordLiveSupportState();
 }
 
 async function restoreSavedSurveyDraft() {
@@ -926,10 +931,11 @@ async function renderSurveyForSession(session, options = {}) {
     <h3 class="font-bold text-[#162A53]">Pre-recording *</h3>
     <p class="text-sm text-gray-800">You previously expressed interest in pre-recording your session and having it shown during the Global Gathering in a simulated live format. Please confirm whether you formally plan to pre-record your session and having it played automatically. If we do not receive a response, we will assume you plan to present live. If you plan to pre-record, please email us a copy of your presentation by September 4, 2026 to give us enough time to program it into the system.</p>
     ${radioGroup("prerecord-confirmation", [
-      "Yes, I plan to pre-record my session and have it shown in a simulated live format.",
+      PRERECORD_YES_OPTION,
       "I would prefer to present live."
     ])}
   ` : "";
+  updatePrerecordLiveSupportState();
 
   const sbiSection = document.getElementById("survey-sbi-section");
   const showSbi = isSkillBuildingInstitute(session);
@@ -980,17 +986,28 @@ function setRadioValue(name, value) {
   });
 }
 
+function updatePrerecordLiveSupportState() {
+  const section = document.getElementById("survey-prerecord-live-support-section");
+  const response = document.getElementById("survey-prerecord-live-support");
+  if (!section || !response) return;
+  const show = selectedRadioValue("prerecord-confirmation") === PRERECORD_YES_OPTION;
+  section.classList.toggle("hidden", !show);
+  if (!show) response.value = "";
+}
+
 function clearSurveyResponseFields() {
   document.getElementById("survey-ceu-objectives").value = "";
   document.getElementById("survey-ceu-questions").value = "";
   document.getElementById("survey-ceu-opt-out").checked = false;
   document.getElementById("survey-session-followup-response").value = "";
+  document.getElementById("survey-prerecord-live-support").value = "";
   document.getElementById("survey-additional-notes").value = "";
   document.getElementById("survey-sbi-max-participants").value = "";
   document.querySelectorAll('input[name="format-confirmation"], input[name="recording-confirmation"], input[name="prerecord-confirmation"]').forEach(radio => {
     radio.checked = false;
   });
   updateCeuOptOutState();
+  updatePrerecordLiveSupportState();
 }
 
 function clearSurveyStatusMessage() {
@@ -1034,6 +1051,7 @@ function populateSurveyResponseFields(response) {
   document.getElementById("survey-ceu-questions").value = response.ceuQuestions || "";
   document.getElementById("survey-ceu-opt-out").checked = !!response.ceuOptOut;
   document.getElementById("survey-session-followup-response").value = response.sessionFollowupResponse || "";
+  document.getElementById("survey-prerecord-live-support").value = response.prerecordLiveSupport || "";
   document.getElementById("survey-additional-notes").value = response.additionalNotes || "";
   document.getElementById("survey-sbi-max-participants").value = response.sbiMaxParticipants || "";
   setRadioValue("format-confirmation", response.formatConfirmation);
@@ -1041,6 +1059,7 @@ function populateSurveyResponseFields(response) {
   setRadioValue("prerecord-confirmation", response.prerecordConfirmation);
   updateQuestionnaireSubmitButton();
   updateCeuOptOutState();
+  updatePrerecordLiveSupportState();
   saveSurveyDraft();
 }
 
@@ -1557,6 +1576,7 @@ function bindSurvey() {
 
   form.addEventListener("change", () => {
     updateCeuOptOutState();
+    updatePrerecordLiveSupportState();
     saveSurveyDraft();
   });
 
@@ -1702,6 +1722,7 @@ function bindSurvey() {
       formatConfirmation: selectedRadioValue("format-confirmation"),
       recordingConfirmation: selectedRadioValue("recording-confirmation"),
       prerecordConfirmation: selectedRadioValue("prerecord-confirmation"),
+      prerecordLiveSupport: selectedRadioValue("prerecord-confirmation") === PRERECORD_YES_OPTION ? document.getElementById("survey-prerecord-live-support").value : "",
       sbiMaxParticipants: isSkillBuildingInstitute(selectedSurveySession) ? document.getElementById("survey-sbi-max-participants").value : "",
       additionalNotes: document.getElementById("survey-additional-notes").value,
       isResubmission: wasResubmitting

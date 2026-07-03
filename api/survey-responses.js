@@ -29,6 +29,7 @@ export default async function handler(req, res) {
         format_confirmation,
         recording_confirmation,
         prerecord_confirmation,
+        prerecord_live_support,
         sbi_max_participants,
         additional_notes,
         submitted_at
@@ -54,6 +55,7 @@ export default async function handler(req, res) {
         formatConfirmation: rows[0].format_confirmation || '',
         recordingConfirmation: rows[0].recording_confirmation || '',
         prerecordConfirmation: rows[0].prerecord_confirmation || '',
+        prerecordLiveSupport: rows[0].prerecord_live_support || '',
         sbiMaxParticipants: rows[0].sbi_max_participants || '',
         additionalNotes: rows[0].additional_notes || '',
         submittedAt: rows[0].submitted_at
