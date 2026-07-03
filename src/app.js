@@ -918,11 +918,11 @@ function getCeuGenerateBlockMessage() {
   const state = getCeuGenerateState();
 
   if (state.dailyCooldownUntil && now < state.dailyCooldownUntil) {
-    return `Please wait about ${formatWaitTime(state.dailyCooldownUntil - now)} before using the generator tool again.`;
+    return `Please wait ${formatWaitTime(state.dailyCooldownUntil - now)} before using the generator tool again.`;
   }
 
   if (state.count >= CEU_INITIAL_LIMIT && state.count < CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT && state.shortCooldownUntil && now < state.shortCooldownUntil) {
-    return `Please wait about ${formatWaitTime(state.shortCooldownUntil - now)} before using the generator tool again.`;
+    return `Please wait ${formatWaitTime(state.shortCooldownUntil - now)} before using the generator tool again.`;
   }
 
   return "";
@@ -1392,7 +1392,7 @@ function bindSurvey() {
       }
       const state = recordCeuGenerateUse();
       if (state.count === CEU_INITIAL_LIMIT) {
-        draftEl.textContent += " Please wait about 5 minutes before using the generator tool again.";
+        draftEl.textContent += " Please wait 5 minutes before using the generator tool again.";
       } else if (state.count >= CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT) {
         draftEl.textContent += " Please wait 24 hours before using the generator tool again.";
       }
