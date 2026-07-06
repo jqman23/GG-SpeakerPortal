@@ -240,7 +240,8 @@ function buildConfirmationEmail({
 }
 
 const NOTIFICATION_TO = 'globalgathering@cuanschutz.edu';
-const SPEAKER_EMAIL_MISMATCH_TO = 'joshua.kumin@cuanschutz.edu';
+const INTERNAL_ALERT_TO = 'joshua.kumin@cuanschutz.edu';
+const PRERECORD_YES_OPTION = 'Yes, I plan to pre-record my session.';
 
 function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase();
@@ -443,7 +444,7 @@ async function sendSpeakerEmailMismatchEmail(response) {
     },
     body: JSON.stringify({
       from,
-      to: SPEAKER_EMAIL_MISMATCH_TO,
+      to: INTERNAL_ALERT_TO,
       reply_to: response.email.trim(),
       subject: email.subject,
       text: email.text,
@@ -454,6 +455,119 @@ async function sendSpeakerEmailMismatchEmail(response) {
   if (!resendResponse.ok) {
     const details = await resendResponse.text();
     throw new Error(`Resend speaker email mismatch error ${resendResponse.status}: ${details}`);
+  }
+}
+
+function buildPrerecordConfirmationEmail({
+  name,
+  email,
+  sessionTitle,
+  sessionCode,
+  sessionId,
+  prerecordLiveSupport,
+  submittedAt,
+  isResubmission
+}) {
+  const cleanName = (name || '').trim() || 'Unknown submitter';
+  const cleanEmail = (email || '').trim() || 'Unknown email';
+  const cleanSession = (sessionTitle || '').trim() || 'Unknown session';
+  const cleanSessionCode = (sessionCode || '').trim();
+  const cleanLiveSupport = (prerecordLiveSupport || '').trim();
+  const action = isResubmission ? 'resubmitted' : 'submitted';
+  const subject = `Pre-record confirmed: ${cleanName} – ${cleanSession}`;
+
+  const text = compactLines([
+    `${cleanName} ${action} a Speaker Questionnaire and confirmed they plan to pre-record their session.`,
+    '',
+    `Submitted name: ${cleanName}`,
+    `Submitted email: ${cleanEmail}`,
+    `Session: ${cleanSession}`,
+    cleanSessionCode ? `Session code: ${cleanSessionCode}` : '',
+    sessionId ? `Session ID: ${sessionId}` : '',
+    submittedAt ? `Submitted: ${submittedAt}` : '',
+    '',
+    `Pre-recording: ${PRERECORD_YES_OPTION}`,
+    cleanLiveSupport ? `Live chat during "simulive" session:\n${cleanLiveSupport}` : ''
+  ]);
+
+  const html = `
+    <div style="margin:0; padding:32px 16px; background:#ffffff; font-family:Montserrat, Arial, sans-serif; color:#1f2937; line-height:1.5;">
+      <div style="max-width:680px; margin:0 auto;">
+        <div style="background:#ffffff; border:1px solid #d9e2ea; border-radius:8px; padding:28px;">
+          <p style="margin:0 0 6px 0; color:#46775D; font-size:12px; font-weight:bold; letter-spacing:0.04em; text-transform:uppercase;">Pre-record Confirmed</p>
+          <h1 style="margin:0 0 18px 0; color:#122345; font-size:22px; line-height:1.3;">A presenter confirmed they plan to pre-record their session.</h1>
+
+          <table cellpadding="0" cellspacing="0" style="border-collapse:collapse; width:100%; border:1px solid #d9e2ea; border-radius:8px; overflow:hidden; margin:0 0 22px 0;">
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; width:150px; vertical-align:top; border-bottom:1px solid #e5edf3;">Submitted name</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;">${escapeHtml(cleanName)}</td>
+            </tr>
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top; border-bottom:1px solid #e5edf3;">Submitted email</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;"><a href="mailto:${escapeHtml(cleanEmail)}" style="color:#0563C1;">${escapeHtml(cleanEmail)}</a></td>
+            </tr>
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top; border-bottom:1px solid #e5edf3;">Session</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;"><em>${escapeHtml(cleanSession)}</em></td>
+            </tr>
+            ${cleanSessionCode ? `
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top; border-bottom:1px solid #e5edf3;">Session code</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;">${escapeHtml(cleanSessionCode)}</td>
+            </tr>` : ''}
+            ${sessionId ? `
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top; border-bottom:1px solid #e5edf3;">Session ID</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;">${escapeHtml(sessionId)}</td>
+            </tr>` : ''}
+            ${submittedAt ? `
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top;">Submitted</td>
+              <td style="padding:11px 14px; vertical-align:top;">${escapeHtml(submittedAt)}</td>
+            </tr>` : ''}
+          </table>
+
+          <div style="margin:0; padding:16px 18px; background:#F5F7FA; border-left:4px solid #46775D; border-radius:6px;">
+            <p style="margin:0 0 6px 0; font-size:11px; font-weight:bold; letter-spacing:0.05em; text-transform:uppercase; color:#46775D;">Pre-recording response</p>
+            <p style="margin:0 0 ${cleanLiveSupport ? '14px' : '0'} 0; color:#1f2937;">${escapeHtml(PRERECORD_YES_OPTION)}</p>
+            ${cleanLiveSupport ? `
+              <p style="margin:0 0 6px 0; font-size:11px; font-weight:bold; letter-spacing:0.05em; text-transform:uppercase; color:#46775D;">Live chat during &quot;simulive&quot; session</p>
+              <p style="margin:0; white-space:pre-wrap; color:#1f2937;">${escapeHtml(cleanLiveSupport)}</p>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return { subject, text, html };
+}
+
+async function sendPrerecordConfirmationEmail(response) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.SURVEY_CONFIRMATION_FROM;
+  if (!apiKey || !from) return;
+
+  const email = buildPrerecordConfirmationEmail(response);
+  const resendResponse = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from,
+      to: INTERNAL_ALERT_TO,
+      reply_to: response.email.trim(),
+      subject: email.subject,
+      text: email.text,
+      html: email.html
+    })
+  });
+
+  if (!resendResponse.ok) {
+    const details = await resendResponse.text();
+    throw new Error(`Resend pre-record confirmation alert error ${resendResponse.status}: ${details}`);
   }
 }
 
@@ -618,6 +732,23 @@ export default async function handler(req, res) {
         });
       } catch (mismatchErr) {
         console.error('Speaker email mismatch notification error:', mismatchErr);
+      }
+    }
+
+    if ((prerecordConfirmation || '').trim() === PRERECORD_YES_OPTION) {
+      try {
+        await sendPrerecordConfirmationEmail({
+          name: cleanName,
+          email,
+          sessionTitle,
+          sessionCode,
+          sessionId: sessionId.trim(),
+          prerecordLiveSupport,
+          submittedAt,
+          isResubmission
+        });
+      } catch (prerecordAlertErr) {
+        console.error('Pre-record confirmation alert error:', prerecordAlertErr);
       }
     }
 
