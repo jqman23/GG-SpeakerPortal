@@ -1561,7 +1561,7 @@ async function generateShareCaption(session) {
     if (!res.ok) throw new Error(data.error || "Unable to generate caption.");
     if (requestId !== shareGenerationRequestId || selectedShareSession?.id !== session.id) return;
     message.value = buildShareMessage(session, data.middle || data.message || "");
-    if (status) status.textContent = "Caption generated from the selected session. Please review and edit before posting.";
+    if (status) status.textContent = "Social post generated from the selected session. Please review and edit before posting.";
   } catch (err) {
     if (requestId !== shareGenerationRequestId || selectedShareSession?.id !== session.id) return;
     message.value = buildShareMessage(session);
