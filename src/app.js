@@ -25,18 +25,19 @@ const SESSION_FOLLOWUPS = [
 ];
 // Toggle tabs here. Set enabled: false to hide a tab without editing markup.
 const TAB_CONFIG = [
-  { id: "overview-tab", label: "Overview", sectionId: "overview", enabled: true },
+  { id: "overview-tab", label: "Overview", sectionId: "overview", enabled: true, trackingButton: "SpeakerPortal_OverviewTab" },
   {
     id: "survey-tab",
     label: "Speaker Questionnaire",
     sectionId: "survey",
     enabled: true,
-    featured: true
+    featured: true,
+    trackingButton: "SpeakerPortal_SpeakerQuestionnaireTab"
   },
-  { id: "faqs-tab", label: "Frequently Asked Questions (FAQs)", sectionId: "faqs", enabled: true },
-  { id: "session-lookup-tab", label: "Session Information Lookup", sectionId: "session-lookup", enabled: true },
-  { id: "share-tab", label: "📣 Share your participation", sectionId: "share", enabled: true },
-  { id: "attendee-hub-tab", label: "Attendee Hub", sectionId: "attendee-hub", enabled: true },
+  { id: "faqs-tab", label: "Frequently Asked Questions (FAQs)", sectionId: "faqs", enabled: true, trackingButton: "SpeakerPortal_FAQsTab" },
+  { id: "session-lookup-tab", label: "Session Information Lookup", sectionId: "session-lookup", enabled: true, trackingButton: "SpeakerPortal_SessionLookupTab" },
+  { id: "share-tab", label: "📣 Share your participation", sectionId: "share", enabled: true, trackingButton: "SpeakerPortal_ShareWidgetTab" },
+  { id: "attendee-hub-tab", label: "Attendee Hub", sectionId: "attendee-hub", enabled: true, trackingButton: "SpeakerPortal_AttendeeHubTab" },
   {
     id: "speaker-resource-guide",
     label: "Speaker Resource Guide (PDF)",
@@ -88,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const gotoShareLink = event.target.closest?.("[data-goto-share]");
     if (gotoShareLink) {
       event.preventDefault();
+      trackPortalInteraction("SpeakerPortal_ConfirmationShareLink");
       activateTab("share");
       loadRememberedShareSession();
     }
@@ -187,7 +189,10 @@ function renderTabs() {
       button.addEventListener("click", () => window.open(tab.url, "_blank", "noopener,noreferrer"));
     } else {
       button.dataset.tab = tab.sectionId;
-      button.addEventListener("click", () => activateTab(tab.sectionId));
+      button.addEventListener("click", () => {
+        if (tab.trackingButton) trackPortalInteraction(tab.trackingButton);
+        activateTab(tab.sectionId);
+      });
     }
 
     tabsEl.appendChild(button);
@@ -1835,22 +1840,38 @@ function escapeHtml(value) {
 
 // Click tracking (once per session)
 var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxq8HofSFbnFxS7HeKQKZVhyuPIqpu_7NAWhvOzAXBzyxfatdeJu8hfGCRCahOINshA/exec";
-var TRACK_KEY = "ggSpeakerPortalTracked";
+var TRACK_KEY_PREFIX = "ggSpeakerPortalTracked:";
+var geoTrackingPromise = null;
 
-async function trackClick() {
-  if (sessionStorage.getItem(TRACK_KEY)) return;
-  sessionStorage.setItem(TRACK_KEY, "1");
+function getTrackingKey(buttonName) {
+  return `${TRACK_KEY_PREFIX}${buttonName}`;
+}
+
+function getTrackingGeo() {
+  if (!geoTrackingPromise) {
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 3000);
+    geoTrackingPromise = fetch("https://ipapi.co/json/", { signal: ctrl.signal })
+      .then(function (r) { return r.json(); })
+      .catch(function () { return {}; })
+      .finally(function () { clearTimeout(timer); });
+  }
+  return geoTrackingPromise;
+}
+
+async function trackPortalInteraction(buttonName) {
+  if (!buttonName) return;
+  var trackingKey = getTrackingKey(buttonName);
+  if (sessionStorage.getItem(trackingKey)) return;
+  sessionStorage.setItem(trackingKey, "1");
 
   var params = new URLSearchParams({
     sheet: "2026Registration",
-    button: "SpeakerPortal"
+    button: buttonName
   });
 
   try {
-    var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, 3000);
-    var geo = await fetch("https://ipapi.co/json/", { signal: ctrl.signal }).then(function (r) { return r.json(); });
-    clearTimeout(timer);
+    var geo = await getTrackingGeo();
     if (geo.ip) params.set("ip", geo.ip);
     if (geo.country_name) params.set("country", geo.country_name);
     if (geo.region) params.set("state", geo.region);
@@ -1861,7 +1882,9 @@ async function trackClick() {
 }
 
 function bindClickTracking() {
-  document.getElementById("speakerPortalShell").addEventListener("pointerdown", trackClick, { once: true });
+  document.getElementById("speakerPortalShell").addEventListener("pointerdown", () => {
+    trackPortalInteraction("SpeakerPortal");
+  }, { once: true });
 }
 
 function bindSurvey() {
