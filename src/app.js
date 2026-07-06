@@ -36,8 +36,8 @@ const TAB_CONFIG = [
   },
   { id: "faqs-tab", label: "Frequently Asked Questions (FAQs)", sectionId: "faqs", enabled: true },
   { id: "session-lookup-tab", label: "Session Information Lookup", sectionId: "session-lookup", enabled: true },
+  { id: "share-tab", label: "✨ Share your participation", sectionId: "share", enabled: true, standout: true },
   { id: "attendee-hub-tab", label: "Attendee Hub", sectionId: "attendee-hub", enabled: true },
-  { id: "share-tab", label: "Share your participation", sectionId: "share", enabled: true },
   {
     id: "speaker-resource-guide",
     label: "Speaker Resource Guide (PDF)",
@@ -169,6 +169,7 @@ function renderTabs() {
     button.className = [
       "tab-btn",
       tab.featured ? "tab-featured" : "",
+      tab.standout ? "tab-standout" : "",
       tab.external ? "tab-external tab-inactive" : tab.sectionId === firstInternalTab?.sectionId ? "tab-active" : "tab-inactive",
       "px-6",
       "py-3",
