@@ -35,7 +35,7 @@ const TAB_CONFIG = [
   },
   { id: "faqs-tab", label: "Frequently Asked Questions (FAQs)", sectionId: "faqs", enabled: true },
   { id: "session-lookup-tab", label: "Session Information Lookup", sectionId: "session-lookup", enabled: true },
-  { id: "share-tab", label: "✨ Share your participation", sectionId: "share", enabled: true },
+  { id: "share-tab", label: "📣 Share your participation", sectionId: "share", enabled: true },
   { id: "attendee-hub-tab", label: "Attendee Hub", sectionId: "attendee-hub", enabled: true },
   {
     id: "speaker-resource-guide",
