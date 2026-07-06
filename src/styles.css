@@ -133,6 +133,16 @@ a {
   text-decoration: none;
 }
 
+.share-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
 .content-section {
   display: none;
 }
