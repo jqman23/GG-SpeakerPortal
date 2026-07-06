@@ -9,7 +9,6 @@ const PRERECORD_YES_OPTION = "Yes, I plan to pre-record my session";
 const SHARE_IMAGE_URL = "https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/01bdd5da709e4b7dba3d34b65e40694a.png";
 const SHARE_CANVA_URL = "https://canva.link/mkoom2inq4f7xuv";
 const EVENT_URL = "https://www.futureofchildwelfare.org";
-const SHARE_HASHTAGS = "#FutureOfChildWelfare #ChildWelfare #SocialWork";
 const SESSION_FOLLOWUPS = [
   {
     matchTitle: "centering parents caregiver voice in child welfare evaluation",
@@ -1492,18 +1491,15 @@ function renderResults(rows, statusEl, containerEl, mode) {
   statusEl.textContent = `${rows.length} match${rows.length === 1 ? "" : "es"} found - Session data as of ${SESSIONS_AS_OF}.`;
 }
 
-function buildShareMessage(session) {
-  const title = session?.title?.trim() || "my session";
-  const sessionType = formatPresentationType(session?.presentationType || "");
-  const typeText = sessionType ? ` ${sessionType.toLowerCase()}` : "";
+function buildShareMessage() {
   return [
-    `I'm presenting${typeText} "${title}" at the 2026 Global Gathering for the Future of Child Welfare.`,
+    "I am excited to present at the 2026 Global Gathering for the Future of Child Welfare.",
     "",
     "I'm looking forward to joining colleagues and partners from around the world to learn, share ideas, and strengthen the future of child, youth, family, and community well-being.",
     "",
     `Learn more: ${EVENT_URL}`,
     "",
-    SHARE_HASHTAGS
+    "#GlobalGathering #FutureOfChildWelfare"
   ].join("\n");
 }
 
