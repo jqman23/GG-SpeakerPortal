@@ -82,6 +82,22 @@ function toBoolean(value) {
   return value === true || value === 'true' || value === '1' || value === 1;
 }
 
+function normalizeCcEmails(value, primaryEmail = '') {
+  const primary = String(primaryEmail || '').trim().toLowerCase();
+  const seen = new Set();
+  const list = Array.isArray(value) ? value : [];
+  return list
+    .map(item => String(item || '').trim())
+    .filter(item => item && item.toLowerCase() !== primary)
+    .filter(item => {
+      const key = item.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 5);
+}
+
 function buildConfirmationEmail({
   firstName,
   name,
@@ -156,6 +172,12 @@ function buildConfirmationEmail({
   const html = `
     <div style="margin:0; padding:32px 16px; background:#ffffff; font-family:Montserrat, Arial, sans-serif; color:#1f2937; line-height:1.5;">
       <div style="max-width:680px; margin:0 auto;">
+        <img
+          src="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/4c40728a45af4e0289e8075b9759c684.png"
+          width="680"
+          alt="2026 Global Gathering for the Future of Child Welfare"
+          style="display:block; width:100%; max-width:680px; height:auto; border:0; outline:none; text-decoration:none; margin:0 0 18px 0;"
+        />
         <div style="background:#ffffff; border:1px solid #d9e2ea; border-radius:8px; padding:28px;">
           <p style="margin:0 0 8px 0; color:#46775D; font-size:12px; font-weight:bold; letter-spacing:0.04em; text-transform:uppercase;">${escapeHtml(eyebrow)}</p>
           <h1 style="margin:0 0 14px 0; color:#122345; font-size:26px; line-height:1.25;">Thank you, ${escapeHtml(salutationName)}.</h1>
@@ -203,13 +225,6 @@ function buildConfirmationEmail({
                 <a href="https://www.futureofchildwelfare.org/" style="color:#0563C1; text-decoration:underline;">www.futureofchildwelfare.org</a>
               </p>
 
-              <img
-                src="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/4c40728a45af4e0289e8075b9759c684.png"
-                width="485"
-                height="109"
-                alt="2026 Global Gathering for the Future of Child Welfare"
-                style="display:block; width:485px; max-width:100%; height:auto; border:0; outline:none; text-decoration:none;"
-              />
             </td>
           </tr>
         </table>
@@ -332,6 +347,7 @@ async function sendConfirmationEmail(response) {
 
   const replyTo = process.env.SURVEY_REPLY_TO || undefined;
   const email = buildConfirmationEmail(response);
+  const cc = normalizeCcEmails(response.ccEmails, response.email);
   const resendResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -341,6 +357,7 @@ async function sendConfirmationEmail(response) {
     body: JSON.stringify({
       from,
       to: response.email.trim(),
+      ...(cc.length ? { cc } : {}),
       reply_to: replyTo,
       subject: email.subject,
       text: email.text,
@@ -366,6 +383,7 @@ export default async function handler(req, res) {
     lastName,
     name,
     email,
+    ccEmails,
     sessionId,
     sessionCode,
     sessionTitle,
@@ -466,6 +484,7 @@ export default async function handler(req, res) {
         firstName: cleanFirstName,
         name: cleanName,
         email,
+        ccEmails,
         sessionTitle,
         sessionVideoFormat,
         sessionRecordingStatus,

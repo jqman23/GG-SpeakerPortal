@@ -281,6 +281,8 @@ function buildSurveyDraft() {
     firstName: document.getElementById("survey-first-name")?.value || "",
     lastName: document.getElementById("survey-last-name")?.value || "",
     email: document.getElementById("survey-email")?.value || "",
+    copyOthers: document.getElementById("survey-copy-others")?.checked || false,
+    ccEmails: getSurveyCcEmails(),
     sessionId: selectedSurveySession?.id || "",
     sessionSearch: document.getElementById("survey-session-search")?.value || "",
     ceuObjectives: document.getElementById("survey-ceu-objectives")?.value || "",
@@ -304,6 +306,8 @@ function saveSurveyDraft() {
     draft.firstName,
     draft.lastName,
     draft.email,
+    draft.copyOthers ? "yes" : "",
+    ...(draft.ccEmails || []),
     draft.sessionId,
     draft.sessionSearch,
     draft.ceuObjectives,
@@ -334,6 +338,8 @@ function applySurveyDraftFields(draft) {
   document.getElementById("survey-first-name").value = draft.firstName || "";
   document.getElementById("survey-last-name").value = draft.lastName || "";
   document.getElementById("survey-email").value = draft.email || "";
+  document.getElementById("survey-copy-others").checked = !!draft.copyOthers;
+  renderSurveyCcFields(draft.copyOthers ? (draft.ccEmails || [""]) : []);
   document.getElementById("survey-ceu-objectives").value = draft.ceuObjectives || "";
   document.getElementById("survey-ceu-questions").value = draft.ceuQuestions || "";
   document.getElementById("survey-ceu-opt-out").checked = !!draft.ceuOptOut;
@@ -348,6 +354,36 @@ function applySurveyDraftFields(draft) {
   updateQuestionnaireSubmitButton();
   updateCeuOptOutState();
   updatePrerecordLiveSupportState();
+}
+
+function getSurveyCcEmails() {
+  const copyOthers = document.getElementById("survey-copy-others")?.checked || false;
+  if (!copyOthers) return [];
+  return Array.from(document.querySelectorAll(".survey-cc-email"))
+    .map(input => input.value.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
+function renderSurveyCcFields(values = [""]) {
+  const container = document.getElementById("survey-cc-fields");
+  const addButton = document.getElementById("survey-add-cc");
+  const copyOthers = document.getElementById("survey-copy-others")?.checked || false;
+  if (!container || !addButton) return;
+
+  const fieldValues = copyOthers
+    ? (values.length ? values.slice(0, 5) : [""])
+    : [];
+
+  container.innerHTML = fieldValues.map((value, index) => `
+    <div class="flex items-center gap-2">
+      <input type="email" class="survey-cc-email w-full border-2 border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0" placeholder="copy@example.com" value="${escapeHtml(value)}" />
+      ${fieldValues.length > 1 ? `<button type="button" class="survey-remove-cc flex-none text-xs font-semibold text-gray-500 hover:text-red-700" data-remove-cc="${index}">Remove</button>` : ""}
+    </div>
+  `).join("");
+
+  container.classList.toggle("hidden", !copyOthers);
+  addButton.classList.toggle("hidden", !copyOthers || fieldValues.length >= 5);
 }
 
 async function restoreSavedSurveyDraft() {
@@ -1081,6 +1117,7 @@ function clearSurveyStatusMessage() {
 function resetSurveyForm() {
   const form = document.getElementById("survey-form");
   if (form) form.reset();
+  renderSurveyCcFields([]);
   clearSavedSurveyDraft();
   selectedSurveySession = null;
   latestSurveyResponse = null;
@@ -1108,6 +1145,8 @@ function populateSurveyResponseFields(response) {
   document.getElementById("survey-first-name").value = splitName.firstName || "";
   document.getElementById("survey-last-name").value = splitName.lastName || "";
   document.getElementById("survey-email").value = response.email || "";
+  document.getElementById("survey-copy-others").checked = false;
+  renderSurveyCcFields([]);
   document.getElementById("survey-ceu-objectives").value = response.ceuObjectives || "";
   document.getElementById("survey-ceu-questions").value = response.ceuQuestions || "";
   document.getElementById("survey-ceu-opt-out").checked = !!response.ceuOptOut;
@@ -1622,9 +1661,13 @@ function bindSurvey() {
   const suggestionsBox = document.getElementById("survey-session-suggestions");
   const generateBtn = document.getElementById("survey-generate-ceu");
   const optOutCheckbox = document.getElementById("survey-ceu-opt-out");
+  const copyOthersCheckbox = document.getElementById("survey-copy-others");
+  const ccFields = document.getElementById("survey-cc-fields");
+  const addCcButton = document.getElementById("survey-add-cc");
   const submitBtn = document.getElementById("survey-submit");
   const statusEl = document.getElementById("survey-status");
   updateCeuGenerateButtonLabel(generateBtn);
+  renderSurveyCcFields([]);
 
   form.addEventListener("input", () => {
     saveSurveyDraft();
@@ -1642,6 +1685,29 @@ function bindSurvey() {
     } else {
       document.getElementById("survey-ceu-opt-out-confirmation")?.remove();
     }
+  });
+
+  copyOthersCheckbox?.addEventListener("change", () => {
+    renderSurveyCcFields(copyOthersCheckbox.checked ? getSurveyCcEmails().concat([""]).slice(0, 5) : []);
+    saveSurveyDraft();
+  });
+
+  ccFields?.addEventListener("input", saveSurveyDraft);
+  ccFields?.addEventListener("click", event => {
+    const removeButton = event.target.closest?.("[data-remove-cc]");
+    if (!removeButton) return;
+    const index = Number(removeButton.dataset.removeCc);
+    const values = Array.from(document.querySelectorAll(".survey-cc-email")).map(input => input.value.trim());
+    values.splice(index, 1);
+    renderSurveyCcFields(values.length ? values : [""]);
+    saveSurveyDraft();
+  });
+
+  addCcButton?.addEventListener("click", () => {
+    const values = Array.from(document.querySelectorAll(".survey-cc-email")).map(input => input.value.trim());
+    if (values.length >= 5) return;
+    renderSurveyCcFields(values.concat(""));
+    saveSurveyDraft();
   });
 
   sessionInput.addEventListener("input", () => {
@@ -1771,6 +1837,7 @@ function bindSurvey() {
       firstName: document.getElementById("survey-first-name").value,
       lastName: document.getElementById("survey-last-name").value,
       email: document.getElementById("survey-email").value,
+      ccEmails: getSurveyCcEmails(),
       sessionId: selectedSurveySession.id || "",
       sessionCode: selectedSurveySession.code || "",
       sessionTitle: selectedSurveySession.title || "",
@@ -1804,6 +1871,7 @@ function bindSurvey() {
         clearSavedSurveyDraft();
         updateOverviewSurveyCta();
         form.reset();
+        renderSurveyCcFields([]);
         selectedSurveySession = null;
         latestSurveyResponse = null;
         document.getElementById("survey-session-summary").classList.add("hidden");
