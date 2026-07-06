@@ -137,9 +137,24 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.45rem;
   padding: 0.5rem 1rem;
   font-size: 1rem;
   line-height: 1.5;
+}
+
+.linkedin-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 0.18rem;
+  background: #fff;
+  color: #0A66C2;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .content-section {
