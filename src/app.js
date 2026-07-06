@@ -1508,6 +1508,18 @@ function buildShareMessage(session, middle = "") {
   ].join("\n");
 }
 
+function buildDefaultShareMessage() {
+  return [
+    "I am excited to present at the 2026 Global Gathering for the Future of Child Welfare.",
+    "",
+    "I'm looking forward to joining colleagues and partners from around the world to learn, share ideas, and strengthen the future of child, youth, family, and community well-being.",
+    "",
+    `Learn more: ${EVENT_URL}`,
+    "",
+    "#GlobalGathering #FutureOfChildWelfare"
+  ].join("\n");
+}
+
 async function renderShareSession(session) {
   selectedShareSession = session;
   const summary = document.getElementById("share-session-summary");
@@ -1623,14 +1635,18 @@ function bindShare() {
   if (!sessionInput || !suggestionsBox || !message) return;
 
   if (canvaLink) canvaLink.href = SHARE_CANVA_URL;
-  message.value = "";
-  if (status) status.textContent = "Select your session to generate a caption.";
+  message.value = buildDefaultShareMessage();
+  if (status) status.textContent = "Select your session to generate a session-specific caption.";
 
   sessionInput.addEventListener("input", () => {
     const q = sessionInput.value.toLowerCase().trim();
     selectedShareSession = null;
     suggestionsBox.innerHTML = "";
     if (!q) {
+      message.value = buildDefaultShareMessage();
+      const summary = document.getElementById("share-session-summary");
+      if (summary) summary.classList.add("hidden");
+      if (status) status.textContent = "Select your session to generate a session-specific caption.";
       suggestionsBox.classList.add("hidden");
       return;
     }
