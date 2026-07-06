@@ -302,6 +302,41 @@
         </div>
       </section>
 
+      <section id="share" class="content-section bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-bold text-[#162A53] mb-4">Share your participation</h2>
+        <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div class="space-y-4">
+            <div>
+              <label for="share-session-search" class="block text-sm font-semibold text-gray-700 mb-1">Select your session</label>
+              <div class="relative">
+                <input id="share-session-search" type="text" autocomplete="off" placeholder="Start typing your session title or speaker name..."
+                  class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0" />
+                <div id="share-session-suggestions" class="absolute z-20 bg-white border border-gray-200 rounded-lg shadow mt-1 w-full hidden max-h-64 overflow-y-auto"></div>
+              </div>
+            </div>
+            <div id="share-session-summary" class="hidden border border-gray-200 rounded-lg p-4 bg-gray-50 text-sm"></div>
+            <div>
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <label for="share-message" class="block text-sm font-semibold text-gray-700">Post caption</label>
+                <button id="share-generate-message" type="button" class="px-3 py-2 bg-[var(--survey-primary)] text-white text-sm font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Generate session caption</button>
+              </div>
+              <textarea id="share-message" rows="9"
+                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--survey-primary)] focus:ring-0"></textarea>
+              <p id="share-status" class="mt-2 text-sm text-gray-600"></p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+              <button id="share-copy-message" type="button" class="px-4 py-2 bg-[#0A66C2] text-white font-semibold rounded-lg hover:bg-[#004182] transition-colors">Copy caption</button>
+              <button id="share-open-linkedin" type="button" class="px-4 py-2 bg-[#0A66C2] text-white font-semibold rounded-lg hover:bg-[#004182] transition-colors">Copy caption &amp; open LinkedIn</button>
+              <button id="share-download-image" type="button" class="px-4 py-2 bg-white text-[#162A53] font-semibold rounded-lg border-2 border-gray-200 hover:border-[#162A53] transition-colors">Download image</button>
+              <a id="share-canva" href="https://canva.link/mkoom2inq4f7xuv" target="_blank" rel="noopener noreferrer" class="share-action-link px-4 py-2 bg-white text-[#162A53] font-semibold rounded-lg border-2 border-gray-200 hover:border-[#162A53] transition-colors">Customize in Canva</a>
+            </div>
+          </div>
+          <div>
+            <img id="share-image" src="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/01bdd5da709e4b7dba3d34b65e40694a.png" alt="Presenter share graphic for the 2026 Global Gathering for the Future of Child Welfare" class="w-full rounded-lg border border-gray-200 shadow-sm" loading="lazy" />
+          </div>
+        </div>
+      </section>
+
       <section id="session-lookup" class="content-section bg-white p-6 rounded-lg shadow">
         <h2 class="text-2xl font-bold text-[#162A53] mb-4">Session Information Lookup</h2>
         <p>Search by speaker name or session title to review session details currently on file, including recording status, CEU eligibility, and video format. Please note that any requested changes made in the Questionnaire may not be reflected on this tab in real time.</p><br />

@@ -6,6 +6,10 @@ const CEU_GENERATE_LIMIT_KEY = "ggCeuGenerateLimit";
 const CEU_DAILY_SESSION_LIMIT = 2;
 const CEU_OPT_OUT_MESSAGE = "Are you sure you want to opt out from offering CEU credit for your session? Sessions that are CEU eligible tend to draw a greater number of participants. To offer CEU credit for your session, simply generate three knowledge check questions and objectives.";
 const PRERECORD_YES_OPTION = "Yes, I plan to pre-record my session";
+const SHARE_IMAGE_URL = "https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/01bdd5da709e4b7dba3d34b65e40694a.png";
+const SHARE_CANVA_URL = "https://canva.link/mkoom2inq4f7xuv";
+const EVENT_URL = "https://www.futureofchildwelfare.org";
+const SHARE_HASHTAGS = "#FutureOfChildWelfare #ChildWelfare #SocialWork";
 const SESSION_FOLLOWUPS = [
   {
     matchTitle: "centering parents caregiver voice in child welfare evaluation",
@@ -33,6 +37,7 @@ const TAB_CONFIG = [
   { id: "faqs-tab", label: "Frequently Asked Questions (FAQs)", sectionId: "faqs", enabled: true },
   { id: "session-lookup-tab", label: "Session Information Lookup", sectionId: "session-lookup", enabled: true },
   { id: "attendee-hub-tab", label: "Attendee Hub", sectionId: "attendee-hub", enabled: true },
+  { id: "share-tab", label: "Share your participation", sectionId: "share", enabled: true },
   {
     id: "speaker-resource-guide",
     label: "Speaker Resource Guide (PDF)",
@@ -57,6 +62,7 @@ let latestSurveyResponse = null;
 let pendingOverviewSurveyLoad = false;
 let isResubmittingQuestionnaire = false;
 let ceuDraftGeneratedSessionId = null;
+let selectedShareSession = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   const modalRoot = document.getElementById("format-comparison-modal-root");
@@ -78,6 +84,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gotoLookupLink) {
       event.preventDefault();
       activateTab("session-lookup");
+    }
+    const gotoShareLink = event.target.closest?.("[data-goto-share]");
+    if (gotoShareLink) {
+      event.preventDefault();
+      activateTab("share");
     }
     const openComparisonLink = event.target.closest?.("[data-open-comparison]");
     if (openComparisonLink) {
@@ -139,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindOverviewSurveyCta();
   bindLookup();
   bindSurvey();
+  bindShare();
   bindClickTracking();
   bindIframeHeight();
   loadSessions();
@@ -1479,6 +1491,174 @@ function renderResults(rows, statusEl, containerEl, mode) {
   statusEl.textContent = `${rows.length} match${rows.length === 1 ? "" : "es"} found - Session data as of ${SESSIONS_AS_OF}.`;
 }
 
+function buildShareMessage(session) {
+  const title = session?.title?.trim() || "my session";
+  const sessionType = formatPresentationType(session?.presentationType || "");
+  const typeText = sessionType ? ` ${sessionType.toLowerCase()}` : "";
+  return [
+    `I'm presenting${typeText} "${title}" at the 2026 Global Gathering for the Future of Child Welfare.`,
+    "",
+    "I'm looking forward to joining colleagues and partners from around the world to learn, share ideas, and strengthen the future of child, youth, family, and community well-being.",
+    "",
+    `Learn more: ${EVENT_URL}`,
+    "",
+    SHARE_HASHTAGS
+  ].join("\n");
+}
+
+function renderShareSession(session) {
+  selectedShareSession = session;
+  const summary = document.getElementById("share-session-summary");
+  const message = document.getElementById("share-message");
+  const status = document.getElementById("share-status");
+  if (!summary || !message) return;
+
+  summary.innerHTML = `
+    <p class="font-semibold text-[#162A53] mb-1"><em>${escapeHtml(session.title || "Not listed")}</em></p>
+    <dl class="grid gap-x-4 gap-y-1 sm:grid-cols-2 text-xs">
+      <div class="flex gap-1"><dt class="font-semibold text-gray-600">Date/time:</dt><dd>${escapeHtml(formatSessionDateTime(session))}</dd></div>
+      ${formatPresentationType(session.presentationType) ? `<div class="flex gap-1"><dt class="font-semibold text-gray-600">Session type:</dt><dd>${escapeHtml(formatPresentationType(session.presentationType))}</dd></div>` : ""}
+    </dl>
+  `;
+  summary.classList.remove("hidden");
+  message.value = buildShareMessage(session);
+  if (status) status.textContent = "Caption drafted from the selected session. Edit it before posting if you would like.";
+}
+
+async function copyShareMessage() {
+  const message = document.getElementById("share-message")?.value || "";
+  const status = document.getElementById("share-status");
+  if (!message.trim()) {
+    if (status) status.textContent = "Select a session or write a caption before copying.";
+    return false;
+  }
+
+  try {
+    await navigator.clipboard.writeText(message);
+  } catch (_) {
+    const textarea = document.getElementById("share-message");
+    textarea?.select();
+    try { document.execCommand("copy"); } catch (_) {}
+  }
+  if (status) status.textContent = "Caption copied.";
+  return true;
+}
+
+function triggerDownload(href, filename) {
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+async function downloadShareImage() {
+  try {
+    const res = await fetch(SHARE_IMAGE_URL, { mode: "cors" });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    triggerDownload(url, "global-gathering-presenter.png");
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  } catch (_) {
+    window.open(SHARE_IMAGE_URL, "_blank", "noopener,noreferrer");
+  }
+}
+
+function bindShare() {
+  const sessionInput = document.getElementById("share-session-search");
+  const suggestionsBox = document.getElementById("share-session-suggestions");
+  const generateButton = document.getElementById("share-generate-message");
+  const copyButton = document.getElementById("share-copy-message");
+  const linkedInButton = document.getElementById("share-open-linkedin");
+  const downloadButton = document.getElementById("share-download-image");
+  const canvaLink = document.getElementById("share-canva");
+  const status = document.getElementById("share-status");
+  const message = document.getElementById("share-message");
+  if (!sessionInput || !suggestionsBox || !message) return;
+
+  if (canvaLink) canvaLink.href = SHARE_CANVA_URL;
+  message.value = buildShareMessage(null);
+
+  sessionInput.addEventListener("input", () => {
+    const q = sessionInput.value.toLowerCase().trim();
+    selectedShareSession = null;
+    suggestionsBox.innerHTML = "";
+    if (!q) {
+      suggestionsBox.classList.add("hidden");
+      return;
+    }
+
+    const matches = sessions
+      .filter(s => `${s.title || ""} ${s.code || ""} ${(s.speakers || []).map(sp => sp.name).join(" ")}`.toLowerCase().includes(q))
+      .slice(0, 12);
+
+    if (!matches.length) {
+      suggestionsBox.classList.add("hidden");
+      return;
+    }
+
+    matches.forEach(session => {
+      const speakerNames = (session.speakers || []).map(sp => sp.name).filter(Boolean).join(", ");
+      const div = document.createElement("div");
+      div.className = "px-3 py-2 hover:bg-gray-100 cursor-pointer";
+      div.innerHTML = `
+        <div class="font-semibold">${escapeHtml(session.title || "")}</div>
+        ${speakerNames ? `<div class="text-xs text-gray-600">${escapeHtml(speakerNames)}</div>` : ""}
+      `;
+      div.addEventListener("click", () => {
+        sessionInput.value = session.title || "";
+        suggestionsBox.classList.add("hidden");
+        renderShareSession(session);
+      });
+      suggestionsBox.appendChild(div);
+    });
+    suggestionsBox.classList.remove("hidden");
+  });
+
+  document.addEventListener("click", e => {
+    if (!suggestionsBox.contains(e.target) && e.target !== sessionInput) suggestionsBox.classList.add("hidden");
+  });
+
+  generateButton?.addEventListener("click", async () => {
+    if (!selectedShareSession) {
+      if (status) status.textContent = "Select your session before generating a session caption.";
+      return;
+    }
+
+    generateButton.disabled = true;
+    if (status) status.textContent = "Generating caption...";
+    try {
+      const res = await fetch("/api/generate-share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: selectedShareSession.title || "",
+          description: selectedShareSession.description || "",
+          sessionType: formatPresentationType(selectedShareSession.presentationType || ""),
+          speakers: (selectedShareSession.speakers || []).map(speaker => speaker.name).filter(Boolean)
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Unable to generate caption.");
+      message.value = data.message || buildShareMessage(selectedShareSession);
+      if (status) status.textContent = "Caption generated. Please review and edit before posting.";
+    } catch (err) {
+      message.value = buildShareMessage(selectedShareSession);
+      if (status) status.textContent = `Unable to generate with AI right now. A standard caption has been added instead. ${err.message}`;
+    } finally {
+      generateButton.disabled = false;
+    }
+  });
+
+  copyButton?.addEventListener("click", copyShareMessage);
+  linkedInButton?.addEventListener("click", async () => {
+    await copyShareMessage();
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(EVENT_URL)}`, "_blank", "noopener,noreferrer");
+  });
+  downloadButton?.addEventListener("click", downloadShareImage);
+}
+
 function bindLookup() {
   const tabSpeakerBtn = document.getElementById("lookup-tab-speaker");
   const tabSessionBtn = document.getElementById("lookup-tab-session");
@@ -1878,12 +2058,15 @@ function bindSurvey() {
         document.getElementById("survey-existing-response").classList.add("hidden");
         document.getElementById("survey-conditional-fields").classList.add("hidden");
         document.getElementById("survey-ceu-draft").classList.add("hidden");
-        statusEl.textContent = data.warning || (wasResubmitting
-          ? "Thank you — your updated Speaker Questionnaire response was submitted. A confirmation email has been sent."
-          : "Thank you — your Speaker Questionnaire response was submitted. A confirmation email has been sent.");
-        statusEl.className = data.warning
-          ? "p-4 rounded-lg text-sm font-medium bg-yellow-50 text-yellow-800 border border-yellow-200"
-          : "p-4 rounded-lg text-sm font-medium bg-green-50 text-green-800 border border-green-200";
+        if (data.warning) {
+          statusEl.textContent = data.warning;
+          statusEl.className = "p-4 rounded-lg text-sm font-medium bg-yellow-50 text-yellow-800 border border-yellow-200";
+        } else {
+          statusEl.innerHTML = `${wasResubmitting
+            ? "Thank you &mdash; your updated Speaker Questionnaire response was submitted. A confirmation email has been sent."
+            : "Thank you &mdash; your Speaker Questionnaire response was submitted. A confirmation email has been sent."} Take a moment to <a href="#" data-goto-share class="underline font-semibold">share your participation</a> in the Global Gathering.`;
+          statusEl.className = "p-4 rounded-lg text-sm font-medium bg-green-50 text-[#235540] border border-[#235540]";
+        }
         submitBtn.disabled = false;
         isResubmittingQuestionnaire = false;
         updateQuestionnaireSubmitButton();
