@@ -8,27 +8,87 @@ const require = createRequire(import.meta.url);
 const XLSX = require('../node_modules/xlsx/xlsx.js');
 
 const sql = neon(process.env.DATABASE_URL);
+const SPEAKER_FILE = process.env.SPEAKER_FILE || './Speaker Database.csv';
+const PROGRAM_FILE = process.env.PROGRAM_FILE || './Program Database.xlsx';
 
-// ── Excel serial → "YYYY-MM-DD|HH:MM" (times stored as local Mountain Time) ──
+function parseDateTimeParts(value) {
+  if (!value) return null;
+
+  if (typeof value === 'number') {
+    const days = Math.floor(value);
+    const fraction = value - days;
+    const d = new Date((days - 25569) * 86400 * 1000);
+    const totalMin = Math.round(fraction * 24 * 60);
+    return {
+      year: d.getUTCFullYear(),
+      month: d.getUTCMonth() + 1,
+      day: d.getUTCDate(),
+      hour: Math.floor(totalMin / 60),
+      minute: totalMin % 60
+    };
+  }
+
+  const clean = String(value).trim();
+  const isoMatch = clean.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  if (isoMatch) {
+    return {
+      year: Number(isoMatch[1]),
+      month: Number(isoMatch[2]),
+      day: Number(isoMatch[3]),
+      hour: Number(isoMatch[4]),
+      minute: Number(isoMatch[5])
+    };
+  }
+
+  const usMatch = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)$/i);
+  if (usMatch) {
+    let hour = Number(usMatch[4]);
+    const period = usMatch[6].toUpperCase();
+    if (period === 'PM' && hour !== 12) hour += 12;
+    if (period === 'AM' && hour === 12) hour = 0;
+    return {
+      year: Number(usMatch[3]),
+      month: Number(usMatch[1]),
+      day: Number(usMatch[2]),
+      hour,
+      minute: Number(usMatch[5])
+    };
+  }
+
+  return null;
+}
+
+// ── Date/time → "YYYY-MM-DD|HH:MM" (times stored as local Mountain Time) ──
+function dateTimeToBlockKey(value) {
+  const parts = parseDateTimeParts(value);
+  if (!parts) return '';
+  const { year, month, day, hour, minute } = parts;
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}|${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+function dateTimeToTimeOnly(value) {
+  const key = dateTimeToBlockKey(value);
+  return key.split('|')[1] || '';
+}
+
+// Backward-compatible aliases for older references.
 function excelSerialToBlockKey(serial) {
-  if (!serial || typeof serial !== 'number') return '';
-  const days     = Math.floor(serial);
-  const fraction = serial - days;
-  // Excel epoch is Dec 30, 1899; 25569 days to Unix epoch (Jan 1, 1970)
-  const d        = new Date((days - 25569) * 86400 * 1000);
-  const year     = d.getUTCFullYear();
-  const month    = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const day      = String(d.getUTCDate()).padStart(2, '0');
-  // Fractional part is already in local Mountain Time — convert directly
-  const totalMin = Math.round(fraction * 24 * 60);
-  const h        = Math.floor(totalMin / 60);
-  const m        = totalMin % 60;
-  return `${year}-${month}-${day}|${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  return dateTimeToBlockKey(serial);
 }
 
 function excelSerialToTimeOnly(serial) {
-  const key = excelSerialToBlockKey(serial);
-  return key.split('|')[1] || '';
+  return dateTimeToTimeOnly(serial);
+}
+
+function readRows(file) {
+  if (/\.csv$/i.test(file)) {
+    const raw = readFileSync(file);
+    return parse(raw, { bom: true, columns: true, skip_empty_lines: true, trim: true });
+  }
+
+  const wb = XLSX.readFile(file);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(ws, { defval: '' });
 }
 
 const TYPE_MAP = {
@@ -99,8 +159,7 @@ async function createSchema() {
 // ── Parse Speaker CSV ─────────────────────────────────────────────────────────
 
 function parseSpeakers() {
-  const raw  = readFileSync('./Speaker Database.csv');
-  const rows = parse(raw, { columns: true, skip_empty_lines: true, trim: true });
+  const rows = readRows(SPEAKER_FILE);
 
   const byCode = new Map();
   for (const r of rows) {
@@ -124,9 +183,7 @@ function parseSpeakers() {
 // ── Parse Program XLSX ────────────────────────────────────────────────────────
 
 function parseSessions() {
-  const wb   = XLSX.readFile('./Program Database.xlsx');
-  const ws   = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+  const rows = readRows(PROGRAM_FILE);
 
   const sessions = rows.map(r => {
     // Handle possible duplicate Description columns — use whichever has content
