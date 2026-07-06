@@ -1,7 +1,7 @@
 const API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const SHARE_MODEL = process.env.GROQ_SHARE_MODEL || "llama-3.1-8b-instant";
 
-const SYSTEM_PROMPT = `Write one LinkedIn caption for a presenter at the 2026 Global Gathering for the Future of Child Welfare. Use only the provided session details. The caption should sound warm, professional, and specific to the session topic. Do not invent speaker affiliations, dates, or claims. Keep it between 70 and 120 words. Include the event website and these hashtags at the end: #GlobalGathering #FutureOfChildWelfare. Return only the caption text.`;
+const SYSTEM_PROMPT = `Write only the middle paragraph for a LinkedIn caption from a presenter at the 2026 Global Gathering for the Future of Child Welfare. Use only the provided session details. Write 2-3 warm, professional sentences that are specific to the session topic and explain what the session is about or why it matters. Do not include the event name, the session title, presenter names, a greeting, a call to action, a website, hashtags, bullets, quotation marks, or labels. Do not invent speaker affiliations, dates, outcomes, or claims. Return only the paragraph text.`;
 
 function buildUserPrompt({ title, description, sessionType, speakers }) {
   return [
@@ -56,8 +56,8 @@ export default async function handler(req, res) {
     }
 
     const data = JSON.parse(bodyText);
-    const message = data.choices?.[0]?.message?.content?.trim();
-    return res.status(200).json({ message: message || "" });
+    const middle = data.choices?.[0]?.message?.content?.trim();
+    return res.status(200).json({ middle: middle || "" });
   } catch (error) {
     if (error.status) {
       return res.status(error.status).json({

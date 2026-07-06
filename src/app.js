@@ -62,6 +62,7 @@ let pendingOverviewSurveyLoad = false;
 let isResubmittingQuestionnaire = false;
 let ceuDraftGeneratedSessionId = null;
 let selectedShareSession = null;
+let shareGenerationRequestId = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
   const modalRoot = document.getElementById("format-comparison-modal-root");
@@ -88,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gotoShareLink) {
       event.preventDefault();
       activateTab("share");
+      loadRememberedShareSession();
     }
     const openComparisonLink = event.target.closest?.("[data-open-comparison]");
     if (openComparisonLink) {
@@ -1490,9 +1492,13 @@ function renderResults(rows, statusEl, containerEl, mode) {
   statusEl.textContent = `${rows.length} match${rows.length === 1 ? "" : "es"} found - Session data as of ${SESSIONS_AS_OF}.`;
 }
 
-function buildShareMessage() {
+function buildShareMessage(session, middle = "") {
+  const title = session?.title?.trim() || "my session";
+  const middleText = String(middle || "").trim() || "This session will contribute to timely conversations about strengthening supports, systems, and partnerships for children, youth, families, and communities. I am looking forward to sharing ideas and learning alongside others committed to this work.";
   return [
-    "I am excited to present at the 2026 Global Gathering for the Future of Child Welfare.",
+    `I am excited to present my session, ${title}, at the 2026 Global Gathering for the Future of Child Welfare.`,
+    "",
+    middleText,
     "",
     "I'm looking forward to joining colleagues and partners from around the world to learn, share ideas, and strengthen the future of child, youth, family, and community well-being.",
     "",
@@ -1502,11 +1508,10 @@ function buildShareMessage() {
   ].join("\n");
 }
 
-function renderShareSession(session) {
+async function renderShareSession(session) {
   selectedShareSession = session;
   const summary = document.getElementById("share-session-summary");
   const message = document.getElementById("share-message");
-  const status = document.getElementById("share-status");
   if (!summary || !message) return;
 
   summary.innerHTML = `
@@ -1518,7 +1523,52 @@ function renderShareSession(session) {
   `;
   summary.classList.remove("hidden");
   message.value = buildShareMessage(session);
-  if (status) status.textContent = "Caption drafted from the selected session. Edit it before posting if you would like.";
+  await generateShareCaption(session);
+}
+
+async function generateShareCaption(session) {
+  const message = document.getElementById("share-message");
+  const status = document.getElementById("share-status");
+  if (!session || !message) return;
+
+  const requestId = ++shareGenerationRequestId;
+  if (status) status.textContent = "Generating caption from the selected session...";
+
+  try {
+    const res = await fetch("/api/generate-share", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: session.title || "",
+        description: session.description || "",
+        sessionType: formatPresentationType(session.presentationType || ""),
+        speakers: (session.speakers || []).map(speaker => speaker.name).filter(Boolean)
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Unable to generate caption.");
+    if (requestId !== shareGenerationRequestId || selectedShareSession?.id !== session.id) return;
+    message.value = buildShareMessage(session, data.middle || data.message || "");
+    if (status) status.textContent = "Caption generated from the selected session. Please review and edit before posting.";
+  } catch (err) {
+    if (requestId !== shareGenerationRequestId || selectedShareSession?.id !== session.id) return;
+    message.value = buildShareMessage(session);
+    if (status) status.textContent = "Unable to auto-generate the session-specific middle section right now. A standard caption has been added instead.";
+  }
+}
+
+function loadRememberedShareSession() {
+  const remembered = getRememberedSurveySubmission();
+  const status = document.getElementById("share-status");
+  if (!remembered?.sessionId) return;
+  const session = sessions.find(s => s.id === remembered.sessionId);
+  if (!session) {
+    if (status) status.textContent = "Session data is still loading. Please try the Share your participation tab again in a moment.";
+    return;
+  }
+  const input = document.getElementById("share-session-search");
+  if (input) input.value = session.title || "";
+  renderShareSession(session);
 }
 
 async function copyShareMessage() {
@@ -1564,7 +1614,6 @@ async function downloadShareImage() {
 function bindShare() {
   const sessionInput = document.getElementById("share-session-search");
   const suggestionsBox = document.getElementById("share-session-suggestions");
-  const generateButton = document.getElementById("share-generate-message");
   const copyButton = document.getElementById("share-copy-message");
   const linkedInButton = document.getElementById("share-open-linkedin");
   const downloadButton = document.getElementById("share-download-image");
@@ -1574,7 +1623,8 @@ function bindShare() {
   if (!sessionInput || !suggestionsBox || !message) return;
 
   if (canvaLink) canvaLink.href = SHARE_CANVA_URL;
-  message.value = buildShareMessage(null);
+  message.value = "";
+  if (status) status.textContent = "Select your session to generate a caption.";
 
   sessionInput.addEventListener("input", () => {
     const q = sessionInput.value.toLowerCase().trim();
@@ -1614,37 +1664,6 @@ function bindShare() {
 
   document.addEventListener("click", e => {
     if (!suggestionsBox.contains(e.target) && e.target !== sessionInput) suggestionsBox.classList.add("hidden");
-  });
-
-  generateButton?.addEventListener("click", async () => {
-    if (!selectedShareSession) {
-      if (status) status.textContent = "Select your session before generating a session caption.";
-      return;
-    }
-
-    generateButton.disabled = true;
-    if (status) status.textContent = "Generating caption...";
-    try {
-      const res = await fetch("/api/generate-share", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: selectedShareSession.title || "",
-          description: selectedShareSession.description || "",
-          sessionType: formatPresentationType(selectedShareSession.presentationType || ""),
-          speakers: (selectedShareSession.speakers || []).map(speaker => speaker.name).filter(Boolean)
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Unable to generate caption.");
-      message.value = data.message || buildShareMessage(selectedShareSession);
-      if (status) status.textContent = "Caption generated. Please review and edit before posting.";
-    } catch (err) {
-      message.value = buildShareMessage(selectedShareSession);
-      if (status) status.textContent = `Unable to generate with AI right now. A standard caption has been added instead. ${err.message}`;
-    } finally {
-      generateButton.disabled = false;
-    }
   });
 
   copyButton?.addEventListener("click", copyShareMessage);
