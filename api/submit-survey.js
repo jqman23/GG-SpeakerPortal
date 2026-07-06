@@ -240,6 +240,11 @@ function buildConfirmationEmail({
 }
 
 const NOTIFICATION_TO = 'globalgathering@cuanschutz.edu';
+const SPEAKER_EMAIL_MISMATCH_TO = 'joshua.kumin@cuanschutz.edu';
+
+function normalizeEmail(value) {
+  return String(value || '').trim().toLowerCase();
+}
 
 function buildNotificationEmail({
   name,
@@ -335,6 +340,133 @@ async function sendNotificationEmail(response) {
     const details = await resendResponse.text();
     throw new Error(`Resend notification error ${resendResponse.status}: ${details}`);
   }
+}
+
+function buildSpeakerEmailMismatchEmail({
+  name,
+  email,
+  sessionTitle,
+  sessionCode,
+  sessionId,
+  associatedSpeakers,
+  submittedAt,
+  isResubmission
+}) {
+  const cleanName = (name || '').trim() || 'Unknown submitter';
+  const cleanEmail = (email || '').trim() || 'Unknown email';
+  const cleanSession = (sessionTitle || '').trim() || 'Unknown session';
+  const cleanSessionCode = (sessionCode || '').trim();
+  const action = isResubmission ? 'resubmitted' : 'submitted';
+  const speakerRows = (associatedSpeakers || []).length
+    ? associatedSpeakers.map(speaker => {
+      const speakerName = (speaker.name || '').trim() || 'Unnamed speaker';
+      const speakerEmail = (speaker.email || '').trim() || 'No email on file';
+      return `${speakerName} <${speakerEmail}>`;
+    })
+    : ['No speakers with emails were found for this session.'];
+
+  const subject = `Speaker email mismatch: ${cleanName} – ${cleanSession}`;
+  const text = compactLines([
+    `${cleanName} ${action} a Speaker Questionnaire using an email address that does not match a speaker email associated with the selected session.`,
+    '',
+    `Submitted name: ${cleanName}`,
+    `Submitted email: ${cleanEmail}`,
+    `Session: ${cleanSession}`,
+    cleanSessionCode ? `Session code: ${cleanSessionCode}` : '',
+    sessionId ? `Session ID: ${sessionId}` : '',
+    submittedAt ? `Submitted: ${submittedAt}` : '',
+    '',
+    'Associated speaker emails on file:',
+    ...speakerRows.map(row => `- ${row}`)
+  ]);
+
+  const html = `
+    <div style="margin:0; padding:32px 16px; background:#ffffff; font-family:Montserrat, Arial, sans-serif; color:#1f2937; line-height:1.5;">
+      <div style="max-width:680px; margin:0 auto;">
+        <div style="background:#ffffff; border:1px solid #d9e2ea; border-radius:8px; padding:28px;">
+          <p style="margin:0 0 6px 0; color:#B45309; font-size:12px; font-weight:bold; letter-spacing:0.04em; text-transform:uppercase;">Speaker Email Mismatch</p>
+          <h1 style="margin:0 0 18px 0; color:#122345; font-size:22px; line-height:1.3;">A questionnaire was ${escapeHtml(action)} from an email not associated with this session.</h1>
+
+          <table cellpadding="0" cellspacing="0" style="border-collapse:collapse; width:100%; border:1px solid #d9e2ea; border-radius:8px; overflow:hidden; margin:0 0 22px 0;">
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; width:150px; vertical-align:top; border-bottom:1px solid #e5edf3;">Submitted name</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;">${escapeHtml(cleanName)}</td>
+            </tr>
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top; border-bottom:1px solid #e5edf3;">Submitted email</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;"><a href="mailto:${escapeHtml(cleanEmail)}" style="color:#0563C1;">${escapeHtml(cleanEmail)}</a></td>
+            </tr>
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top; border-bottom:1px solid #e5edf3;">Session</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;"><em>${escapeHtml(cleanSession)}</em></td>
+            </tr>
+            ${cleanSessionCode ? `
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top; border-bottom:1px solid #e5edf3;">Session code</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;">${escapeHtml(cleanSessionCode)}</td>
+            </tr>` : ''}
+            ${sessionId ? `
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top; border-bottom:1px solid #e5edf3;">Session ID</td>
+              <td style="padding:11px 14px; vertical-align:top; border-bottom:1px solid #e5edf3;">${escapeHtml(sessionId)}</td>
+            </tr>` : ''}
+            ${submittedAt ? `
+            <tr>
+              <td style="padding:11px 14px; font-weight:bold; color:#122345; vertical-align:top;">Submitted</td>
+              <td style="padding:11px 14px; vertical-align:top;">${escapeHtml(submittedAt)}</td>
+            </tr>` : ''}
+          </table>
+
+          <p style="margin:0 0 8px 0; color:#122345; font-size:15px; font-weight:bold;">Associated speaker emails on file:</p>
+          <ul style="margin:0; padding-left:20px;">
+            ${speakerRows.map(row => `<li style="margin:0 0 6px 0;">${escapeHtml(row)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return { subject, text, html };
+}
+
+async function sendSpeakerEmailMismatchEmail(response) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.SURVEY_CONFIRMATION_FROM;
+  if (!apiKey || !from) return;
+
+  const email = buildSpeakerEmailMismatchEmail(response);
+  const resendResponse = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from,
+      to: SPEAKER_EMAIL_MISMATCH_TO,
+      reply_to: response.email.trim(),
+      subject: email.subject,
+      text: email.text,
+      html: email.html
+    })
+  });
+
+  if (!resendResponse.ok) {
+    const details = await resendResponse.text();
+    throw new Error(`Resend speaker email mismatch error ${resendResponse.status}: ${details}`);
+  }
+}
+
+async function getAssociatedSpeakersForSession(sql, sessionId) {
+  return sql`
+    SELECT
+      TRIM(sp.first_name || ' ' || sp.last_name) AS name,
+      sp.email
+    FROM session_speakers ss
+    JOIN speakers sp ON ss.speaker_code = sp.speaker_code
+    WHERE ss.session_id = ${sessionId}
+    ORDER BY sp.last_name, sp.first_name
+  `;
 }
 
 async function sendConfirmationEmail(response) {
@@ -463,6 +595,31 @@ export default async function handler(req, res) {
     `;
 
     const cleanAdditionalNotes = (additionalNotes || q3 || '').trim();
+    const submittedAt = new Date().toLocaleString('en-US', { timeZone: 'America/Denver', dateStyle: 'long', timeStyle: 'short' }) + ' MDT';
+    const associatedSpeakers = await getAssociatedSpeakersForSession(sql, sessionId.trim());
+    const submittedEmail = normalizeEmail(email);
+    const associatedEmails = new Set(
+      associatedSpeakers
+        .map(speaker => normalizeEmail(speaker.email))
+        .filter(Boolean)
+    );
+
+    if (!associatedEmails.has(submittedEmail)) {
+      try {
+        await sendSpeakerEmailMismatchEmail({
+          name: cleanName,
+          email,
+          sessionTitle,
+          sessionCode,
+          sessionId: sessionId.trim(),
+          associatedSpeakers,
+          submittedAt,
+          isResubmission
+        });
+      } catch (mismatchErr) {
+        console.error('Speaker email mismatch notification error:', mismatchErr);
+      }
+    }
 
     if (cleanAdditionalNotes) {
       try {
@@ -471,7 +628,7 @@ export default async function handler(req, res) {
           email,
           sessionTitle,
           additionalNotes: cleanAdditionalNotes,
-          submittedAt: new Date().toLocaleString('en-US', { timeZone: 'America/Denver', dateStyle: 'long', timeStyle: 'short' }) + ' MDT',
+          submittedAt,
           isResubmission
         });
       } catch (notifyErr) {
