@@ -3,10 +3,8 @@ const SURVEY_SUBMISSION_KEY = "ggSpeakerSurveyLastSubmission";
 const SURVEY_DRAFT_KEY = "ggSpeakerSurveyDraft";
 const SURVEY_SESSION_DRAFTS_KEY = "ggSpeakerSurveySessionDrafts";
 const CEU_GENERATE_LIMIT_KEY = "ggCeuGenerateLimit";
-const CEU_INITIAL_LIMIT = 3;
-const CEU_EXTRA_LIMIT = 2;
-const CEU_SHORT_WAIT_MS = 5 * 60 * 1000;
-const CEU_DAILY_WAIT_MS = 24 * 60 * 60 * 1000;
+const CEU_DAILY_SESSION_LIMIT = 2;
+const CEU_OPT_OUT_MESSAGE = "Are you sure you want to opt out from offering CEU credit for your session? Sessions that are CEU eligible tend to draw a greater number of participants. To offer CEU credit for your session, simply generate three knowledge check questions and objectives.";
 const PRERECORD_YES_OPTION = "Yes, I plan to pre-record my session";
 const SESSION_FOLLOWUPS = [
   {
@@ -538,6 +536,38 @@ function updateCeuOptOutState() {
   }
 }
 
+function showCeuOptOutConfirmation() {
+  const section = document.getElementById("survey-ceu-section");
+  const existing = document.getElementById("survey-ceu-opt-out-confirmation");
+  if (!section || existing) return;
+
+  const box = document.createElement("div");
+  box.id = "survey-ceu-opt-out-confirmation";
+  box.className = "rounded-lg border border-[var(--survey-primary)] bg-white p-4 text-sm text-gray-800 shadow-sm";
+  box.innerHTML = `
+    <p class="mb-3">${escapeHtml(CEU_OPT_OUT_MESSAGE)}</p>
+    <div class="flex flex-wrap gap-2">
+      <button type="button" id="survey-confirm-ceu-opt-out" class="px-4 py-2 bg-white text-[var(--survey-primary)] font-semibold rounded-lg border-2 border-[var(--survey-primary)] hover:bg-[var(--survey-primary-soft)] transition-colors">I would like to continue opting out of offering CEU credit for my session.</button>
+      <button type="button" id="survey-auto-generate-after-opt-out" class="px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Auto-generate objectives and knowledge check questions</button>
+    </div>
+  `;
+
+  section.insertBefore(box, section.children[2] || null);
+
+  document.getElementById("survey-confirm-ceu-opt-out")?.addEventListener("click", () => {
+    box.remove();
+  });
+
+  document.getElementById("survey-auto-generate-after-opt-out")?.addEventListener("click", () => {
+    const optOut = document.getElementById("survey-ceu-opt-out");
+    if (optOut) optOut.checked = false;
+    updateCeuOptOutState();
+    saveSurveyDraft();
+    box.remove();
+    document.getElementById("survey-generate-ceu")?.click();
+  });
+}
+
 function isKeynote(session) {
   return normalize(session?.presentationType || "").includes("keynote");
 }
@@ -576,12 +606,12 @@ function buildFormatComparisonRows() {
     { label: "Breakout rooms", zoom: "Supported", embedded: "Not supported" },
     { label: "Polls", zoom: "External tool", zoomNote: "Zoom would rely on an external tool such as Mentimeter.", embedded: "Supported", embeddedNote: "Polling is a native Embedded feature." },
     { label: "Chat", zoom: "Supported", embedded: "Supported" },
-    { label: "Q&A", zoom: "Via chat", zoomNote: "Q&A is not available for Zoom; chat could be used for questions instead.", embedded: "Supported", embeddedNote: "Q&A is a native Embedded feature." },
+    { label: "Q&A", zoom: "Via chat", zoomNote: "The Q&A feature is not available for Zoom; however, Zoom chat can be used for soliciting questions instead.", embedded: "Supported", embeddedNote: "Q&A is a native Embedded feature." },
     { label: "Screen sharing", zoom: "Supported", zoomNote: "Zoom has more advanced screen sharing options.", embedded: "Supported", embeddedNote: "Screen sharing features are less robust for Embedded." },
     { label: "Virtual backgrounds", zoom: "Supported", zoomNote: "Various virtual backgrounds are supported for Zoom.", embedded: "Blurred only", embeddedNote: "Only a blurred background is available." },
     { label: "Waiting rooms", zoom: "Supported", embedded: "Not supported" },
     { label: "Captions", zoom: "Supported", embedded: "Supported" },
-    { label: "Transcripts", zoom: "Supported", zoomNote: "Presenter must manually start the transcript at the beginning of their session and download it to their computer at the end.", embedded: "Not supported" },
+    { label: "Transcripts", zoom: "Supported", zoomNote: "One of the presenters must manually start the transcript at the beginning of their session and download it to their computer at the end.", embedded: "Not supported" },
     { label: "Share video or audio", zoom: "Supported", embedded: "Supported" },
     { label: "Participant management", zoom: "Full control", embedded: "Limited control" },
     { label: "Participants showing video / coming off mute", zoom: "Supported", embedded: "Requires permission", embeddedNote: "Participants must request permission to unmute or turn on video." }
@@ -914,7 +944,7 @@ async function renderSurveyForSession(session, options = {}) {
     const currentMode = normalize(feature) === "embedded" ? "embedded" : "zoom";
     const explanation = normalize(feature) === "zoom"
       ? "Your session is currently programmed as a Zoom session. Zoom supports breakout rooms, virtual backgrounds, transcript generation, and other Zoom-related features."
-      : "Our records show this session is planned as Embedded. Embedded sessions live inside Attendee Hub and support native polling, Q&A, and Chat features. Only blurred backgrounds are available. Participants must request permission before coming on video and unmuting.";
+      : "Our records show this session is planned as Embedded. Embedded sessions live inside Attendee Hub, the online event center, and support native polling, Q&A, and Chat features. Only blurred backgrounds are available. Participants must request permission before coming on video and unmuting.";
     formatSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Session format confirmation *</h3>
       <p class="text-sm text-gray-800">${escapeHtml(explanation)}</p>
@@ -945,7 +975,7 @@ async function renderSurveyForSession(session, options = {}) {
   recordingSection.classList.toggle("hidden", !showRecording);
   if (showRecording) {
     const recordingText = normalize(session.recordingStatus || "").includes("not")
-      ? "Our records show this session is marked as not recorded."
+      ? "Our records show this session is currently set to not be recorded."
       : "Your session is set to be recorded. If you choose to have your session recorded, you can request a copy of the video file afterwards.";
     recordingSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Recording confirmation *</h3>
@@ -1184,64 +1214,54 @@ function buildCeuGenerationContext(session) {
 }
 
 function getCeuGenerateState() {
-  const now = Date.now();
-  let state;
+  const sessionId = selectedSurveySession?.id || "unknown-session";
+  const today = new Date().toISOString().slice(0, 10);
+  let allState;
   try {
-    state = JSON.parse(localStorage.getItem(CEU_GENERATE_LIMIT_KEY)) || {};
+    allState = JSON.parse(localStorage.getItem(CEU_GENERATE_LIMIT_KEY)) || {};
   } catch (_) {
-    state = {};
+    allState = {};
   }
 
-  if (state.dailyCooldownUntil && now >= state.dailyCooldownUntil) {
-    state = {};
+  const sessionState = allState[sessionId] || {};
+  if (sessionState.date !== today) {
+    return {
+      sessionId,
+      date: today,
+      count: 0,
+      allState
+    };
   }
 
   return {
-    count: Number(state.count) || 0,
-    shortCooldownUntil: Number(state.shortCooldownUntil) || 0,
-    dailyCooldownUntil: Number(state.dailyCooldownUntil) || 0
+    sessionId,
+    date: today,
+    count: Number(sessionState.count) || 0,
+    allState
   };
 }
 
 function saveCeuGenerateState(state) {
-  localStorage.setItem(CEU_GENERATE_LIMIT_KEY, JSON.stringify(state));
-}
-
-function formatWaitTime(ms) {
-  const minutes = Math.ceil(ms / 60000);
-  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"}`;
-  const hours = Math.ceil(ms / 3600000);
-  return `${hours} hour${hours === 1 ? "" : "s"}`;
+  const allState = state.allState || {};
+  allState[state.sessionId] = {
+    date: state.date,
+    count: state.count
+  };
+  localStorage.setItem(CEU_GENERATE_LIMIT_KEY, JSON.stringify(allState));
 }
 
 function getCeuGenerateBlockMessage() {
-  const now = Date.now();
   const state = getCeuGenerateState();
-
-  if (state.dailyCooldownUntil && now < state.dailyCooldownUntil) {
-    return `Please wait ${formatWaitTime(state.dailyCooldownUntil - now)} before using the generator tool again.`;
-  }
-
-  if (state.count >= CEU_INITIAL_LIMIT && state.count < CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT && state.shortCooldownUntil && now < state.shortCooldownUntil) {
-    return `Please wait ${formatWaitTime(state.shortCooldownUntil - now)} before using the generator tool again.`;
+  if (state.count >= CEU_DAILY_SESSION_LIMIT) {
+    return "You can auto-generate once and regenerate once per day for each session. Please review or edit the current draft, or try again tomorrow.";
   }
 
   return "";
 }
 
 function recordCeuGenerateUse() {
-  const now = Date.now();
   const state = getCeuGenerateState();
   state.count += 1;
-
-  if (state.count === CEU_INITIAL_LIMIT) {
-    state.shortCooldownUntil = now + CEU_SHORT_WAIT_MS;
-  }
-
-  if (state.count >= CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT) {
-    state.dailyCooldownUntil = now + CEU_DAILY_WAIT_MS;
-  }
-
   saveCeuGenerateState(state);
   return state;
 }
@@ -1249,7 +1269,7 @@ function recordCeuGenerateUse() {
 function updateCeuGenerateButtonLabel(button) {
   if (!button) return;
   const generatedForCurrentSession = !!selectedSurveySession && ceuDraftGeneratedSessionId === selectedSurveySession.id;
-  button.textContent = generatedForCurrentSession ? "Regenerate CEU materials" : "Help me draft CEU materials";
+  button.textContent = generatedForCurrentSession ? "Regenerate objectives and questions" : "Auto-generate objectives and knowledge check questions";
 }
 
 async function loadSessions() {
@@ -1601,6 +1621,7 @@ function bindSurvey() {
   const sessionInput = document.getElementById("survey-session-search");
   const suggestionsBox = document.getElementById("survey-session-suggestions");
   const generateBtn = document.getElementById("survey-generate-ceu");
+  const optOutCheckbox = document.getElementById("survey-ceu-opt-out");
   const submitBtn = document.getElementById("survey-submit");
   const statusEl = document.getElementById("survey-status");
   updateCeuGenerateButtonLabel(generateBtn);
@@ -1613,6 +1634,14 @@ function bindSurvey() {
     updateCeuOptOutState();
     updatePrerecordLiveSupportState();
     saveSurveyDraft();
+  });
+
+  optOutCheckbox?.addEventListener("change", () => {
+    if (optOutCheckbox.checked) {
+      showCeuOptOutConfirmation();
+    } else {
+      document.getElementById("survey-ceu-opt-out-confirmation")?.remove();
+    }
   });
 
   sessionInput.addEventListener("input", () => {
@@ -1714,10 +1743,8 @@ function bindSurvey() {
         draftEl.textContent = `${cleanedOutput}\n\nThe draft could not be placed automatically. Please copy the useful parts into the boxes above.`;
       }
       const state = recordCeuGenerateUse();
-      if (state.count === CEU_INITIAL_LIMIT) {
-        draftEl.textContent += " Please wait 5 minutes before using the generator tool again.";
-      } else if (state.count >= CEU_INITIAL_LIMIT + CEU_EXTRA_LIMIT) {
-        draftEl.textContent += " Please wait 24 hours before using the generator tool again.";
+      if (state.count >= CEU_DAILY_SESSION_LIMIT) {
+        draftEl.textContent += " You have used today's auto-generate and regenerate options for this session.";
       }
     } catch (err) {
       draftEl.textContent = `Unable to generate a draft right now: ${err.message}`;
