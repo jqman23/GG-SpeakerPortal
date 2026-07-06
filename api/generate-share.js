@@ -1,5 +1,9 @@
 const API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const SHARE_MODEL = process.env.GROQ_SHARE_MODEL || "llama-3.1-8b-instant";
+const SHARE_FALLBACK_MODELS = (process.env.GROQ_SHARE_FALLBACK_MODELS || "openai/gpt-oss-20b")
+  .split(",")
+  .map(model => model.trim())
+  .filter(Boolean);
 
 const SYSTEM_PROMPT = `Write only the middle paragraph for a LinkedIn caption from a presenter at the 2026 Global Gathering for the Future of Child Welfare. Use only the provided session details. Write 2-3 warm, professional sentences that are specific to the session topic and explain what the session is about or why it matters. Do not include the event name, the session title, presenter names, a greeting, a call to action, a website, hashtags, bullets, quotation marks, or labels. Do not invent speaker affiliations, dates, outcomes, or claims. Return only the paragraph text.`;
 
@@ -11,6 +15,53 @@ function buildUserPrompt({ title, description, sessionType, speakers }) {
     `Description: ${String(description || "").trim() || "Not provided"}`,
     "Event website: https://www.futureofchildwelfare.org"
   ].join("\n");
+}
+
+function getShareModels() {
+  return [...new Set([SHARE_MODEL, ...SHARE_FALLBACK_MODELS])];
+}
+
+function shouldTryFallback(error) {
+  const details = String(error.details || error.message || "").toLowerCase();
+  return (
+    error.status === 429 ||
+    error.status === 500 ||
+    error.status === 503 ||
+    error.status === 529 ||
+    details.includes("rate limit") ||
+    details.includes("token") ||
+    details.includes("quota") ||
+    details.includes("decommissioned") ||
+    details.includes("not supported")
+  );
+}
+
+async function requestShareMiddle(apiKey, model, messages) {
+  const groqRes = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.7,
+      max_tokens: 180
+    })
+  });
+
+  const bodyText = await groqRes.text();
+  if (!groqRes.ok) {
+    const error = new Error(`Groq error ${groqRes.status}: ${groqRes.statusText}`);
+    error.status = groqRes.status;
+    error.details = bodyText;
+    error.model = model;
+    throw error;
+  }
+
+  const data = JSON.parse(bodyText);
+  return data.choices?.[0]?.message?.content?.trim() || "";
 }
 
 export default async function handler(req, res) {
@@ -30,34 +81,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    const groqRes = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: SHARE_MODEL,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: buildUserPrompt({ title, description, sessionType, speakers }) }
-        ],
-        temperature: 0.7,
-        max_tokens: 260
-      })
-    });
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: buildUserPrompt({ title, description, sessionType, speakers }) }
+    ];
+    let lastError = null;
 
-    const bodyText = await groqRes.text();
-    if (!groqRes.ok) {
-      const error = new Error(`Groq error ${groqRes.status}: ${groqRes.statusText}`);
-      error.status = groqRes.status;
-      error.details = bodyText;
-      throw error;
+    for (const model of getShareModels()) {
+      try {
+        const middle = await requestShareMiddle(apiKey, model, messages);
+        return res.status(200).json({ middle, model });
+      } catch (error) {
+        lastError = error;
+        if (!shouldTryFallback(error)) throw error;
+      }
     }
 
-    const data = JSON.parse(bodyText);
-    const middle = data.choices?.[0]?.message?.content?.trim();
-    return res.status(200).json({ middle: middle || "" });
+    throw lastError || new Error("Unable to generate social post.");
   } catch (error) {
     if (error.status) {
       return res.status(error.status).json({
