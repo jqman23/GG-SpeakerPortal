@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       preRecordInterest: r.pre_record_interest || '',
     }));
 
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
     return res.status(200).json({
       SESSIONS_AS_OF: new Date().toISOString().split('T')[0],
       sessions,
