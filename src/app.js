@@ -25,22 +25,24 @@ const SESSION_FOLLOWUPS = [
 ];
 // Toggle tabs here. Set enabled: false to hide a tab without editing markup.
 const TAB_CONFIG = [
-  { id: "overview-tab", label: "Overview", sectionId: "overview", enabled: true, trackingButton: "SpeakerPortal_OverviewTab" },
+  { id: "overview-tab", label: "Overview", mobileLabel: "Overview", sectionId: "overview", enabled: true, trackingButton: "SpeakerPortal_OverviewTab" },
   {
     id: "survey-tab",
     label: "Speaker Questionnaire",
+    mobileLabel: "Questionnaire",
     sectionId: "survey",
     enabled: true,
     featured: true,
     trackingButton: "SpeakerPortal_SpeakerQuestionnaireTab"
   },
-  { id: "faqs-tab", label: "Frequently Asked Questions (FAQs)", sectionId: "faqs", enabled: true, trackingButton: "SpeakerPortal_FAQsTab" },
-  { id: "session-lookup-tab", label: "Session Information Lookup", sectionId: "session-lookup", enabled: true, trackingButton: "SpeakerPortal_SessionLookupTab" },
-  { id: "share-tab", label: "📣 Share your participation", sectionId: "share", enabled: true, trackingButton: "SpeakerPortal_ShareWidgetTab" },
-  { id: "attendee-hub-tab", label: "Attendee Hub", sectionId: "attendee-hub", enabled: true, trackingButton: "SpeakerPortal_AttendeeHubTab" },
+  { id: "faqs-tab", label: "Frequently Asked Questions (FAQs)", mobileLabel: "FAQs", sectionId: "faqs", enabled: true, trackingButton: "SpeakerPortal_FAQsTab" },
+  { id: "session-lookup-tab", label: "Session Information Lookup", mobileLabel: "Lookup", sectionId: "session-lookup", enabled: true, trackingButton: "SpeakerPortal_SessionLookupTab" },
+  { id: "share-tab", label: "📣 Share your participation", mobileLabel: "Share", sectionId: "share", enabled: true, trackingButton: "SpeakerPortal_ShareWidgetTab" },
+  { id: "attendee-hub-tab", label: "Attendee Hub", mobileLabel: "Hub", sectionId: "attendee-hub", enabled: true, trackingButton: "SpeakerPortal_AttendeeHubTab" },
   {
     id: "speaker-resource-guide",
     label: "Speaker Resource Guide (PDF)",
+    mobileLabel: "Guide",
     url: "REPLACE_WITH_2026_SPEAKER_RESOURCE_GUIDE_URL",
     enabled: false,
     external: true
@@ -48,6 +50,7 @@ const TAB_CONFIG = [
   {
     id: "attendee-hub-video",
     label: "Informational Video on Attendee Hub",
+    mobileLabel: "Video",
     url: "REPLACE_WITH_2026_ATTENDEE_HUB_VIDEO_URL",
     enabled: false,
     external: true
@@ -210,6 +213,13 @@ function activateTab(sectionId) {
     button.classList.toggle("tab-active", tab.sectionId === sectionId);
     button.classList.toggle("tab-inactive", tab.sectionId !== sectionId);
   });
+
+  const activeTab = TAB_CONFIG.find(tab => tab.enabled && !tab.external && tab.sectionId === sectionId);
+  const activeButton = activeTab ? document.getElementById(activeTab.id) : null;
+  const tabsEl = document.getElementById("primary-tabs");
+  if (activeButton && tabsEl) {
+    tabsEl.scrollLeft = activeButton.offsetLeft - (tabsEl.clientWidth - activeButton.offsetWidth) / 2;
+  }
 
   document.querySelectorAll(".content-section").forEach(section => {
     section.classList.toggle("active", section.id === sectionId);
