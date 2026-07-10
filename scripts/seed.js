@@ -10,6 +10,7 @@ const XLSX = require('../node_modules/xlsx/xlsx.js');
 const sql = neon(process.env.DATABASE_URL);
 const SPEAKER_FILE = process.env.SPEAKER_FILE || './Speaker Database.csv';
 const PROGRAM_FILE = process.env.PROGRAM_FILE || './Program Database.xlsx';
+const EXCLUDED_SPEAKER_CODES = new Set(['JoshKumin', 'JoshKumin1']);
 
 function parseDateTimeParts(value) {
   if (!value) return null;
@@ -164,6 +165,7 @@ function parseSpeakers() {
   const byCode = new Map();
   for (const r of rows) {
     const code = (r['Code'] || '').trim();
+    if (EXCLUDED_SPEAKER_CODES.has(code)) continue;
     if (!code || byCode.has(code)) continue;
     byCode.set(code, {
       speaker_code: code,
@@ -194,7 +196,8 @@ function parseSessions() {
     const speakerCodes = String(r['Speaker Code'] || '')
       .split(',')
       .map(s => s.trim())
-      .filter(Boolean);
+      .filter(Boolean)
+      .filter(code => !EXCLUDED_SPEAKER_CODES.has(code));
 
     // Prefer 2026 GG headers, fall back to 2025 CTA equivalents
     const get = (...keys) => {
