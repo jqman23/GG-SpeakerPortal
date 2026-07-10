@@ -143,7 +143,7 @@ async function createSchema() {
 async function currentState() {
   await createSchema();
   const [speakers, sessions, links] = await Promise.all([
-    sql`SELECT speaker_code, first_name, last_name, full_name, biography, email, title, org FROM speakers ORDER BY speaker_code`,
+    sql`SELECT speaker_code, first_name, last_name, full_name, biography, email, title, org, photo_url FROM speakers ORDER BY speaker_code`,
     sql`SELECT session_id, session_code, session_name, description, session_start, session_end, presentation_type, category, ceu_eligibility, recording_status, video_format, special_tag, pre_record_interest, video_preference, tags FROM sessions ORDER BY session_id`,
     sql`SELECT session_id, speaker_code FROM session_speakers ORDER BY session_id, speaker_code`,
   ]);
@@ -209,11 +209,16 @@ function printDiff(diff, excluded) {
   for (const row of linkDiff.removed) console.log(`  - link ${row.session_id} -> ${row.speaker_code}`);
 }
 
-async function applyLoad(speakers, sessions) {
+async function applyLoad(speakers, sessions, existingSpeakers) {
+  const photoUrls = new Map(
+    existingSpeakers
+      .filter(sp => compact(sp.photo_url))
+      .map(sp => [sp.speaker_code, compact(sp.photo_url)])
+  );
   await sql`TRUNCATE session_speakers, sessions, speakers RESTART IDENTITY CASCADE`;
   for (const sp of speakers) {
-    await sql`INSERT INTO speakers (speaker_code, first_name, last_name, full_name, biography, email, title, org)
-      VALUES (${sp.speaker_code}, ${sp.first_name}, ${sp.last_name}, ${sp.full_name}, ${sp.biography}, ${sp.email}, ${sp.title}, ${sp.org})`;
+    await sql`INSERT INTO speakers (speaker_code, first_name, last_name, full_name, biography, email, title, org, photo_url)
+      VALUES (${sp.speaker_code}, ${sp.first_name}, ${sp.last_name}, ${sp.full_name}, ${sp.biography}, ${sp.email}, ${sp.title}, ${sp.org}, ${photoUrls.get(sp.speaker_code) || null})`;
   }
   const speakerCodeSet = new Set(speakers.map(s => s.speaker_code));
   for (const s of sessions) {
@@ -247,6 +252,6 @@ printDiff(diff, excluded);
 if (!APPLY) {
   console.log('Dry run only. Re-run with --apply to update the database.');
 } else {
-  await applyLoad(speakers, sessions);
+  await applyLoad(speakers, sessions, before.speakers);
   console.log(`Applied program database load: ${speakers.length} speakers, ${sessions.length} sessions.`);
 }

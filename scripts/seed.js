@@ -235,14 +235,20 @@ function parseSessions() {
 async function seed() {
   const speakers = parseSpeakers();
   const sessions = parseSessions();
+  const existingPhotos = await sql`
+    SELECT speaker_code, photo_url
+    FROM speakers
+    WHERE photo_url IS NOT NULL AND photo_url <> ''
+  `;
+  const photoUrls = new Map(existingPhotos.map(sp => [sp.speaker_code, sp.photo_url]));
 
   await sql`TRUNCATE session_speakers, sessions, speakers RESTART IDENTITY CASCADE`;
   console.log('✓ Cleared existing data');
 
   for (const sp of speakers) {
     await sql`
-      INSERT INTO speakers (speaker_code, first_name, last_name, full_name, biography, email, title, org)
-      VALUES (${sp.speaker_code}, ${sp.first_name}, ${sp.last_name}, ${sp.full_name}, ${sp.biography}, ${sp.email}, ${sp.title}, ${sp.org})
+      INSERT INTO speakers (speaker_code, first_name, last_name, full_name, biography, email, title, org, photo_url)
+      VALUES (${sp.speaker_code}, ${sp.first_name}, ${sp.last_name}, ${sp.full_name}, ${sp.biography}, ${sp.email}, ${sp.title}, ${sp.org}, ${photoUrls.get(sp.speaker_code) || null})
       ON CONFLICT (speaker_code) DO UPDATE SET
         first_name = EXCLUDED.first_name,
         last_name  = EXCLUDED.last_name,
@@ -250,7 +256,8 @@ async function seed() {
         biography  = EXCLUDED.biography,
         email      = EXCLUDED.email,
         title      = EXCLUDED.title,
-        org        = EXCLUDED.org
+        org        = EXCLUDED.org,
+        photo_url  = COALESCE(EXCLUDED.photo_url, speakers.photo_url)
     `;
   }
   console.log(`✓ Inserted ${speakers.length} speakers`);
