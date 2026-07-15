@@ -637,7 +637,7 @@ function isKeynote(session) {
 }
 
 function isSkillBuildingInstitute(session) {
-  return normalize(session?.presentationType || "").includes("skill building institute");
+  return normalize(session?.presentationType || "").includes("skill");
 }
 
 function hasPreRecordInterest(session) {
