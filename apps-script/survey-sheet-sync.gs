@@ -20,7 +20,7 @@
 //    you change this script — editing the file alone does not update
 //    the live URL's code.
 
-const SHEET_NAME = 'Survey Responses';
+const SHEET_NAME = 'Speaker Answers';
 
 // [payload key, column header] — order here is the column order in the sheet.
 const COLUMNS = [
