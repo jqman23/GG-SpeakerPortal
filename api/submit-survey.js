@@ -583,6 +583,31 @@ async function getAssociatedSpeakersForSession(sql, sessionId) {
   `;
 }
 
+async function sendToSheetSync(response) {
+  const url = process.env.SHEET_SYNC_URL;
+  const secret = process.env.SHEET_SYNC_SECRET;
+  if (!url) return;
+
+  const sheetResponse = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...response, sharedSecret: secret })
+  });
+
+  // Apps Script web apps always answer with HTTP 200, even on failure,
+  // so success/failure has to be read from the JSON body instead of the status code.
+  const details = await sheetResponse.text();
+  let parsed;
+  try {
+    parsed = JSON.parse(details);
+  } catch {
+    throw new Error(`Sheet sync error: non-JSON response: ${details.slice(0, 200)}`);
+  }
+  if (!sheetResponse.ok || !parsed.success) {
+    throw new Error(`Sheet sync error ${sheetResponse.status}: ${details}`);
+  }
+}
+
 async function sendConfirmationEmail(response) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.SURVEY_CONFIRMATION_FROM;
@@ -665,7 +690,7 @@ export default async function handler(req, res) {
   try {
     const sql = getDb();
     await ensureSchema(sql);
-    await sql`
+    const [inserted] = await sql`
       INSERT INTO survey_responses (
         speaker_name,
         email,
@@ -706,11 +731,42 @@ export default async function handler(req, res) {
         ${q1?.trim() || null},
         ${q2?.trim() || null}
       )
+      RETURNING id, submitted_at
     `;
 
     const cleanAdditionalNotes = (additionalNotes || q3 || '').trim();
     const submittedAt = new Date().toLocaleString('en-US', { timeZone: 'America/Denver', dateStyle: 'long', timeStyle: 'short' }) + ' MDT';
     const associatedSpeakers = await getAssociatedSpeakersForSession(sql, sessionId.trim());
+
+    try {
+      await sendToSheetSync({
+        id: inserted?.id,
+        submittedAt: inserted?.submitted_at,
+        isResubmission: !!isResubmission,
+        firstName: cleanFirstName,
+        lastName: cleanLastName,
+        email: email.trim(),
+        sessionCode: sessionCode?.trim() || '',
+        sessionTitle: sessionTitle?.trim() || '',
+        sessionVideoFormat: sessionVideoFormat || '',
+        formatConfirmation: formatConfirmation || '',
+        sessionRecordingStatus: sessionRecordingStatus || '',
+        recordingConfirmation: recordingConfirmation || '',
+        prerecordConfirmation: prerecordConfirmation || '',
+        prerecordLiveSupport: prerecordLiveSupport || '',
+        sbiMaxParticipants: sbiMaxParticipants ? String(sbiMaxParticipants).trim() : '',
+        ceuOptOut: cleanCeuOptOut,
+        ceuObjectives: cleanCeuOptOut ? '' : (ceuObjectives?.trim() || ''),
+        ceuQuestions: cleanCeuOptOut ? '' : (ceuQuestions?.trim() || ''),
+        sessionFollowupPrompt: sessionFollowupPrompt || '',
+        sessionFollowupResponse: sessionFollowupResponse || '',
+        sessionTitleFeedback: q1?.trim() || '',
+        avRequirements: q2?.trim() || '',
+        additionalNotes: (additionalNotes || q3 || '').trim()
+      });
+    } catch (sheetErr) {
+      console.error('Sheet sync error:', sheetErr);
+    }
     const submittedEmail = normalizeEmail(email);
     const associatedEmails = new Set(
       associatedSpeakers
