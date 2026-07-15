@@ -62,6 +62,19 @@ function doPost(e) {
       return jsonResponse({ success: false, error: 'Unauthorized' });
     }
 
+    // Debug ping: reports what this deployment thinks is true, without
+    // writing a row. Lets you confirm a redeploy actually took effect.
+    if (data.debugPing === true) {
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
+      return jsonResponse({
+        success: true,
+        debug: true,
+        configuredSheetName: SHEET_NAME,
+        existingTabs: ss.getSheets().map(s => s.getName()),
+        spreadsheetUrl: ss.getUrl()
+      });
+    }
+
     appendRow(getOrCreateSheet(), data);
 
     return jsonResponse({ success: true });
