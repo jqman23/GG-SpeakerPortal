@@ -19,8 +19,14 @@ const SHEET_SYNC_SECRET = process.env.SHEET_SYNC_SECRET;
 // Delay between rows so we stay well under Apps Script's execution quotas.
 const DELAY_MS = 300;
 
-if (!SHEET_SYNC_URL) {
-  console.error('SHEET_SYNC_URL is not set. Deploy apps-script/survey-sheet-sync.gs first.');
+const missing = [
+  !process.env.DATABASE_URL?.trim() && 'DATABASE_URL',
+  !SHEET_SYNC_URL?.trim() && 'SHEET_SYNC_URL',
+  !SHEET_SYNC_SECRET?.trim() && 'SHEET_SYNC_SECRET'
+].filter(Boolean);
+
+if (missing.length) {
+  console.error(`Cannot backfill: ${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} empty or missing.`);
   process.exit(1);
 }
 

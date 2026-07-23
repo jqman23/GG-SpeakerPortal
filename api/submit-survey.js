@@ -584,11 +584,28 @@ async function getAssociatedSpeakersForSession(sql, sessionId) {
 }
 
 async function sendToSheetSync(response) {
-  const url = process.env.SHEET_SYNC_URL;
-  const secret = process.env.SHEET_SYNC_SECRET;
-  if (!url) return;
+  const url = process.env.SHEET_SYNC_URL?.trim();
+  const secret = process.env.SHEET_SYNC_SECRET?.trim();
+  const missing = [
+    !url && 'SHEET_SYNC_URL',
+    !secret && 'SHEET_SYNC_SECRET'
+  ].filter(Boolean);
 
-  const sheetResponse = await fetch(url, {
+  if (missing.length) {
+    throw new Error(`Sheet sync is not configured: ${missing.join(' and ')} ${missing.length === 1 ? 'is' : 'are'} empty or missing.`);
+  }
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    throw new Error('Sheet sync is not configured: SHEET_SYNC_URL is not a valid URL.');
+  }
+  if (parsedUrl.protocol !== 'https:') {
+    throw new Error('Sheet sync is not configured: SHEET_SYNC_URL must use HTTPS.');
+  }
+
+  const sheetResponse = await fetch(parsedUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...response, sharedSecret: secret })
