@@ -2197,17 +2197,53 @@ function bindSurvey() {
   });
 }
 
+// shell.scrollHeight only reflects normal document flow — with the shell's default
+// overflow: visible, it does NOT grow to include absolutely-positioned overflowing
+// content (like the session search suggestions dropdown), so the parent iframe never
+// hears about it and clips it. computeWidgetHeight() pads scrollHeight out to cover
+// any currently-visible absolute-positioned overlay so the iframe grows to fit it.
+function computeWidgetHeight() {
+  const shell = document.getElementById("speakerPortalShell");
+  if (!shell) return 0;
+  let height = shell.scrollHeight;
+
+  const suggestionsBox = document.getElementById("survey-session-suggestions");
+  if (suggestionsBox && !suggestionsBox.classList.contains("hidden")) {
+    const shellTop = shell.getBoundingClientRect().top;
+    const suggestionsBottom = suggestionsBox.getBoundingClientRect().bottom;
+    height = Math.max(height, Math.ceil(suggestionsBottom - shellTop) + 16);
+  }
+
+  return height + 32;
+}
+
+function emitWidgetHeight() {
+  if (!window.parent || window.parent === window) return;
+  const height = computeWidgetHeight();
+  if (!height) return;
+  window.parent.postMessage({ ggWidgetHeight: height }, "*");
+}
+
 function bindIframeHeight() {
   const shell = document.getElementById("speakerPortalShell");
   if (!shell || !window.parent || window.parent === window) return;
 
-  function emitHeight() {
-    const height = shell.scrollHeight + 32;
-    window.parent.postMessage({ ggWidgetHeight: height }, "*");
-  }
+  const emitHeight = emitWidgetHeight;
 
   if ("ResizeObserver" in window) {
     new ResizeObserver(emitHeight).observe(shell);
+  }
+
+  // The suggestions dropdown is absolute-positioned, so opening/closing it or
+  // resizing its content doesn't change the shell's own box size and the
+  // ResizeObserver above never fires — watch it directly instead.
+  const suggestionsBox = document.getElementById("survey-session-suggestions");
+  if (suggestionsBox && "MutationObserver" in window) {
+    new MutationObserver(emitHeight).observe(suggestionsBox, {
+      attributes: true,
+      attributeFilter: ["class"],
+      childList: true,
+    });
   }
 
   window.addEventListener("load", emitHeight);
