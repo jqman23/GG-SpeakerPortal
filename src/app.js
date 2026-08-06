@@ -443,7 +443,7 @@ function updateOverviewSurveyCta() {
   if (icon) icon.classList.add("flex");
   heading.textContent = "Speaker Questionnaire received";
   const sessionTitle = remembered.sessionTitle || "your session";
-  copy.innerHTML = `Thank you. We have a response on file for <em>${escapeHtml(sessionTitle)}</em>. You have until August 7, 2026 to review or submit changes. If you are presenting on another session, you may submit a new response.`;
+  copy.innerHTML = `Thank you. We have a response on file for <em>${escapeHtml(sessionTitle)}</em>. You have until August 12, 2026 (extended deadline) to review or submit changes. If you are presenting on another session, you may submit a new response.`;
   button.textContent = "Review or update your Speaker Questionnaire";
 
   const newButton = document.getElementById("overview-survey-new");
@@ -638,6 +638,32 @@ function isKeynote(session) {
 
 function isSkillBuildingInstitute(session) {
   return normalize(session?.presentationType || "").includes("skill");
+}
+
+function isInternationalExchange(session) {
+  return normalize(session?.presentationType || "") === "intl";
+}
+
+// Lazy singleton: only ever fetched once, and only when an International Exchange
+// session is actually selected (explicit action), never on page load or on a timer.
+// The source DB (backend masterplanner) has a tight monthly egress cap. This is a
+// session-level exclusion (resolved server-side from speaker emails to session IDs) —
+// it has nothing to do with who is filling out the Questionnaire.
+let intlExclusionsPromise = null;
+function getIntlExcludedSessionIds() {
+  if (!intlExclusionsPromise) {
+    intlExclusionsPromise = fetch("/api/intl-exclusions")
+      .then(res => (res.ok ? res.json() : { excludedSessionIds: [] }))
+      .then(data => new Set(data.excludedSessionIds || []))
+      .catch(() => new Set());
+  }
+  return intlExclusionsPromise;
+}
+
+async function isIntlExchangeExcluded(session) {
+  if (!isInternationalExchange(session)) return false;
+  const excluded = await getIntlExcludedSessionIds();
+  return excluded.has(session?.id);
 }
 
 function hasPreRecordInterest(session) {
@@ -996,13 +1022,19 @@ async function renderSurveyForSession(session, options = {}) {
   const conditional = document.getElementById("survey-conditional-fields");
   conditional.classList.remove("hidden");
 
+  // International Exchange sessions get the SBI-style treatment (no format,
+  // recording, or pre-record questions) unless the presenting speaker's email is on
+  // the International Exchange Exclusions list, in which case normal rules apply.
+  const intlExcluded = await isIntlExchangeExcluded(session);
+  const isIntl = isInternationalExchange(session) && !intlExcluded;
+
   const ceuSection = document.getElementById("survey-ceu-section");
   ceuSection.classList.toggle("hidden", !isCeuEligible(session));
   updateCeuOptOutState();
 
   const formatSection = document.getElementById("survey-format-section");
   const feature = (session.videoFormat || "").trim();
-  const showFormat = !isKeynote(session) && !isSkillBuildingInstitute(session) && ["zoom", "embedded"].includes(normalize(feature));
+  const showFormat = !isKeynote(session) && !isSkillBuildingInstitute(session) && !isIntl && ["zoom", "embedded"].includes(normalize(feature));
   formatSection.classList.toggle("hidden", !showFormat);
   if (showFormat) {
     const currentMode = normalize(feature) === "embedded" ? "embedded" : "zoom";
@@ -1035,12 +1067,15 @@ async function renderSurveyForSession(session, options = {}) {
   }
 
   const recordingSection = document.getElementById("survey-recording-section");
-  const showRecording = !isKeynote(session) && !isSkillBuildingInstitute(session);
+  const showRecording = !isKeynote(session) && !isSkillBuildingInstitute(session) && !isIntl;
   recordingSection.classList.toggle("hidden", !showRecording);
   if (showRecording) {
-    const recordingText = normalize(session.recordingStatus || "").includes("not")
-      ? "Our records show this session is currently set to not be recorded."
-      : "Your session is set to be recorded. If you choose to have your session recorded, you can request a copy of the video file afterwards.";
+    const recordingStatus = normalize(session.recordingStatus || "");
+    const recordingText = !recordingStatus
+      ? "Our records do not list a recording status for this session. Please confirm whether you want your session recorded."
+      : recordingStatus.includes("not")
+        ? "Our records show this session is currently set to not be recorded."
+        : "Your session is set to be recorded. If you choose to have your session recorded, you can request a copy of the video file afterwards.";
     recordingSection.innerHTML = `
       <h3 class="font-bold text-[#162A53]">Recording confirmation *</h3>
       <p class="text-sm text-gray-800">${escapeHtml(recordingText)}</p>
@@ -1051,8 +1086,9 @@ async function renderSurveyForSession(session, options = {}) {
   }
 
   const prerecordSection = document.getElementById("survey-prerecord-section");
-  prerecordSection.classList.toggle("hidden", !hasPreRecordInterest(session));
-  prerecordSection.innerHTML = hasPreRecordInterest(session) ? `
+  const showPrerecord = hasPreRecordInterest(session) && !isIntl;
+  prerecordSection.classList.toggle("hidden", !showPrerecord);
+  prerecordSection.innerHTML = showPrerecord ? `
     <h3 class="font-bold text-[#162A53]">Pre-recording *</h3>
     <p class="text-sm text-gray-800">You previously expressed interest in pre-recording your session and having it shown during the Global Gathering in a simulated live format. Please confirm whether you formally plan to pre-record your session and having it played automatically. If we do not receive a response, we will assume you plan to present live. If you plan to pre-record, please email us a copy of your presentation by September 4, 2026 to give us enough time to program it into the system.</p>
     ${radioGroup("prerecord-confirmation", [
@@ -1094,7 +1130,7 @@ async function renderSurveyForSession(session, options = {}) {
     box.classList.remove("hidden");
     box.innerHTML = `
       <p class="text-[#162A53] font-semibold mb-2">Latest response loaded. Review, edit, and submit again if needed. A new submission will be saved.</p>
-      <p class="text-gray-800">You have until August 7, 2026 to make changes.</p>
+      <p class="text-gray-800">You have until August 12, 2026 (extended deadline) to make changes.</p>
     `;
   }
 }
@@ -1222,7 +1258,7 @@ async function checkExistingSurveyResponse(session) {
     box.innerHTML = `
       <p class="text-[#162A53] font-semibold mb-2">A questionnaire response already exists for this session.</p>
       <p class="text-gray-800 mb-3">Latest submitted by: ${escapeHtml(data.latest.speakerName || "another presenter")}. Total submissions: ${escapeHtml(String(data.count))}.${submittedAt ? ` Latest submission: ${escapeHtml(submittedAt)}.` : ""}</p>
-      <p class="text-gray-800 mb-3">Would you like to view and update that submission? If you resubmit, we will record your changes. You can make updates to this form until August 7, 2026.</p>
+      <p class="text-gray-800 mb-3">Would you like to view and update that submission? If you resubmit, we will record your changes. You can make updates to this form until August 12, 2026 (extended deadline).</p>
       <button id="load-existing-survey-response" type="button" class="px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Load latest response</button>
     `;
     box.classList.remove("hidden");
