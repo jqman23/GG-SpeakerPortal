@@ -7,6 +7,9 @@ export default async function handler(req, res) {
 
   try {
     const sql = getDb();
+    // Defensive — matches the widget's own guard — so this endpoint can
+    // never 500 on a missing column regardless of deploy/migration order.
+    await sql`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS display_on_agenda BOOLEAN NOT NULL DEFAULT TRUE`;
     const rows = await sql`
       SELECT
         s.session_id,
@@ -31,6 +34,7 @@ export default async function handler(req, res) {
       FROM sessions s
       LEFT JOIN session_speakers ss ON s.session_id = ss.session_id
       LEFT JOIN speakers sp ON ss.speaker_code = sp.speaker_code
+      WHERE s.display_on_agenda IS NOT FALSE
       GROUP BY s.session_id, s.session_code, s.session_name, s.description, s.session_start, s.session_end, s.presentation_type, s.ceu_eligibility, s.recording_status, s.video_format, s.pre_record_interest
       ORDER BY s.session_name
     `;

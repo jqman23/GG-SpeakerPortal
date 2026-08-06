@@ -60,6 +60,16 @@ function compact(value) {
   return String(value ?? '').trim();
 }
 
+// "No"/"N"/"false"/"0" (case/whitespace-insensitive) hides a session from
+// the questionnaire's session list entirely, same as it hides it from the
+// public agenda; anything else — including blank/missing — defaults to
+// visible, so existing rows and untouched columns don't suddenly vanish.
+const HIDE_VALUES = new Set(['no', 'n', 'false', '0']);
+function parseDisplayOnAgenda(value) {
+  const trimmed = String(value || '').trim().toLowerCase();
+  return !HIDE_VALUES.has(trimmed);
+}
+
 function parseSpeakers() {
   const byCode = new Map();
   const excluded = [];
@@ -116,6 +126,7 @@ function parseSessions() {
       pre_record_interest: get('2026 GG pre-record', '2025 CTA pre-record interest', 'Interest in pre-recording session'),
       video_preference: get('2026 GG video format preferences', '2025 CTA video preference'),
       tags: get('2026 GG tags', '2025 CTA tags'),
+      display_on_agenda: parseDisplayOnAgenda(get('Display on Agenda')),
       speakerCodes,
     };
   }).filter(s => s.session_id && s.session_name);
@@ -131,8 +142,10 @@ async function createSchema() {
     description TEXT, session_start TEXT, session_end TEXT, presentation_type TEXT,
     category TEXT, ceu_eligibility TEXT, recording_status TEXT, video_format TEXT,
     special_tag TEXT, pre_record_interest TEXT, video_preference TEXT, tags TEXT,
+    display_on_agenda BOOLEAN NOT NULL DEFAULT TRUE,
     updated_at TIMESTAMPTZ DEFAULT NOW()
   )`;
+  await sql`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS display_on_agenda BOOLEAN NOT NULL DEFAULT TRUE`;
   await sql`CREATE TABLE IF NOT EXISTS session_speakers (
     session_id TEXT REFERENCES sessions(session_id) ON DELETE CASCADE,
     speaker_code TEXT REFERENCES speakers(speaker_code) ON DELETE CASCADE,
@@ -144,7 +157,7 @@ async function currentState() {
   await createSchema();
   const [speakers, sessions, links] = await Promise.all([
     sql`SELECT speaker_code, first_name, last_name, full_name, biography, email, title, org, photo_url FROM speakers ORDER BY speaker_code`,
-    sql`SELECT session_id, session_code, session_name, description, session_start, session_end, presentation_type, category, ceu_eligibility, recording_status, video_format, special_tag, pre_record_interest, video_preference, tags FROM sessions ORDER BY session_id`,
+    sql`SELECT session_id, session_code, session_name, description, session_start, session_end, presentation_type, category, ceu_eligibility, recording_status, video_format, special_tag, pre_record_interest, video_preference, tags, display_on_agenda FROM sessions ORDER BY session_id`,
     sql`SELECT session_id, speaker_code FROM session_speakers ORDER BY session_id, speaker_code`,
   ]);
   return { speakers, sessions, links };
@@ -225,11 +238,11 @@ async function applyLoad(speakers, sessions, existingSpeakers) {
     await sql`INSERT INTO sessions (
       session_id, session_code, session_name, description, session_start, session_end,
       presentation_type, category, ceu_eligibility, recording_status, video_format,
-      special_tag, pre_record_interest, video_preference, tags
+      special_tag, pre_record_interest, video_preference, tags, display_on_agenda
     ) VALUES (
       ${s.session_id}, ${s.session_code}, ${s.session_name}, ${s.description}, ${s.session_start}, ${s.session_end},
       ${s.presentation_type}, ${s.category}, ${s.ceu_eligibility}, ${s.recording_status}, ${s.video_format},
-      ${s.special_tag}, ${s.pre_record_interest}, ${s.video_preference}, ${s.tags}
+      ${s.special_tag}, ${s.pre_record_interest}, ${s.video_preference}, ${s.tags}, ${s.display_on_agenda}
     )`;
     for (const code of s.speakerCodes) {
       if (!speakerCodeSet.has(code)) continue;
@@ -243,7 +256,7 @@ const sessions = parseSessions();
 const before = await currentState();
 const diff = {
   speakerDiff: compareRows('full_name', before.speakers, speakers, 'speaker_code', ['first_name', 'last_name', 'full_name', 'biography', 'email', 'title', 'org']),
-  sessionDiff: compareRows('session_name', before.sessions, sessions, 'session_id', ['session_code', 'session_name', 'description', 'session_start', 'session_end', 'presentation_type', 'category', 'ceu_eligibility', 'recording_status', 'video_format', 'special_tag', 'pre_record_interest', 'video_preference', 'tags']),
+  sessionDiff: compareRows('session_name', before.sessions, sessions, 'session_id', ['session_code', 'session_name', 'description', 'session_start', 'session_end', 'presentation_type', 'category', 'ceu_eligibility', 'recording_status', 'video_format', 'special_tag', 'pre_record_interest', 'video_preference', 'tags', 'display_on_agenda']),
   linkDiff: compareLinks(before.links, sessions),
 };
 
