@@ -61,6 +61,11 @@ let SESSIONS_AS_OF = "";
 let sessions = [];
 const SPEAKER_INDEX = [];
 let selectedSurveySession = null;
+// True when the currently selected session is an active (non-excluded) International
+// Exchange session — the CEU rule for those trumps whatever the ceu_eligibility data
+// field says, so this is checked alongside isCeuEligible() everywhere CEU visibility/
+// requirement is decided.
+let selectedSessionIsIntlExchange = false;
 let latestSurveyResponse = null;
 let pendingOverviewSurveyLoad = false;
 let isResubmittingQuestionnaire = false;
@@ -563,6 +568,12 @@ function isCeuEligible(session) {
   return normalize(session?.ceuEligibility || "") === "ceu eligible";
 }
 
+// International Exchange sessions always get the CEU section, regardless of what the
+// ceu_eligibility data field says — that rule trumps the normal data-driven check.
+function isCeuSectionActive(session) {
+  return isCeuEligible(session) || (session === selectedSurveySession && selectedSessionIsIntlExchange);
+}
+
 function getSessionFollowup(session) {
   const title = normalize(session?.title || "");
   return SESSION_FOLLOWUPS.find(followup => title.includes(followup.matchTitle)) || null;
@@ -578,7 +589,7 @@ function updateCeuOptOutState() {
   const questionsEl = document.getElementById("survey-ceu-questions");
   const generateBtn = document.getElementById("survey-generate-ceu");
   const draftEl = document.getElementById("survey-ceu-draft");
-  const shouldRequireCeu = isCeuEligible(selectedSurveySession) && !optedOut;
+  const shouldRequireCeu = isCeuSectionActive(selectedSurveySession) && !optedOut;
 
   if (objectivesEl) {
     objectivesEl.required = shouldRequireCeu;
@@ -1027,9 +1038,10 @@ async function renderSurveyForSession(session, options = {}) {
   // the International Exchange Exclusions list, in which case normal rules apply.
   const intlExcluded = await isIntlExchangeExcluded(session);
   const isIntl = isInternationalExchange(session) && !intlExcluded;
+  selectedSessionIsIntlExchange = isIntl;
 
   const ceuSection = document.getElementById("survey-ceu-section");
-  ceuSection.classList.toggle("hidden", !isCeuEligible(session));
+  ceuSection.classList.toggle("hidden", !isCeuSectionActive(session));
   updateCeuOptOutState();
 
   const formatSection = document.getElementById("survey-format-section");
@@ -2123,9 +2135,9 @@ function bindSurvey() {
       sessionTitle: selectedSurveySession.title || "",
       sessionVideoFormat: selectedSurveySession.videoFormat || "",
       sessionRecordingStatus: selectedSurveySession.recordingStatus || "",
-      ceuObjectives: isCeuEligible(selectedSurveySession) && !isCeuOptedOut() ? document.getElementById("survey-ceu-objectives").value : "",
-      ceuQuestions: isCeuEligible(selectedSurveySession) && !isCeuOptedOut() ? document.getElementById("survey-ceu-questions").value : "",
-      ceuOptOut: isCeuEligible(selectedSurveySession) ? isCeuOptedOut() : false,
+      ceuObjectives: isCeuSectionActive(selectedSurveySession) && !isCeuOptedOut() ? document.getElementById("survey-ceu-objectives").value : "",
+      ceuQuestions: isCeuSectionActive(selectedSurveySession) && !isCeuOptedOut() ? document.getElementById("survey-ceu-questions").value : "",
+      ceuOptOut: isCeuSectionActive(selectedSurveySession) ? isCeuOptedOut() : false,
       sessionFollowupPrompt: getSessionFollowup(selectedSurveySession)?.heading || "",
       sessionFollowupResponse: getSessionFollowup(selectedSurveySession) ? document.getElementById("survey-session-followup-response").value : "",
       formatConfirmation: selectedRadioValue("format-confirmation"),
