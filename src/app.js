@@ -1098,7 +1098,7 @@ async function renderSurveyForSession(session, options = {}) {
   }
 
   const prerecordSection = document.getElementById("survey-prerecord-section");
-  const showPrerecord = hasPreRecordInterest(session) && !isIntl;
+  const showPrerecord = hasPreRecordInterest(session) && !isIntl && !isKeynote(session);
   prerecordSection.classList.toggle("hidden", !showPrerecord);
   prerecordSection.innerHTML = showPrerecord ? `
     <h3 class="font-bold text-[#162A53]">Pre-recording *</h3>
@@ -1118,7 +1118,7 @@ async function renderSurveyForSession(session, options = {}) {
     document.getElementById("survey-sbi-max-participants").value = "";
   }
 
-  const followup = getSessionFollowup(session);
+  const followup = isKeynote(session) ? null : getSessionFollowup(session);
   const followupSection = document.getElementById("survey-session-followup-section");
   const followupHeading = document.getElementById("survey-session-followup-heading");
   const followupCopy = document.getElementById("survey-session-followup-copy");
