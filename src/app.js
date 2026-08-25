@@ -1952,8 +1952,6 @@ function bindClickTracking() {
 function bindSurvey() {
   const form = document.getElementById("survey-form");
   if (!form) return;
-  const form = document.getElementById("survey-form");
-  if (!form) return;
 
   const sessionInput = document.getElementById("survey-session-search");
   const suggestionsBox = document.getElementById("survey-session-suggestions");
