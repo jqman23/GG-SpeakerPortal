@@ -446,10 +446,10 @@ function updateOverviewSurveyCta() {
 
   if (icon) icon.classList.remove("hidden");
   if (icon) icon.classList.add("flex");
-  heading.textContent = "Speaker Questionnaire — submissions are closed";
+  heading.textContent = "Speaker Questionnaire received";
   const sessionTitle = remembered.sessionTitle || "your session";
-  copy.innerHTML = `Thank you. We have a response on file for <em>${escapeHtml(sessionTitle)}</em>. The Speaker Questionnaire deadline has passed and submissions are now closed. If you have questions or need to make a change, please contact us at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.`;
-  button.textContent = "Questionnaire closed";
+  copy.innerHTML = `Thank you! We have your response on file for <em>${escapeHtml(sessionTitle)}</em>. Your Questionnaire is complete. If you have questions or need to request a change, please contact us at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.`;
+  button.textContent = "Questionnaire complete";
   button.disabled = true;
   button.classList.add("opacity-50", "cursor-not-allowed");
 
