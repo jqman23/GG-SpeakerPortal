@@ -118,19 +118,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (collapseAllFaqs) {
       document.querySelectorAll("#faqs details").forEach(details => { details.open = false; });
     }
-    const dismissChangelogBanner = event.target.closest?.("[data-dismiss-changelog]");
-    if (dismissChangelogBanner) {
-      event.preventDefault();
-      markChangelogEntrySeen(dismissChangelogBanner.dataset.dismissChangelog);
-      renderChangelogBanner();
-      renderChangelogBadges();
-      renderOverviewUpdates();
-    }
     const markAllChangelogRead = event.target.closest?.("[data-changelog-mark-all]");
     if (markAllChangelogRead) {
       event.preventDefault();
       markAllChangelogSeen();
-      renderChangelogBanner();
       renderChangelogBadges();
       renderOverviewUpdates();
     }
@@ -264,16 +255,15 @@ function activateTab(sectionId) {
   markSectionChangelogSeen(sectionId);
   if (changelogEntries.length) {
     renderChangelogBadges();
-    renderChangelogBanner();
     renderOverviewUpdates();
   }
 }
 
 // ── Recent Updates (changelog) ────────────────────────────────────────────────
 // Backed by the /api/changelog endpoint (Neon changelog table, seeded via
-// scripts/seed-changelog.js). Speakers see a "New update" banner, numbered
-// badges on tabs with unseen changes, and a Recent Updates timeline on the
-// Overview tab. Read state is tracked per browser in localStorage.
+// scripts/seed-changelog.js). Speakers see numbered badges on tabs with unseen
+// changes and a Recent Updates timeline on the Overview tab. Read state is
+// tracked per browser in localStorage.
 const CHANGELOG_SECTION_LABELS = {
   overview: "Overview",
   faqs: "FAQs",
@@ -300,12 +290,6 @@ function saveChangelogSeen() {
 
 function isChangelogEntryUnseen(entry) {
   return !!entry && !changelogSeen.has(entry.key);
-}
-
-function markChangelogEntrySeen(key) {
-  if (!key || changelogSeen.has(key)) return;
-  changelogSeen.add(key);
-  saveChangelogSeen();
 }
 
 function markSectionChangelogSeen(sectionId) {
@@ -355,29 +339,6 @@ function renderChangelogBadges() {
     badge.textContent = count > 0 ? String(count) : "";
     badge.classList.toggle("hidden", count === 0);
   });
-}
-
-function renderChangelogBanner() {
-  const root = document.getElementById("changelog-banner");
-  if (!root) return;
-  const latestUnseen = changelogEntries.find(entry => isChangelogEntryUnseen(entry));
-  if (!latestUnseen) {
-    root.innerHTML = "";
-    root.classList.add("hidden");
-    return;
-  }
-  root.classList.remove("hidden");
-  root.innerHTML = `
-    <div class="changelog-banner-inner">
-      <span class="changelog-banner-dot" aria-hidden="true"></span>
-      <p class="changelog-banner-text">
-        <span class="changelog-banner-kicker">New update</span>
-        <span class="changelog-banner-headline">${escapeHtml(latestUnseen.headline)}</span>
-        <span class="changelog-banner-date">${formatChangelogDate(latestUnseen.createdAt)}</span>
-      </p>
-      <button type="button" class="changelog-banner-dismiss" data-dismiss-changelog="${escapeHtml(latestUnseen.key)}" aria-label="Dismiss update">✕</button>
-    </div>
-  `;
 }
 
 function renderOverviewUpdates() {
@@ -433,7 +394,6 @@ async function loadChangelog() {
     console.error("Error loading changelog:", err);
   }
   renderChangelogBadges();
-  renderChangelogBanner();
   renderOverviewUpdates();
 }
 
