@@ -1,4 +1,6 @@
 const SESSION_DATA_URL = "/api/sessions";
+const CHANGELOG_URL = "/api/changelog";
+const CHANGELOG_SEEN_KEY = "ggChangelogSeen";
 const SURVEY_SUBMISSION_KEY = "ggSpeakerSurveyLastSubmission";
 const SURVEY_DRAFT_KEY = "ggSpeakerSurveyDraft";
 const SURVEY_SESSION_DRAFTS_KEY = "ggSpeakerSurveySessionDrafts";
@@ -72,6 +74,8 @@ let isResubmittingQuestionnaire = false;
 let ceuDraftGeneratedSessionId = null;
 let selectedShareSession = null;
 let shareGenerationRequestId = 0;
+let changelogEntries = [];
+let changelogSeen = new Set();
 
 document.addEventListener("DOMContentLoaded", () => {
   const modalRoot = document.getElementById("format-comparison-modal-root");
@@ -113,6 +117,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const collapseAllFaqs = event.target.closest?.("[data-faq-collapse-all]");
     if (collapseAllFaqs) {
       document.querySelectorAll("#faqs details").forEach(details => { details.open = false; });
+    }
+    const dismissChangelogBanner = event.target.closest?.("[data-dismiss-changelog]");
+    if (dismissChangelogBanner) {
+      event.preventDefault();
+      markChangelogEntrySeen(dismissChangelogBanner.dataset.dismissChangelog);
+      renderChangelogBanner();
+      renderChangelogBadges();
+      renderOverviewUpdates();
+    }
+    const markAllChangelogRead = event.target.closest?.("[data-changelog-mark-all]");
+    if (markAllChangelogRead) {
+      event.preventDefault();
+      markAllChangelogSeen();
+      renderChangelogBanner();
+      renderChangelogBadges();
+      renderOverviewUpdates();
+    }
+    const gotoSectionLink = event.target.closest?.("[data-goto-section]");
+    if (gotoSectionLink) {
+      event.preventDefault();
+      const sectionId = gotoSectionLink.dataset.gotoSection;
+      const targetTab = TAB_CONFIG.find(tab => tab.enabled && !tab.external && tab.sectionId === sectionId);
+      if (targetTab) activateTab(sectionId);
     }
     const modeButton = event.target.closest?.("[data-format-mode]");
     if (modeButton) {
@@ -165,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindClickTracking();
   bindIframeHeight();
   loadSessions();
+  loadChangelog();
 });
 
 function renderTabs() {
@@ -187,11 +215,10 @@ function renderTabs() {
       "text-sm"
     ].join(" ");
 
-    if (tab.mobileLabel) {
-      button.innerHTML = `<span class="desktop-label">${tab.label}</span><span class="mobile-label">${tab.mobileLabel}</span>`;
-    } else {
-      button.textContent = tab.label;
-    }
+    const labelHtml = tab.mobileLabel
+      ? `<span class="desktop-label">${tab.label}</span><span class="mobile-label">${tab.mobileLabel}</span>`
+      : `<span>${escapeHtml(tab.label)}</span>`;
+    button.innerHTML = `${labelHtml}<span class="changelog-badge hidden" data-changelog-badge aria-hidden="true"></span>`;
 
     if (tab.external) {
       button.addEventListener("click", () => window.open(tab.url, "_blank", "noopener,noreferrer"));
@@ -233,6 +260,179 @@ function activateTab(sectionId) {
   if (sectionId !== "survey") {
     clearSurveyStatusMessage();
   }
+
+  markSectionChangelogSeen(sectionId);
+  if (changelogEntries.length) {
+    renderChangelogBadges();
+    renderChangelogBanner();
+    renderOverviewUpdates();
+  }
+}
+
+// ── Recent Updates (changelog) ────────────────────────────────────────────────
+// Backed by the /api/changelog endpoint (Neon changelog table, seeded via
+// scripts/seed-changelog.js). Speakers see a "New update" banner, numbered
+// badges on tabs with unseen changes, and a Recent Updates timeline on the
+// Overview tab. Read state is tracked per browser in localStorage.
+const CHANGELOG_SECTION_LABELS = {
+  overview: "Overview",
+  faqs: "FAQs",
+  "session-lookup": "Session Lookup",
+  share: "Share your participation",
+  "attendee-hub": "Attendee Hub",
+  survey: "Speaker Questionnaire",
+};
+
+function getChangelogSeen() {
+  try {
+    const raw = localStorage.getItem(CHANGELOG_SEEN_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch (_) {
+    return new Set();
+  }
+}
+
+function saveChangelogSeen() {
+  try {
+    localStorage.setItem(CHANGELOG_SEEN_KEY, JSON.stringify([...changelogSeen]));
+  } catch (_) {}
+}
+
+function isChangelogEntryUnseen(entry) {
+  return !!entry && !changelogSeen.has(entry.key);
+}
+
+function markChangelogEntrySeen(key) {
+  if (!key || changelogSeen.has(key)) return;
+  changelogSeen.add(key);
+  saveChangelogSeen();
+}
+
+function markSectionChangelogSeen(sectionId) {
+  let changed = false;
+  changelogEntries.forEach(entry => {
+    if (entry.section === sectionId && !changelogSeen.has(entry.key)) {
+      changelogSeen.add(entry.key);
+      changed = true;
+    }
+  });
+  if (changed) saveChangelogSeen();
+}
+
+function markAllChangelogSeen() {
+  changelogEntries.forEach(entry => changelogSeen.add(entry.key));
+  saveChangelogSeen();
+}
+
+function unseenChangelogCount(sectionId) {
+  return changelogEntries.filter(entry => entry.section === sectionId && isChangelogEntryUnseen(entry)).length;
+}
+
+function formatChangelogDate(iso) {
+  if (!iso) return "";
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(new Date(iso));
+  } catch (_) {
+    return String(iso).slice(0, 10);
+  }
+}
+
+function changelogTabExists(sectionId) {
+  return TAB_CONFIG.some(tab => tab.enabled && !tab.external && tab.sectionId === sectionId);
+}
+
+function renderChangelogBadges() {
+  TAB_CONFIG.filter(tab => tab.enabled && !tab.external).forEach(tab => {
+    const button = document.getElementById(tab.id);
+    const badge = button?.querySelector("[data-changelog-badge]");
+    if (!badge) return;
+    const count = unseenChangelogCount(tab.sectionId);
+    badge.textContent = count > 0 ? String(count) : "";
+    badge.classList.toggle("hidden", count === 0);
+  });
+}
+
+function renderChangelogBanner() {
+  const root = document.getElementById("changelog-banner");
+  if (!root) return;
+  const latestUnseen = changelogEntries.find(entry => isChangelogEntryUnseen(entry));
+  if (!latestUnseen) {
+    root.innerHTML = "";
+    root.classList.add("hidden");
+    return;
+  }
+  root.classList.remove("hidden");
+  root.innerHTML = `
+    <div class="changelog-banner-inner">
+      <span class="changelog-banner-dot" aria-hidden="true"></span>
+      <p class="changelog-banner-text">
+        <span class="changelog-banner-kicker">New update</span>
+        <span class="changelog-banner-headline">${escapeHtml(latestUnseen.headline)}</span>
+        <span class="changelog-banner-date">${formatChangelogDate(latestUnseen.createdAt)}</span>
+      </p>
+      <button type="button" class="changelog-banner-dismiss" data-dismiss-changelog="${escapeHtml(latestUnseen.key)}" aria-label="Dismiss update">✕</button>
+    </div>
+  `;
+}
+
+function renderOverviewUpdates() {
+  const root = document.getElementById("overview-updates");
+  if (!root) return;
+  if (!changelogEntries.length) {
+    root.innerHTML = "";
+    return;
+  }
+
+  const show = changelogEntries.slice(0, 5);
+  const hasUnseen = changelogEntries.some(entry => isChangelogEntryUnseen(entry));
+
+  root.innerHTML = `
+    <div class="changelog-card">
+      <div class="changelog-card-header">
+        <div class="changelog-card-title">
+          <span class="changelog-card-icon" aria-hidden="true">📋</span>
+          <h3 class="text-xl font-bold text-[#162A53]">Recent updates</h3>
+        </div>
+        ${hasUnseen ? `<button type="button" class="changelog-mark-all" data-changelog-mark-all>Mark all as read</button>` : ""}
+      </div>
+      <ul class="changelog-list">
+        ${show.map(entry => `
+          <li class="changelog-entry${isChangelogEntryUnseen(entry) ? " changelog-entry-unread" : ""}">
+            <span class="changelog-entry-dot" aria-hidden="true"></span>
+            <div class="changelog-entry-body">
+              <p class="changelog-entry-headline">${escapeHtml(entry.headline)}</p>
+              ${entry.details ? `<p class="changelog-entry-details">${escapeHtml(entry.details)}</p>` : ""}
+              <p class="changelog-entry-meta">
+                ${formatChangelogDate(entry.createdAt)} · ${CHANGELOG_SECTION_LABELS[entry.section] || entry.section}
+                ${isChangelogEntryUnseen(entry) ? `<span class="changelog-new-pill">New</span>` : ""}
+              </p>
+            </div>
+            ${changelogTabExists(entry.section) ? `<a href="#" class="changelog-goto" data-goto-section="${escapeHtml(entry.section)}">View →</a>` : ""}
+          </li>
+        `).join("")}
+      </ul>
+    </div>
+  `;
+}
+
+async function loadChangelog() {
+  changelogSeen = getChangelogSeen();
+  try {
+    const res = await fetch(CHANGELOG_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch changelog");
+    const data = await res.json();
+    changelogEntries = data.entries || [];
+  } catch (err) {
+    console.error("Error loading changelog:", err);
+  }
+  renderChangelogBadges();
+  renderChangelogBanner();
+  renderOverviewUpdates();
 }
 
 function bindOverviewSurveyCta() {
