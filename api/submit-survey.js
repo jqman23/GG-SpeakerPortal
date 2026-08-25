@@ -666,6 +666,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  return res.status(403).json({
+    error: 'The Speaker Questionnaire is now closed. Submissions are no longer being accepted. If you have questions or need to request a change, please contact the Global Gathering Team at globalgathering@cuanschutz.edu.'
+  });
+
   const {
     firstName,
     lastName,

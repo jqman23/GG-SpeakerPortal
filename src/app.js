@@ -31,7 +31,7 @@ const TAB_CONFIG = [
     label: "Speaker Questionnaire",
     mobileLabel: "Questionnaire",
     sectionId: "survey",
-    enabled: true,
+    enabled: false,
     featured: true,
     trackingButton: "SpeakerPortal_SpeakerQuestionnaireTab"
   },
@@ -446,13 +446,15 @@ function updateOverviewSurveyCta() {
 
   if (icon) icon.classList.remove("hidden");
   if (icon) icon.classList.add("flex");
-  heading.textContent = "Speaker Questionnaire received";
+  heading.textContent = "Speaker Questionnaire — submissions are closed";
   const sessionTitle = remembered.sessionTitle || "your session";
-  copy.innerHTML = `Thank you. We have a response on file for <em>${escapeHtml(sessionTitle)}</em>. You have until August 12, 2026 (extended deadline) to review or submit changes. If you are presenting on another session, you may submit a new response.`;
-  button.textContent = "Review or update your Speaker Questionnaire";
+  copy.innerHTML = `Thank you. We have a response on file for <em>${escapeHtml(sessionTitle)}</em>. The Speaker Questionnaire deadline has passed and submissions are now closed. If you have questions or need to make a change, please contact us at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.`;
+  button.textContent = "Questionnaire closed";
+  button.disabled = true;
+  button.classList.add("opacity-50", "cursor-not-allowed");
 
   const newButton = document.getElementById("overview-survey-new");
-  if (newButton) newButton.classList.remove("hidden");
+  if (newButton) newButton.classList.add("hidden");
 }
 
 function splitSpeakerName(fullName) {
@@ -1005,6 +1007,8 @@ function closeFormatComparisonModal() {
 }
 
 async function renderSurveyForSession(session, options = {}) {
+  const form = document.getElementById("survey-form");
+  if (!form) return;
   selectedSurveySession = session;
   latestSurveyResponse = null;
   isResubmittingQuestionnaire = false;
@@ -1141,8 +1145,8 @@ async function renderSurveyForSession(session, options = {}) {
     const box = document.getElementById("survey-existing-response");
     box.classList.remove("hidden");
     box.innerHTML = `
-      <p class="text-[#162A53] font-semibold mb-2">Latest response loaded. Review, edit, and submit again if needed. A new submission will be saved.</p>
-      <p class="text-gray-800">You have until August 12, 2026 (extended deadline) to make changes.</p>
+      <p class="text-[#162A53] font-semibold mb-2">Latest response loaded for reference.</p>
+      <p class="text-gray-800">The Speaker Questionnaire deadline has passed and submissions are now closed. If you need to make a change, please contact us at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
     `;
   }
 }
@@ -1270,8 +1274,8 @@ async function checkExistingSurveyResponse(session) {
     box.innerHTML = `
       <p class="text-[#162A53] font-semibold mb-2">A questionnaire response already exists for this session.</p>
       <p class="text-gray-800 mb-3">Latest submitted by: ${escapeHtml(data.latest.speakerName || "another presenter")}. Total submissions: ${escapeHtml(String(data.count))}.${submittedAt ? ` Latest submission: ${escapeHtml(submittedAt)}.` : ""}</p>
-      <p class="text-gray-800 mb-3">Would you like to view and update that submission? If you resubmit, we will record your changes. You can make updates to this form until August 12, 2026 (extended deadline).</p>
-      <button id="load-existing-survey-response" type="button" class="px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">Load latest response</button>
+      <p class="text-gray-800 mb-3">The Speaker Questionnaire deadline has passed and submissions are now closed. If you need to make a change, please contact us at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
+      <button id="load-existing-survey-response" type="button" class="px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">View latest response</button>
     `;
     box.classList.remove("hidden");
     document.getElementById("load-existing-survey-response").addEventListener("click", () => {
@@ -1946,6 +1950,8 @@ function bindClickTracking() {
 }
 
 function bindSurvey() {
+  const form = document.getElementById("survey-form");
+  if (!form) return;
   const form = document.getElementById("survey-form");
   if (!form) return;
 
