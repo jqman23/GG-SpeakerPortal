@@ -14,29 +14,20 @@ import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL);
 
-const CHANGELOG_ENTRIES = [
-  {
-    key: "test-2026-09-04-attendee-hub",
-    headline: "Attendee Hub access instructions are now live",
-    section: "attendee-hub",
-    details: "Step-by-step guidance for logging in and hosting your session in Attendee Hub has been added to the Attendee Hub tab.",
-    createdAt: "2026-09-04T09:00:00Z",
-  },
-  {
-    key: "test-2026-08-24-faqs",
-    headline: "New FAQs about group registration and CEU deadlines",
-    section: "faqs",
-    details: "Three frequently asked questions were added to the FAQ tab.",
-    createdAt: "2026-08-24T15:00:00Z",
-  },
-  {
-    key: "test-2026-08-20-lookup",
-    headline: "Session lookup now shows recording format details",
-    section: "session-lookup",
-    details: "The Session Information Lookup now displays the video format on file for each session.",
-    createdAt: "2026-08-20T12:00:00Z",
-  },
-];
+// Example entry shape — add items to this array to publish an update. Re-running
+// this script upserts listed entries and deletes anything no longer listed.
+//
+// const CHANGELOG_ENTRIES = [
+//   {
+//     key: "2026-09-04-attendee-hub",
+//     headline: "Attendee Hub access instructions are now live",
+//     section: "attendee-hub",
+//     details: "Step-by-step guidance for logging in and hosting your session.",
+//     createdAt: "2026-09-04T09:00:00Z",
+//   },
+// ];
+
+const CHANGELOG_ENTRIES = [];
 
 async function main() {
   await sql`

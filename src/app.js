@@ -383,13 +383,15 @@ function renderChangelogBanner() {
 function renderOverviewUpdates() {
   const root = document.getElementById("overview-updates");
   if (!root) return;
-  if (!changelogEntries.length) {
+
+  // Hide the whole card unless there is at least one unread update.
+  const hasUnseen = changelogEntries.some(entry => isChangelogEntryUnseen(entry));
+  if (!hasUnseen) {
     root.innerHTML = "";
     return;
   }
 
   const show = changelogEntries.slice(0, 5);
-  const hasUnseen = changelogEntries.some(entry => isChangelogEntryUnseen(entry));
 
   root.innerHTML = `
     <div class="changelog-card">
