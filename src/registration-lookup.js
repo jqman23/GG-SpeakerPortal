@@ -12,6 +12,15 @@ export function bindRegistrationLookup() {
     p.append(strong, String(value));
     result.append(p);
   }
+  function formatRegistrationDate(value) {
+    if (!value) return 'Not available';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat(undefined, {
+      month: 'long', day: 'numeric', year: 'numeric',
+      hour: 'numeric', minute: '2-digit', timeZone: 'UTC', timeZoneName: 'short'
+    }).format(date);
+  }
   form.addEventListener('submit', async event => {
     event.preventDefault();
     const request = ++revision;
@@ -33,7 +42,7 @@ export function bindRegistrationLookup() {
       if (data.found) {
         line('Name', data.registration.name || 'Not available');
         line('Email', data.registration.email);
-        line('Registered (GMT)', data.registration.registeredAt || 'Not available');
+        line('Registered', formatRegistrationDate(data.registration.registeredAt));
         line('CEUs included', data.registration.ceusIncluded ? 'Yes' : 'No');
       } else {
         const p = document.createElement('p');
