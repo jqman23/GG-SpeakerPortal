@@ -869,7 +869,7 @@ function getRecordingPreferenceOptions(recordingStatus) {
 function buildFormatComparisonRows() {
   return [
     { label: "Breakout rooms", zoom: "Supported", embedded: "Not supported" },
-    { label: "Polls", zoom: "External tool", zoomNote: "Zoom would rely on an external tool such as Mentimeter.", embedded: "Supported", embeddedNote: "Polling is a native Embedded feature." },
+    { label: "Polls", zoom: "Supported", zoomNote: "Create and manage polls in Zoom. See the Speaker Guide for instructions.", embedded: "Supported", embeddedNote: "Polling is a native Embedded feature." },
     { label: "Chat", zoom: "Supported", embedded: "Supported" },
     { label: "Q&A", zoom: "Via chat", zoomNote: "The Q&A feature is not available for Zoom; however, Zoom chat can be used for soliciting questions instead.", embedded: "Supported", embeddedNote: "Q&A is a native Embedded feature." },
     { label: "Screen sharing", zoom: "Supported", zoomNote: "Zoom has more advanced screen sharing options.", embedded: "Supported", embeddedNote: "Screen sharing features are less robust for Embedded." },

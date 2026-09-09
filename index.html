@@ -48,10 +48,14 @@
             <button type="button" data-faq-collapse-all class="hover:text-[var(--survey-primary)] hover:underline">Collapse all</button>
           </div>
         </div>
-        <div class="space-y-4 text-gray-800">
+        <p class="text-sm text-gray-600 mb-6">Browse by topic, or use the controls above to open or close every answer.</p>
+        <div class="space-y-8 text-gray-800">
+          <section class="faq-category faq-category--getting-started" aria-labelledby="faq-getting-started">
+            <h3 id="faq-getting-started" class="faq-category-title">Getting Started</h3>
+            <div class="faq-list">
           <details class="border border-gray-200 rounded-md p-3">
-            <summary class="font-semibold cursor-pointer">Do presenters need to register for the event?</summary>
-            <p class="mt-2">Yes. Presenters are expected to <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer" class="underline">register</a> for Days 2 and 3 of the 2026 Global Gathering if they have not already done so. Registration ensures presenters can access the virtual event space and take part in the full learning experience.</p>
+            <summary class="font-semibold cursor-pointer">What is this <em>Speaker Resource &amp; Questionnaire Page</em>?</summary>
+            <p class="mt-2">This page is your preparation hub for the 2026 Global Gathering. It includes the Speaker Questionnaire (now closed), a session lookup tool, FAQs, Attendee Hub guidance, and other presenter resources.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How is the 2026 Global Gathering structured?</summary>
@@ -61,13 +65,8 @@
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">As a speaker, what do I need to do to prepare for the event?</summary>
             <p class="mt-2">The <a href="#" data-goto-survey class="underline">Speaker Questionnaire</a> is now closed. If you have questions or need to request a change, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
-            <p class="mt-2">You should also review your session information and monitor your email for additional instructions on how to access Attendee Hub, the online event center, as the event gets closer. If your session involves multiple presenters, please coordinate among your co-presenters to ensure one person completes the Questionnaire for your session.</p>
-            <p class="mt-2">If you have not already registered, please also <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer" class="underline">register for the 2026 Global Gathering</a> before the early-bird deadline to receive the best registration rate.</p>
-          </details>
-          <details class="border border-gray-200 rounded-md p-3">
-            <summary class="font-semibold cursor-pointer">What is this <em>Speaker Resource &amp; Questionnaire Page</em>?</summary>
-            <p class="mt-2">This page is your preparation hub for the 2026 Global Gathering. It includes the Speaker Questionnaire, a session lookup tool, FAQs, Attendee Hub updates as the event nears, and presenter support information.</p>
-            <p class="mt-2">Use this page to access the Speaker Questionnaire (now closed) and other resources.</p>
+            <p class="mt-2">Review your session information, coordinate with your co-presenters, and read the Attendee Hub instructions on this page before your session.</p>
+            <p class="mt-2">If you have not already registered, please <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer" class="underline">register for the 2026 Global Gathering</a>.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">What is the Speaker Questionnaire?</summary>
@@ -107,22 +106,31 @@
               </div>
             </div>
             <p class="mt-3">The <em>Speaker Portal</em> is used to review or update speaker and session profile information, such as speaker details, bios, and session descriptions.</p>
-            <p class="mt-2">This Speaker Resource &amp; Questionnaire Page populates the required Speaker Questionnaire, along with FAQs, guidance on the online event center platform, Attendee Hub, and other support resources.</p>
-          </details>
-          <details class="border border-gray-200 rounded-md p-3">
-            <summary class="font-semibold cursor-pointer">Do I need to complete the Speaker Questionnaire if I already updated my information via the <em>Speaker Portal</em>?</summary>
-            <p class="mt-2">Yes. The <a href="https://cvent.me/gbMzm9" target="_blank" rel="noopener noreferrer" class="underline"><em>Speaker Portal</em></a> and Speaker Questionnaire serve different purposes.</p>
-            <p class="mt-2">Even if you updated your speaker or session profile in the <em>Speaker Portal</em>, the <a href="#" data-goto-survey class="underline">Speaker Questionnaire</a> is now closed. If you have questions or need to request a change, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
+            <p class="mt-2">The <em>Speaker Resource &amp; Questionnaire Page</em> provides FAQs, a session lookup tool, Attendee Hub guidance, and other support resources.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How do I complete the Speaker Questionnaire?</summary>
             <p class="mt-2">The <a href="#" data-goto-survey class="underline">Speaker Questionnaire</a> is now closed. If you have questions about your session, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
             <p class="mt-2">If you are presenting more than one session, only one speaker needed to complete the Questionnaire for each session.</p>
           </details>
+            </div>
+          </section>
+
+          <section class="faq-category faq-category--session-details" aria-labelledby="faq-session-details">
+            <h3 id="faq-session-details" class="faq-category-title">Profiles &amp; Session Details</h3>
+            <div class="faq-list">
           <details class="border border-gray-200 rounded-md p-3">
-            <summary class="font-semibold cursor-pointer">How do I check my session information?</summary>
-            <p class="mt-2">Use the <a href="#" data-goto-lookup class="underline">Session Information Lookup tab</a> to search by speaker name or session title. This will show the session information currently on file, including recording status, CEU eligibility, and video format.</p>
-            <p class="mt-2">If something does not look right or you have any questions about your session, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
+            <summary class="font-semibold cursor-pointer">How do I know if my session is in the Embedded or regular Zoom format?</summary>
+            <p class="mt-2">Check your Attendee Hub video format using the <a href="#" data-goto-lookup class="underline">Session Information Lookup tool</a> on this Speaker Resource Page.</p>
+          </details>
+          <details class="border border-gray-200 rounded-md p-3">
+            <summary class="font-semibold cursor-pointer">How do I know if my session is CEU Eligible?</summary>
+            <p class="mt-2">Check your session using the <a href="#" data-goto-lookup class="underline">Session Information Lookup tool</a> on this Speaker Resource Page. You can also locate your session in Attendee Hub and look for the label “CEU Eligible” or “Not CEU Eligible.”</p>
+          </details>
+          <details class="border border-gray-200 rounded-md p-3">
+            <summary class="font-semibold cursor-pointer">How do I edit my speaker or session profile, or report information that does not look right?</summary>
+            <p class="mt-2">You can update your speaker profile—such as your name, company, title, bio, and social media links—and session details—such as the title and description—at any time in the <a href="https://cvent.me/gbMzm9" target="_blank" rel="noopener noreferrer" class="underline">Speaker Portal</a>. Once logged in, select <strong>My Profile</strong> or <strong>My Sessions</strong> at the top of the page.</p>
+            <p class="mt-2">If a speaker needs to be added to or removed from your session, contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">My session type or duration looks different from what I originally submitted. Is that correct?</summary>
@@ -138,23 +146,61 @@
             <summary class="font-semibold cursor-pointer">Will my session be recorded?</summary>
             <p class="mt-2">To see if your session is set to be recorded, please use the <a href="#" data-goto-lookup class="underline">Session Information Lookup tab</a>. If you have questions about your recording status, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
           </details>
+            </div>
+          </section>
+
+          <section class="faq-category faq-category--format" aria-labelledby="faq-format-features">
+            <h3 id="faq-format-features" class="faq-category-title">Session Format &amp; Features</h3>
+            <div class="faq-list">
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">What is the difference between a Zoom and Embedded session?</summary>
             <p class="mt-2">Zoom sessions use a standard Zoom-based setup connected to the virtual event experience. Embedded sessions are built more directly into Attendee Hub, the online event platform. You can view the differences by <a href="#" data-open-comparison class="underline">clicking here</a>.</p>
+          </details>
+          <details class="border border-gray-200 rounded-md p-3">
+            <summary class="font-semibold cursor-pointer">Can I use polls during my session?</summary>
+            <p class="mt-2">Yes. Whether your session is Embedded or on Zoom, you will be able to create and launch polls. Please review the <a href="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/83356837a8f54981a339ffdf4f10f95f.pdf" target="_blank" rel="noopener noreferrer" class="underline">Speaker Guide (PDF)</a> for instructions for your format.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">What are Skill Building Institutes?</summary>
             <p class="mt-2"><a href="https://cvent.me/Xmd3Oo" target="_blank" rel="noopener noreferrer" class="underline">Skill Building Institutes</a> are extended, hands-on learning sessions offered on Day 1 of the Global Gathering. They are designed for deeper practice, applied tools, and skill development.</p>
             <p class="mt-2">Skill Building Institute presenters will receive additional information from the Global Gathering Team as the event nears.</p>
           </details>
+            </div>
+          </section>
+
+          <section class="faq-category faq-category--attendee-hub" aria-labelledby="faq-attendee-hub">
+            <h3 id="faq-attendee-hub" class="faq-category-title">Attendee Hub &amp; Hosting</h3>
+            <div class="faq-list">
           <details class="border border-gray-200 rounded-md p-3">
-            <summary class="font-semibold cursor-pointer">What is Attendee Hub, and when will I receive access to this platform?</summary>
-            <p class="mt-2">Attendee Hub is the online event center for the Global Gathering. Presenters will receive Attendee Hub access at the beginning of September by email. Attendee Hub is where presenters will log in to begin, host, and access their virtual session(s).</p>
-            <p class="mt-2">Additional Attendee Hub resources will be added to this page as the event nears. Presenters will also be notified by email.</p>
+            <summary class="font-semibold cursor-pointer">What is Attendee Hub, and how do I log in?</summary>
+            <p class="mt-2">Attendee Hub is the online event center where presenters begin, host, and access their virtual sessions. If you are viewing this page within Attendee Hub, you are already logged in. Otherwise, <a href="https://cvent.me/xx5n1g" target="_blank" rel="noopener noreferrer" class="underline">open Attendee Hub</a>, enter your name and registration email, and enter the verification code sent to your email or phone.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
-            <summary class="font-semibold cursor-pointer">How do I host or start my session?</summary>
-            <p class="mt-2">Once Attendee Hub has launched, the Global Gathering Team will share instructions by email to presenters for accessing and starting their sessions.</p>
+            <summary class="font-semibold cursor-pointer">How do I start my session?</summary>
+            <p class="mt-2">Hover over <strong>Sessions and Speakers</strong> and select <strong>All Sessions</strong>. Enter your session name in the search bar, or use the filters in the left-hand column to find it. Select your session name, then select <strong>Join as host</strong>—do not select <strong>Join as participant</strong>.</p>
+            <p class="mt-2">You can join as a host beginning September 28, 2026. The <strong>Join as host</strong> button will not appear before then.</p>
+          </details>
+          <details class="border border-gray-200 rounded-md p-3">
+            <summary class="font-semibold cursor-pointer">I cannot find my session. What should I do?</summary>
+            <p class="mt-2">Try searching with a shorter keyword from the title. For example, for <em>Centering Culture for Transformative Systems Change</em>, search for “Centering Culture.” You can also use the filters in the left-hand column, including time, date, and speaker.</p>
+          </details>
+          <details class="border border-gray-200 rounded-md p-3">
+            <summary class="font-semibold cursor-pointer">Why don’t I see a “Join as host” button?</summary>
+            <p class="mt-2">The button will not appear before September 28, 2026. If it is September 28 or later, the most likely reason is that you are not listed as a Host for that session. Please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a> so they can investigate.</p>
+          </details>
+            </div>
+          </section>
+
+          <section class="faq-category faq-category--registration" aria-labelledby="faq-registration-support">
+            <h3 id="faq-registration-support" class="faq-category-title">Registration &amp; Support</h3>
+            <div class="faq-list">
+          <details class="border border-gray-200 rounded-md p-3">
+            <summary class="font-semibold cursor-pointer">Do presenters need to register for the event?</summary>
+            <p class="mt-2">Yes. Presenters are expected to <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer" class="underline">register</a> for Days 2 and 3 of the 2026 Global Gathering if they have not already done so. Registration ensures presenters can access the virtual event space and take part in the full learning experience.</p>
+          </details>
+          <details class="border border-gray-200 rounded-md p-3">
+            <summary class="font-semibold cursor-pointer">I am not sure what email is associated with my registration. How do I find that out?</summary>
+            <p class="mt-2">Look for your registration confirmation email with the subject line <strong>Registration Confirmed | 2026 Global Gathering for the Future of Child Welfare</strong>. You can also use the <a href="#" data-goto-lookup class="underline">Session Information Lookup tool</a> to determine whether you are registered with the email associated with your speaker profile.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">Can my organization register as a group?</summary>
@@ -173,6 +219,8 @@
             <summary class="font-semibold cursor-pointer">Who do I contact for support?</summary>
             <p class="mt-2">Email the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>. Please include your name, session title, and a short description of what you need support with so we can navigate you to the right resource.</p>
           </details>
+            </div>
+          </section>
         </div>
       </section>
 
@@ -187,14 +235,76 @@
       <div id="format-comparison-modal-root"></div>
 
       <section id="attendee-hub" class="content-section bg-white p-6 rounded-lg shadow">
-        <h2 class="text-2xl font-bold text-[#162A53] mb-4">Attendee Hub</h2>
-        <div class="space-y-4 text-gray-800">
-          <p>Attendee Hub is the online virtual platform for the <em>2026 Global Gathering for the Future of Child Welfare</em>. Presenters and attendees will log in to Attendee Hub to access the entire event, including sessions, event materials, and engagement features.</p>
-          <p>Instructions for accessing and hosting sessions in Attendee Hub will be populated here as the event nears and also emailed to presenters.</p>
-          <div class="border-l-4 border-gray-300 bg-gray-50 p-4 rounded-r-lg">
-            <p class="font-semibold text-[#162A53]">Please check back on September 4, 2026 for Attendee Hub resources.</p>
+        <div class="hub-hero">
+          <p class="hub-eyebrow">Your presenter field guide</p>
+          <h2>Feel ready for your session.</h2>
+          <p>Attendee Hub brings the Global Gathering together. Here’s how to sign in, host confidently, and help attendees get the most from your session.</p>
+          <div class="hub-actions">
+            <a class="hub-button hub-button--primary" href="https://cvent.me/xx5n1g" target="_blank" rel="noopener noreferrer">Open Attendee Hub <span aria-hidden="true">↗</span></a>
+            <a class="hub-button hub-button--secondary" href="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/83356837a8f54981a339ffdf4f10f95f.pdf" target="_blank" rel="noopener noreferrer">Read the full Speaker Guide (PDF) <span aria-hidden="true">↗</span></a>
           </div>
         </div>
+        <div class="hub-facts" aria-label="Before you begin">
+          <div><strong>Use Chrome or Edge</strong><span>The browsers fully compatible with Attendee Hub.</span></div>
+          <div><strong>Host access: September 28</strong><span>“Join as host” appears beginning September 28, 2026.</span></div>
+          <div><strong>Attendees enter 5 minutes early</strong><span>Allow time to prepare before they arrive.</span></div>
+        </div>
+        <nav class="hub-jump-links" aria-label="Attendee Hub topics">
+          <a href="#hub-sign-in">1. Sign in</a><a href="#hub-host">2. Find &amp; host</a><a href="#hub-formats">3. Run your session</a><a href="#hub-wrap-up">4. Wrap up</a>
+        </nav>
+        <section id="hub-sign-in" class="hub-section" aria-labelledby="hub-sign-in-title">
+          <p class="hub-eyebrow">01 / Get connected</p>
+          <h3 id="hub-sign-in-title">Sign in to Attendee Hub</h3>
+          <ol class="hub-steps">
+            <li><span>Open <a href="https://cvent.me/xx5n1g" target="_blank" rel="noopener noreferrer">Attendee Hub</a> in Google Chrome or Microsoft Edge.</span></li>
+            <li><span>Enter your name and the email address associated with your registration.</span></li>
+            <li><span>Enter the verification code sent to your email and/or phone. Text messages are available if you provided a mobile number when registering.</span></li>
+          </ol>
+          <details class="hub-help"><summary>Having trouble signing in?</summary><p>Check your spam folder for the verification code. If it is missing, you may be using a different email address or may not yet be registered. After <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer">registering</a>, wait 15 minutes before trying again.</p><p>To confirm your email, look for <strong>Registration Confirmed | 2026 Global Gathering for the Future of Child Welfare</strong> in your inbox, or check your registration using the <a href="#" data-goto-lookup>Session Information Lookup tool</a>. Contact <a href="mailto:globalgathering@cuanschutz.edu">globalgathering@cuanschutz.edu</a> if you still need help.</p></details>
+        </section>
+        <section id="hub-host" class="hub-section" aria-labelledby="hub-host-title">
+          <p class="hub-eyebrow">02 / Take your place</p>
+          <h3 id="hub-host-title">Find your session &amp; join as host</h3>
+          <ol class="hub-steps">
+            <li><span>In Attendee Hub, hover over <strong>Sessions and Speakers</strong>, then select <strong>All Sessions</strong>.</span></li>
+            <li><span>Search for your session title or filter by time, date, or speaker. Open your session’s page.</span></li>
+            <li><span>Select <strong>Join as host</strong>, rather than <strong>Join as participant</strong>. Host access begins September 28, 2026; after that, you can enter early to prepare.</span></li>
+          </ol>
+          <div class="hub-note"><strong>Give yourself setup time.</strong> Attendees can enter five minutes before the scheduled start. Check your microphone, camera, and screen sharing before they arrive.</div>
+          <details class="hub-help"><summary>Can’t find your session or host button?</summary><p>Search a shorter phrase from the title—for example, “Centering Culture.” If the host button is missing on or after September 28, you may not be listed as a Host. Email <a href="mailto:globalgathering@cuanschutz.edu">the Global Gathering Team</a> with your name and session title.</p><p>Edit your session title or description in the <a href="https://cvent.me/gbMzm9" target="_blank" rel="noopener noreferrer">Speaker Portal</a>. Ask the team to add or remove speakers.</p></details>
+        </section>
+        <section id="hub-formats" class="hub-section" aria-labelledby="hub-formats-title">
+          <p class="hub-eyebrow">03 / Lead the conversation</p>
+          <h3 id="hub-formats-title">Choose the instructions for your format</h3>
+          <p>Not sure which format you have? Check the <a href="#" data-goto-lookup>Session Information Lookup tool</a> or <a href="#" data-open-comparison>compare the formats</a>.</p>
+          <div class="hub-format-grid">
+            <article class="hub-format hub-format--embedded">
+              <span class="hub-format-label">Inside Attendee Hub</span><h4>Embedded sessions</h4>
+              <p>Your session runs entirely in Attendee Hub. Use the controls below the video for your camera, microphone, and screen sharing.</p>
+              <details><summary>Manage participation &amp; recording</summary><p>Attendees enter as <strong>Observers</strong>, with audio and video off. To approve someone who requests to participate, open <strong>Attendees → Requests to participate</strong> in the right engagement panel. Participants can share video, sound, and their screen.</p><p>Check your session’s recording status in Lookup. For sessions being recorded, a moderator, concierge, or speaker can select <strong>Record</strong>.</p></details>
+              <details><summary>Answer live Q&amp;A</summary><p>Open <strong>Q&amp;A</strong> on the right. In <strong>Approved</strong>, select <strong>Write answer</strong>, type your reply, and select <strong>Post response</strong>. Find and edit replies in <strong>Answered</strong>. Speakers and moderators can also answer questions verbally.</p></details>
+              <details><summary>Create &amp; launch polls</summary><p>Open <strong>Polls → Create question</strong>. Choose a question type and enter your question and answer options. Select <strong>Done</strong> or <strong>Add another question</strong>.</p><p>Select <strong>Open question</strong> so attendees can see it and respond. Select <strong>Display</strong> to overlay it on the video, then <strong>Close question</strong> when finished collecting responses.</p><p class="hub-caution"><strong>Before editing:</strong> editing a question deletes any responses already received.</p></details>
+              <details><summary>Keep the chat going</summary><p>Open <strong>Chat</strong> in the right toolbar. Speakers and attendees can exchange messages throughout the session. Your messages are labeled <strong>Facilitator</strong>.</p></details>
+            </article>
+            <article class="hub-format hub-format--zoom">
+              <span class="hub-format-label">Opens in the Zoom app</span><h4>Zoom sessions</h4>
+              <p>Start from Attendee Hub, then continue in the external Zoom meeting. Download the Zoom desktop app before your session.</p>
+              <details><summary>Know your host role &amp; rename yourself</summary><p>The first speaker to join becomes the host. Subsequent speakers and moderators become co-hosts.</p><p>Your name initially appears as <strong>Session Host</strong>. Open <strong>Participants</strong>, hover over your name, and select <strong>More → Rename</strong>.</p></details>
+              <details><summary>Share content &amp; manage participants</summary><p>Use the controls at the bottom of Zoom to share video, sound, and your screen. Use <strong>Security</strong> to manage attendee permissions, including screen and video sharing.</p></details>
+              <details><summary>Use polls, chat &amp; breakout rooms</summary><p>Facilitate chat, create and manage polls, and start breakout rooms as you would in a Zoom meeting. The full Speaker Guide includes links to Zoom’s instructions for these tools and downloading the desktop app.</p></details>
+              <div class="hub-note"><strong>Keep Attendee Hub handy.</strong> The session feedback survey appears on the Attendee Hub session page, not inside Zoom.</div>
+            </article>
+          </div>
+        </section>
+        <section id="hub-wrap-up" class="hub-section" aria-labelledby="hub-wrap-up-title">
+          <p class="hub-eyebrow">04 / Finish well</p>
+          <h3 id="hub-wrap-up-title">Invite feedback, then close your session</h3>
+          <p>Remind attendees to select <strong>Survey</strong> in the right toolbar on their Attendee Hub session page. Attendees who purchased the ability to claim CEUs will see additional knowledge-check questions for CEU-eligible sessions.</p>
+          <div class="hub-script"><span class="hub-format-label">A closing reminder you can read aloud</span><blockquote>Please take a moment to complete the session feedback survey. Open our session page in Attendee Hub and select Survey in the right toolbar. If you are claiming CEUs, complete the three knowledge-check questions at the end of the form.</blockquote></div>
+          <p class="hub-note"><strong>For Zoom sessions:</strong> explicitly direct attendees back to Attendee Hub to complete the survey.</p>
+          <div class="hub-end-grid"><div><strong>Embedded</strong><p>Select <strong>End session</strong> at the bottom right of the video controls.</p></div><div><strong>Zoom</strong><p>Select <strong>End → End Meeting for All</strong> at the bottom right of the Zoom controls.</p></div></div>
+        </section>
+        <div class="hub-support"><div><h3>Need a hand?</h3><p>Send your name, session title, and a brief description of the issue.</p></div><a href="mailto:globalgathering@cuanschutz.edu">Email the Global Gathering Team <span aria-hidden="true">↗</span></a></div>
       </section>
 
       <section id="share" class="content-section bg-white p-6 rounded-lg shadow">

@@ -1,6 +1,6 @@
 const API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const SHARE_MODEL = process.env.GROQ_SHARE_MODEL || "llama-3.1-8b-instant";
-const SHARE_FALLBACK_MODELS = (process.env.GROQ_SHARE_FALLBACK_MODELS || "openai/gpt-oss-20b")
+const SHARE_MODEL = process.env.GROQ_SHARE_MODEL || "openai/gpt-oss-20b";
+const SHARE_FALLBACK_MODELS = (process.env.GROQ_SHARE_FALLBACK_MODELS || "openai/gpt-oss-120b")
   .split(",")
   .map(model => model.trim())
   .filter(Boolean);
@@ -25,6 +25,8 @@ function shouldTryFallback(error) {
   const details = String(error.details || error.message || "").toLowerCase();
   return (
     error.status === 429 ||
+    error.status === 404 ||
+    error.status === 502 ||
     error.status === 500 ||
     error.status === 503 ||
     error.status === 529 ||
@@ -32,13 +34,18 @@ function shouldTryFallback(error) {
     details.includes("token") ||
     details.includes("quota") ||
     details.includes("decommissioned") ||
-    details.includes("not supported")
+    details.includes("not supported") ||
+    details.includes("model_not_found") ||
+    details.includes("model_permission_blocked") ||
+    details.includes("empty completion") ||
+    details.includes("incomplete completion")
   );
 }
 
 async function requestShareMiddle(apiKey, model, messages) {
   const groqRes = await fetch(API_URL, {
     method: "POST",
+    signal: AbortSignal.timeout(20000),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`
@@ -47,7 +54,8 @@ async function requestShareMiddle(apiKey, model, messages) {
       model,
       messages,
       temperature: 0.7,
-      max_tokens: 180
+      max_completion_tokens: 1024,
+      ...(model.startsWith("openai/gpt-oss-") ? { reasoning_effort: "low" } : {})
     })
   });
 
@@ -61,7 +69,12 @@ async function requestShareMiddle(apiKey, model, messages) {
   }
 
   const data = JSON.parse(bodyText);
-  return data.choices?.[0]?.message?.content?.trim() || "";
+  const choice = data.choices?.[0];
+  const middle = choice?.message?.content?.trim();
+  if (!middle || choice.finish_reason === "length") {
+    throw new Error(middle ? "Incomplete completion" : "Empty completion");
+  }
+  return middle;
 }
 
 export default async function handler(req, res) {
@@ -76,7 +89,7 @@ export default async function handler(req, res) {
   }
 
   const { title, description = "", sessionType = "", speakers = [] } = req.body || {};
-  if (!title?.trim()) {
+  if (typeof title !== "string" || !title.trim()) {
     return res.status(400).json({ error: "Session title is required." });
   }
 
