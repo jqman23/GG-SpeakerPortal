@@ -239,6 +239,15 @@ a {
 }
 
 /* Attendee Hub presenter guide */
+.overview-steps { gap: 1.5rem !important; }
+.overview-steps h4 { color: #162a53; font-weight: 700; margin-bottom: .4rem; }
+.overview-steps p { margin-bottom: .5rem; }
+.overview-resources { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem; margin-top: 1.5rem; }
+.overview-resources a { padding: 1rem; border: 1px solid #dce3e9; border-radius: .75rem; color: #162a53 !important; }
+.overview-resources strong, .overview-resources span { display: block; }
+.overview-resources span { margin-top: .5rem; color: #4b5563; font-size: .85rem; line-height: 1.7; }
+.overview-resources a:hover { background: #eef2f8; }
+#overview a:focus-visible { outline: 3px solid #89a84f; outline-offset: 4px; }
 .hub-hero { padding: 2rem; border-radius: 1rem; background: #162a53; color: #fff; }
 .hub-eyebrow { margin: 0 0 .65rem; font-size: .72rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
 .hub-hero .hub-eyebrow { color: #c7ddb3; }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>2026 Global Gathering Speaker Resource &amp; Questionnaire Page</title>
+  <title>2026 Global Gathering Speaker Resources</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./src/styles.css" />
@@ -14,28 +14,29 @@
 
     <main>
       <section id="overview" class="content-section active bg-white p-6 rounded-lg shadow mb-6">
-        <h2 class="text-2xl font-bold text-[#162A53] mb-4">Overview</h2>
-        <p class="text-gray-700">
-          This Speaker Resource &amp; Questionnaire Page populates the Speaker Questionnaire (now closed), along with FAQs, guidance on the online event center platform, Attendee Hub, and other support resources.
-        </p>
-        <div class="survey-cta mt-6 border-l-4 border-gray-400 bg-gray-50 p-5 rounded-r-lg">
-          <div class="flex items-start gap-3">
-            <div id="overview-survey-complete-icon" class="hidden flex-none w-9 h-9 rounded-full bg-gray-400 text-white font-bold items-center justify-center" aria-hidden="true">✓</div>
-            <div>
-              <h3 id="overview-survey-cta-heading" class="text-xl font-bold text-[#162A53] mb-2">Speaker Questionnaire — submissions are closed</h3>
-              <p id="overview-survey-cta-copy" class="text-gray-800 mb-4">The deadline for the Speaker Questionnaire has passed. Submissions are now closed. If you have questions or need to request a change, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
-            </div>
-          </div>
-          <div class="flex flex-wrap gap-3">
-            <button id="overview-survey-cta" type="button" disabled class="px-5 py-3 bg-gray-400 text-white font-semibold rounded-lg cursor-not-allowed opacity-70">
-              Questionnaire closed
-            </button>
-            <button id="overview-survey-new" type="button" class="hidden px-5 py-3 bg-white text-[var(--survey-primary)] font-semibold rounded-lg border-2 border-[var(--survey-primary)] hover:bg-[var(--survey-primary-soft)] transition-colors">
-              Submit a new Questionnaire
-            </button>
+        <div class="hub-hero">
+          <p class="hub-eyebrow">Speaker resources · October 6–8, 2026 · Virtual</p>
+          <h2>Welcome, Global Gathering speakers.</h2>
+          <p>Thank you for sharing your experience, ideas, and commitment to the future of child welfare. We’re here to help you feel prepared and supported for the 2026 Global Gathering.</p>
+          <div class="hub-actions">
+            <a class="hub-button hub-button--primary" href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer">Register for the Global Gathering <span aria-hidden="true">↗</span></a>
+            <a class="hub-button hub-button--secondary" href="#attendee-hub" data-goto-hub>Explore the Attendee Hub guide <span aria-hidden="true">→</span></a>
           </div>
         </div>
-
+        <section class="hub-section" aria-labelledby="overview-ready-title">
+          <p class="hub-eyebrow">Your next steps</p>
+          <h3 id="overview-ready-title">Register, get connected, and feel ready.</h3>
+          <ol class="hub-steps overview-steps">
+            <li><div><h4>Register yourself for the event</h4><p>Each speaker needs to register for the Global Gathering. If you haven’t already, now is a great time. <strong>Registration is required before you can access Attendee Hub.</strong> Use an email address you can easily access for your sign-in code.</p><a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer">Complete your registration ↗</a></div></li>
+            <li><div><h4>After registering, sign in to Attendee Hub</h4><p>Allow <strong>15 minutes</strong> after registering, then open Attendee Hub in <strong>Google Chrome or Microsoft Edge</strong>. Enter your name and registration email, then enter the verification code sent to your email and/or phone.</p><a href="https://cvent.me/xx5n1g" target="_blank" rel="noopener noreferrer">Already registered? Open Attendee Hub ↗</a></div></li>
+            <li><div><h4>Take a little time to explore</h4><p>Get familiar with the platform, find your session, and review the instructions for your Embedded or Zoom format. <strong>Join as host</strong> becomes available September 28, 2026, so you can prepare ahead of your session.</p><a href="#attendee-hub" data-goto-hub>See sign-in and hosting instructions →</a></div></li>
+          </ol>
+        </section>
+        <div class="overview-resources">
+          <a href="#session-lookup" data-goto-lookup><strong>Check your session</strong><span>Look up your format, recording status, and CEU eligibility.</span></a>
+          <a href="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/83356837a8f54981a339ffdf4f10f95f.pdf" target="_blank" rel="noopener noreferrer"><strong>Keep the Speaker Guide handy ↗</strong><span>Step-by-step instructions in one PDF.</span></a>
+        </div>
+        <div class="hub-support"><div><h3>We’re here to help.</h3><p>Questions about registration, access, or your session? Reach out anytime.</p></div><a href="mailto:globalgathering@cuanschutz.edu">Email the Global Gathering Team ↗</a></div>
         <div id="overview-updates"></div>
       </section>
 
@@ -64,9 +65,8 @@
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">As a speaker, what do I need to do to prepare for the event?</summary>
-            <p class="mt-2">The <a href="#" data-goto-survey class="underline">Speaker Questionnaire</a> is now closed. If you have questions or need to request a change, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
-            <p class="mt-2">Review your session information, coordinate with your co-presenters, and read the Attendee Hub instructions on this page before your session.</p>
-            <p class="mt-2">If you have not already registered, please <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer" class="underline">register for the 2026 Global Gathering</a>.</p>
+            <p class="mt-2">First, <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer" class="underline">register yourself for the Global Gathering</a>. Registration is required to access Attendee Hub. Allow 15 minutes after registering before signing in with your registration email and verification code.</p>
+            <p class="mt-2">Then explore Attendee Hub, review your session information, coordinate with your co-presenters, and read the <a href="#attendee-hub" data-goto-hub class="underline">sign-in and hosting instructions</a> before your session.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">What is the Speaker Questionnaire?</summary>
@@ -255,6 +255,7 @@
         <section id="hub-sign-in" class="hub-section" aria-labelledby="hub-sign-in-title">
           <p class="hub-eyebrow">01 / Get connected</p>
           <h3 id="hub-sign-in-title">Sign in to Attendee Hub</h3>
+          <div class="hub-note"><strong>Register first.</strong> Each speaker must <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer">register for the Global Gathering</a> before accessing Attendee Hub. Allow 15 minutes after registration, then follow the steps below.</div>
           <ol class="hub-steps">
             <li><span>Open <a href="https://cvent.me/xx5n1g" target="_blank" rel="noopener noreferrer">Attendee Hub</a> in Google Chrome or Microsoft Edge.</span></li>
             <li><span>Enter your name and the email address associated with your registration.</span></li>

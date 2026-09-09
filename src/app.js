@@ -93,6 +93,12 @@ document.addEventListener("DOMContentLoaded", () => {
       activateTab("survey");
       loadRememberedSurveyResponse();
     }
+    const gotoHubLink = event.target.closest?.("[data-goto-hub]");
+    if (gotoHubLink) {
+      event.preventDefault();
+      activateTab("attendee-hub");
+      document.getElementById("attendee-hub").scrollIntoView({ block: "start" });
+    }
     const gotoLookupLink = event.target.closest?.("[data-goto-lookup]");
     if (gotoLookupLink) {
       event.preventDefault();
