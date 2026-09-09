@@ -239,6 +239,11 @@ a {
 }
 
 /* Attendee Hub presenter guide */
+#overview .hub-hero { padding: 1.25rem 1.5rem; }
+#overview .hub-hero h2 { font-size: clamp(1.25rem, 3vw, 1.6rem); margin-bottom: .5rem; }
+#overview .hub-hero > p { font-size: .88rem; line-height: 1.55; }
+#overview .hub-actions { margin-top: 1rem; }
+#registration-result { overflow-wrap: anywhere; }
 .overview-steps { gap: 1.5rem !important; }
 .overview-steps h4 { color: #162a53; font-weight: 700; margin-bottom: .4rem; }
 .overview-steps p { margin-bottom: .5rem; }

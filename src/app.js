@@ -1,3 +1,4 @@
+import { bindRegistrationLookup } from './registration-lookup.js';
 const SESSION_DATA_URL = "/api/sessions";
 const CHANGELOG_URL = "/api/changelog";
 const CHANGELOG_SEEN_KEY = "ggChangelogSeen";
@@ -39,6 +40,7 @@ const TAB_CONFIG = [
   },
   { id: "faqs-tab", label: "Frequently Asked Questions (FAQs)", mobileLabel: "FAQs", sectionId: "faqs", enabled: true, trackingButton: "SpeakerPortal_FAQsTab" },
   { id: "session-lookup-tab", label: "Session Information Lookup", mobileLabel: "Lookup", sectionId: "session-lookup", enabled: true, trackingButton: "SpeakerPortal_SessionLookupTab" },
+  { id: "registration-lookup-tab", label: "Registration Information Lookup", mobileLabel: "Registration", sectionId: "registration-lookup", enabled: true },
   { id: "share-tab", label: "📣 Share your participation", mobileLabel: "Share", sectionId: "share", enabled: true, trackingButton: "SpeakerPortal_ShareWidgetTab" },
   { id: "attendee-hub-tab", label: "Attendee Hub", mobileLabel: "Hub", sectionId: "attendee-hub", enabled: true, trackingButton: "SpeakerPortal_AttendeeHubTab" },
   {
@@ -78,6 +80,7 @@ let changelogEntries = [];
 let changelogSeen = new Set();
 
 document.addEventListener("DOMContentLoaded", () => {
+  bindRegistrationLookup();
   const modalRoot = document.getElementById("format-comparison-modal-root");
   if (modalRoot) modalRoot.innerHTML = buildFormatComparisonModal();
   document.addEventListener("keydown", event => {
@@ -92,6 +95,12 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       activateTab("survey");
       loadRememberedSurveyResponse();
+    }
+    const gotoRegistrationLink = event.target.closest?.("[data-goto-registration]");
+    if (gotoRegistrationLink) {
+      event.preventDefault();
+      activateTab("registration-lookup");
+      document.getElementById("registration-email").focus();
     }
     const gotoHubLink = event.target.closest?.("[data-goto-hub]");
     if (gotoHubLink) {
