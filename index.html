@@ -14,18 +14,17 @@
 
     <main>
       <section id="portal-search" class="content-section search-panel bg-white p-6 rounded-lg shadow" aria-labelledby="portal-search-heading">
-        <div class="search-eyebrow">YOUR SPEAKER RESOURCES, ONE SEARCH</div>
-        <h2 id="portal-search-heading">What can we help you find?</h2>
-        <p class="search-intro">Find answers, session details, and your next step. Go straight to what you need.</p>
-        <form id="portal-search-form" role="search">
-          <label for="portal-search-input" class="search-label">Search the speaker resources</label>
-          <div class="search-field">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
-            <input id="portal-search-input" type="search" maxlength="200" autocomplete="off" placeholder="Try “join as host” or a speaker’s name" aria-describedby="search-keyboard-help" aria-controls="portal-search-results" />
-            <button type="button" id="portal-search-clear" hidden aria-label="Clear search">Clear</button>
-          </div>
-          <p id="search-keyboard-help" class="search-hint">Search as you type · ↓ to browse results · ⌘ / Ctrl K to search from any tab</p>
-        </form>
+        <div class="search-bar">
+          <h2 id="portal-search-heading">Help me find...</h2>
+          <form id="portal-search-form" role="search">
+            <label for="portal-search-input" class="sr-only">Search the speaker resources</label>
+            <div class="search-field">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+              <input id="portal-search-input" type="search" maxlength="200" autocomplete="off" placeholder="Type a question or speaker name" aria-controls="portal-search-results" />
+              <button type="button" id="portal-search-clear" hidden aria-label="Clear search">Clear</button>
+            </div>
+          </form>
+        </div>
         <div id="search-filters" class="search-filters" role="group" aria-label="Filter search results"></div>
         <p id="search-status" class="search-status" role="status" aria-live="polite" aria-atomic="true"></p>
         <p id="search-session-status" class="search-hint" role="status"></p>
@@ -76,7 +75,7 @@
             <div class="faq-list">
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">What is this <em>Speaker Resource &amp; Questionnaire Page</em>?</summary>
-            <p class="mt-2">This page is your preparation hub for the <em>2026 Global Gathering</em>. It includes the Speaker Questionnaire (now closed), a session lookup tool, FAQs, Attendee Hub guidance, and other presenter resources.</p>
+            <p class="mt-2">This page is your preparation hub for the <em>2026 Global Gathering</em>. It includes a session lookup tool, FAQs, Attendee Hub guidance, and other presenter resources.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How is the <em>2026 Global Gathering</em> structured?</summary>
@@ -85,13 +84,12 @@
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">As a speaker, what do I need to do to prepare for the event?</summary>
-            <p class="mt-2">First, make sure you’re registered for the Global Gathering. Speakers must be registered to access Attendee Hub. If you aren’t registered yet, <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer" class="underline">register here</a>. Allow 15 minutes after registration before signing in with your registration email and verification code.</p>
-            <p class="mt-2">Then explore Attendee Hub, review your session information, coordinate with your co-presenters, and read the <a href="#attendee-hub" data-goto-hub class="underline">sign-in and hosting instructions</a> before your session.</p>
+            <p class="mt-2">First, it is important to register for the Global Gathering. Speakers must be registered to access Attendee Hub. If you aren’t registered yet, <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer" class="underline">register here</a>.</p>
+            <p class="mt-2">Then explore Attendee Hub, review your session information, coordinate with your co-presenters, and read more about <a href="#attendee-hub" data-goto-hub class="underline">hosting your session</a>.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">What is the Speaker Questionnaire?</summary>
-            <p class="mt-2">The <a href="#" data-goto-survey class="underline">Speaker Questionnaire</a> was the required session-specific form that one presenter from each session needed to complete. The form confirmed key details about each presentation.</p>
-            <p class="mt-2">The Questionnaire is now closed. The form was session-specific, so the questions changed depending on the session selected. Only one presenter from each session needed to complete this form.</p>
+            <p class="mt-2">The <a href="#" data-goto-survey class="underline">Speaker Questionnaire</a> was a session-specific form that one presenter from each session needed to complete. The form confirmed key details about each presentation. The Questionnaire is now closed.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">What is the difference between the <em>Speaker Portal</em> and this <em>Speaker Resource &amp; Questionnaire Page</em>?</summary>
@@ -131,7 +129,6 @@
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How do I complete the Speaker Questionnaire?</summary>
             <p class="mt-2">The <a href="#" data-goto-survey class="underline">Speaker Questionnaire</a> is now closed. If you have questions about your session, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
-            <p class="mt-2">If you are presenting more than one session, only one speaker needed to complete the Questionnaire for each session.</p>
           </details>
             </div>
           </section>
@@ -141,11 +138,11 @@
             <div class="faq-list">
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How do I know if my session is in the Embedded or regular Zoom format?</summary>
-            <p class="mt-2">Check your Attendee Hub video format using the <a href="#" data-goto-lookup class="underline">Session Information Lookup tool</a> on this Speaker Resource Page.</p>
+            <p class="mt-2">Check your Attendee Hub video format using the <a href="#" data-goto-lookup class="underline">Session Information Lookup tool</a>.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How do I know if my session is CEU Eligible?</summary>
-            <p class="mt-2">Check your session using the <a href="#" data-goto-lookup class="underline">Session Information Lookup tool</a> on this Speaker Resource Page. You can also locate your session in Attendee Hub and look for the label “CEU Eligible” or “Not CEU Eligible.”</p>
+            <p class="mt-2">Check your session using the <a href="#" data-goto-lookup class="underline">Session Information Lookup tool</a>. You can also locate your session in Attendee Hub and look for the label “CEU Eligible” or “Not CEU Eligible.”</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How do I edit my speaker or session profile, or report information that does not look right?</summary>
@@ -178,7 +175,7 @@
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">Can I use polls during my session?</summary>
-            <p class="mt-2">Yes. Whether your session is Embedded or on Zoom, you will be able to create and launch polls. Please review the <a href="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/83356837a8f54981a339ffdf4f10f95f.pdf" target="_blank" rel="noopener noreferrer" class="underline">Speaker Guide (PDF)</a> for instructions for your format.</p>
+            <p class="mt-2">Yes. Whether your session is Embedded or on Zoom, you will be able to create and launch polls. Please review the <a href="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/83356837a8f54981a339ffdf4f10f95f.pdf" target="_blank" rel="noopener noreferrer" class="underline">Speaker Guide (PDF)</a> for instructions about your format.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How do I generate a transcript for my session?</summary>
@@ -186,13 +183,13 @@
             <p class="mt-2"><strong>Embedded sessions:</strong> Unfortunately, transcripts aren’t available for embedded sessions.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
-            <summary class="font-semibold cursor-pointer">How do I save the notes from my session?</summary>
-            <p class="mt-2"><strong>Zoom sessions:</strong> Open <strong>Notes</strong> in the Zoom meeting—it may be under <strong>More</strong>. Highlight all comments, right-click, and select <strong>Copy</strong>. Then paste the text into a document, email, or wherever you keep your records.</p>
-            <p class="mt-2"><strong>Embedded sessions:</strong> Open the notes panel, highlight all comments, right-click, and select <strong>Copy</strong>. Then paste the text into a document, email, or wherever you keep your records.</p>
+            <summary class="font-semibold cursor-pointer">How do I save the chat from my session?</summary>
+            <p class="mt-2"><strong>Zoom sessions:</strong> Open <strong>Chat</strong> in the Zoom meeting—it may be under <strong>More</strong>. Highlight all comments, right-click, and select <strong>Copy</strong>. Then paste the text into a document, email, or wherever you keep your records.</p>
+            <p class="mt-2"><strong>Embedded sessions:</strong> Open the Chat panel, highlight all comments, right-click, and select <strong>Copy</strong>. Then paste the text into a document, email, or wherever you keep your records.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How do I use the waiting room in my session?</summary>
-            <p class="mt-2"><strong>Zoom sessions:</strong> In the Zoom meeting toolbar, select <strong>Host tools</strong>—it may be under <strong>More</strong>—then select <strong>Enable waiting room</strong>. Attendees wait there until you admit them.</p>
+            <p class="mt-2"><strong>Zoom sessions:</strong> In the Zoom meeting toolbar, select <strong>Host tools</strong>—it may be under <strong>More</strong>—then select <strong>Enable waiting room</strong>. Attendees wait there until you admit them. If you do not enable a waiting room, attendees will start joining your Zoom session starting 5 minutes prior.</p>
             <p class="mt-2"><strong>Embedded sessions:</strong> Embedded sessions do not have a waiting room. Attendees can join the session starting 5 minutes before it begins.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
@@ -212,20 +209,20 @@
             <div class="faq-list">
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">What is Attendee Hub, and how do I log in?</summary>
-            <p class="mt-2">Attendee Hub is the online event center for the Global Gathering. For Zoom and Embedded sessions, presenters use it to access and host their sessions. If you are viewing this page within Attendee Hub, you are already logged in. Otherwise, <a href="https://cvent.me/xx5n1g" target="_blank" rel="noopener noreferrer" class="underline">open Attendee Hub</a>, enter your name and registration email, and enter the verification code sent to your email or phone.</p>
+            <p class="mt-2">Attendee Hub is the online event center for the Global Gathering. For Zoom and Embedded sessions, presenters use it to access and host their sessions. Open Attendee Hub by clicking <a href="https://cvent.me/xx5n1g" target="_blank" rel="noopener noreferrer" class="underline">here</a>, enter your name and registration email, and enter the verification code sent to your email or phone.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How do I start my Zoom or Embedded session?</summary>
             <p class="mt-2">Hover over <strong>Sessions and Speakers</strong> and select <strong>All Sessions</strong>. Enter your session name in the search bar, or use the filters in the left-hand column to find it. Select your session name, then select <strong>Join as host</strong>—do not select <strong>Join as participant</strong>.</p>
-            <p class="mt-2">You can join as a host beginning September 28, 2026. The <strong>Join as host</strong> button will not appear before then.</p>
+            <p class="mt-2">You can join as a host beginning September 28, 2026. The <strong>Join as host</strong> button will not appear before then. If you need Host access prior to September 28, 2026, please contact <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
-            <summary class="font-semibold cursor-pointer">I cannot find my session. What should I do?</summary>
+            <summary class="font-semibold cursor-pointer">I cannot find my session in Attendee Hub. What should I do?</summary>
             <p class="mt-2">Try searching with a shorter keyword from the title. For example, for <em>Centering Culture for Transformative Systems Change</em>, search for “Centering Culture.” You can also use the filters in the left-hand column, including time, date, and speaker.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">Why don’t I see a “Join as host” button?</summary>
-            <p class="mt-2">The button will not appear before September 28, 2026. If it is September 28 or later, the most likely reason is that you are not listed as a Host for that session. Please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a> so they can investigate.</p>
+            <p class="mt-2">The button will not appear before September 28, 2026. If it is September 28th or later, the most likely reason is that you are not listed as a Host for that session. Please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a> so they can investigate.</p>
           </details>
             </div>
           </section>
@@ -235,7 +232,7 @@
             <div class="faq-list">
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">Do presenters need to be registered for the event?</summary>
-            <p class="mt-2">Yes. Presenters must be registered for the Global Gathering using the email associated with their speaker profile to access Attendee Hub. For Zoom and Embedded sessions, this also enables host access. If you aren’t registered yet, <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer" class="underline">register here</a>. If your registration and speaker-profile emails differ, contact <a href="mailto:globalgathering@cuanschutz.edu" class="underline">the Global Gathering Team</a> for help.</p>
+            <p class="mt-2">Yes. Presenters must be registered for the Global Gathering to access Attendee Hub. Please use the same email for registration as was submitted with your presentation. If you aren’t registered yet, <a href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer" class="underline">register here</a>. If your registration and speaker-profile emails differ, please contact <a href="mailto:globalgathering@cuanschutz.edu" class="underline">the Global Gathering Team</a> for support.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">I am not sure what email is associated with my registration. How do I find that out?</summary>
@@ -297,8 +294,8 @@
         </div>
         <div class="hub-facts" aria-label="Before you begin">
           <div><strong>Use Chrome or Edge</strong><span>The browsers fully compatible with Attendee Hub.</span></div>
-          <div><strong>Test your session as a host starting September 28</strong><span>Beginning September 28, 2026, select “Join as host” to explore and test your session’s virtual environment. Want to test your specific session before then? <a href="mailto:globalgathering@cuanschutz.edu" class="underline">Contact us to request early access</a>.</span></div>
-          <div><strong>Become familiar with your session format</strong><span>Use the <a href="#" data-goto-lookup class="underline">Session Information Lookup tool</a> to check whether your session is Zoom or Embedded, then explore the instructions below.</span></div>
+          <div><strong>Test your session as a host starting September 28</strong><span>Beginning September 28, 2026, select “Join as host” to explore and test your session’s virtual environment. Want to test your specific session before then? <a href="mailto:globalgathering@cuanschutz.edu" class="underline">Contact the Global Gathering Team to request early access</a>.</span></div>
+          <div><strong>Become familiar with your session format</strong><span>Use the <a href="#" data-goto-lookup class="underline">Session Information Lookup tool</a> to check whether your session format is Zoom or Embedded, then explore the instructions below.</span></div>
         </div>
         <nav class="hub-jump-links" aria-label="Attendee Hub topics">
           <a href="#hub-sign-in">Prepare now: sign in &amp; explore</a><a href="#hub-host">From September 28: test as a host</a><a href="#hub-formats">Reference: session tools</a><a href="#hub-wrap-up">Event-day reference: session feedback</a>

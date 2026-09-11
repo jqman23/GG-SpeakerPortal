@@ -82,6 +82,7 @@ export function createPortalSearch({ tabs, activateTab, openSession }) {
     const ranked = rankRecords(records, query);
     const filtered = ranked.filter(({ record }) => filter === 'All' || record.type === filter);
     $('portal-search-clear').hidden = !input.value;
+    $('search-filters').hidden = !query;
     $('search-filters').replaceChildren(...categories.map(type => {
       const button = document.createElement('button');
       button.type = 'button'; button.setAttribute('aria-pressed', String(filter === type));
@@ -91,16 +92,9 @@ export function createPortalSearch({ tabs, activateTab, openSession }) {
         [...$('search-filters').children].find(b => b.textContent.startsWith(type))?.focus(); });
       return button;
     }));
-    $('search-session-status').textContent = sessionState === 'loading' ? 'Session details are loading. Answers and resources are ready to search.' : sessionState === 'error' ? 'Session details are unavailable right now. Answers and resources are still searchable; refresh to retry sessions.' : '';
-    $('search-status').textContent = !query ? 'Start with a topic, a question, or a name.' : filtered.length ? `${filtered.length} result${filtered.length === 1 ? '' : 's'}${filter !== 'All' ? ` in ${filter}` : ''}. Showing ${Math.min(limit, filtered.length)}.` : `No results for “${query}”${filter !== 'All' ? ` in ${filter}` : ''}. Try fewer words${filter !== 'All' ? ' or choose All' : ', such as “registration” or “host”'}.`;
+    $('search-session-status').textContent = !query ? '' : sessionState === 'loading' ? 'Session details are loading. Answers and resources are ready to search.' : sessionState === 'error' ? 'Session details are unavailable right now. Answers and resources are still searchable; refresh to retry sessions.' : '';
+    $('search-status').textContent = !query ? '' : filtered.length ? `${filtered.length} result${filtered.length === 1 ? '' : 's'}${filter !== 'All' ? ` in ${filter}` : ''}. Showing ${Math.min(limit, filtered.length)}.` : `No results for “${query}”${filter !== 'All' ? ` in ${filter}` : ''}. Try fewer words${filter !== 'All' ? ' or choose All' : ', such as “registration” or “host”'}.`;
     $('search-suggestions').replaceChildren();
-    if (!query) {
-      ['Join as host', 'Am I registered?', 'CEU eligibility', 'Zoom and Embedded', 'Upload materials', 'Contact support'].forEach(topic => {
-        const button = document.createElement('button'); button.type = 'button'; button.textContent = `${topic} ↗`;
-        button.addEventListener('click', () => { input.value = topic; limit = 15; render(); syncSearchUrl(); input.focus(); });
-        $('search-suggestions').append(button);
-      });
-    }
     results.replaceChildren(...filtered.slice(0, limit).map(({ record }, index) => {
       const li = document.createElement('li'), link = document.createElement('a');
       link.href = `#portal/${record.id}`; link.className = 'search-result';
