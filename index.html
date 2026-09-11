@@ -13,6 +13,26 @@
     <div id="primary-tabs" class="flex space-x-2 border-b border-gray-200 mb-6 overflow-auto"></div>
 
     <main>
+      <section id="portal-search" class="content-section search-panel bg-white p-6 rounded-lg shadow" aria-labelledby="portal-search-heading">
+        <div class="search-eyebrow">YOUR SPEAKER RESOURCES, ONE SEARCH</div>
+        <h2 id="portal-search-heading">What can we help you find?</h2>
+        <p class="search-intro">Find answers, session details, and your next step. Go straight to what you need.</p>
+        <form id="portal-search-form" role="search">
+          <label for="portal-search-input" class="search-label">Search the speaker resources</label>
+          <div class="search-field">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <input id="portal-search-input" type="search" maxlength="200" autocomplete="off" placeholder="Try “join as host” or a speaker’s name" aria-describedby="search-keyboard-help" aria-controls="portal-search-results" />
+            <button type="button" id="portal-search-clear" hidden aria-label="Clear search">Clear</button>
+          </div>
+          <p id="search-keyboard-help" class="search-hint">Search as you type · ↓ to browse results · ⌘ / Ctrl K to search from any tab</p>
+        </form>
+        <div id="search-filters" class="search-filters" role="group" aria-label="Filter search results"></div>
+        <p id="search-status" class="search-status" role="status" aria-live="polite" aria-atomic="true"></p>
+        <p id="search-session-status" class="search-hint" role="status"></p>
+        <div id="search-suggestions" class="search-suggestions"></div>
+        <ol id="portal-search-results" class="search-results" aria-label="Search results"></ol>
+        <button type="button" id="search-show-more" class="search-more" hidden>Show more results</button>
+      </section>
       <section id="overview" class="content-section active bg-white p-6 rounded-lg shadow mb-6">
         <div class="hub-hero">
           <h2>Welcome, Global Gathering speakers.</h2>
@@ -269,7 +289,7 @@
       <section id="attendee-hub" class="content-section bg-white p-6 rounded-lg shadow">
         <div class="hub-hero">
           <h2>Become comfortable before the event</h2>
-          <p>Now is a good time to become familiar with Attendee Hub. Register first, then sign in and explore your session information. Hosting instructions are included below for pre-event testing and event-day reference.</p>
+          <p>Now is a good time to become familiar with Attendee Hub. To access Attendee Hub you must be registered. After you are registered, you can sign into Attendee Hub and explore the platform.</p>
           <div class="hub-actions">
             <a class="hub-button hub-button--primary" href="https://cvent.me/xx5n1g" target="_blank" rel="noopener noreferrer">Open Attendee Hub <span aria-hidden="true">↗</span></a>
             <a class="hub-button hub-button--secondary" href="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/83356837a8f54981a339ffdf4f10f95f.pdf" target="_blank" rel="noopener noreferrer">Read the full Speaker Guide (PDF) <span aria-hidden="true">↗</span></a>

@@ -14,6 +14,49 @@
   --update-accent: #B45309;
 }
 
+/* Portal-wide search */
+.search-panel { padding: clamp(22px, 5vw, 44px); }
+.search-eyebrow { color: #46775d; font-size: 11px; font-weight: 700; letter-spacing: .14em; margin-bottom: 14px; }
+.search-panel h2 { color: #122345; font-size: clamp(25px, 4vw, 36px); font-weight: 700; line-height: 1.2; letter-spacing: -.035em; }
+.search-intro { color: #536176; font-size: 14px; line-height: 1.8; margin: 14px 0 28px; max-width: 580px; }
+.search-label { display: block; font-weight: 600; font-size: 12px; color: #122345; margin-bottom: 8px; }
+.search-field { display: flex; align-items: center; gap: 12px; border: 2px solid #cbd7d1; border-radius: 14px; padding: 4px 16px; background: #f8faf9; transition: box-shadow .15s, border-color .15s; }
+.search-field:focus-within { border-color: #46775d; box-shadow: 0 0 0 4px #46775d18; background: #fff; }
+.search-field svg { flex-shrink: 0; color: #46775d; }
+.search-field input { width: 100%; min-width: 0; border: 0; outline: none; background: transparent; padding: 16px 0; color: #122345; font-size: 16px; }
+.search-field input::-webkit-search-cancel-button { display: none; }
+.search-field button { color: #46775d; font-size: 12px; font-weight: 600; }
+.search-hint { color: #667387; font-size: 11px; line-height: 1.7; margin: 10px 0; }
+.search-filters { display: flex; gap: 7px; flex-wrap: wrap; margin: 25px 0 18px; }
+.search-filters button { border: 1px solid #dce3df; border-radius: 999px; padding: 8px 12px; font-size: 11px; font-weight: 600; color: #536176; background: #fff; }
+.search-filters button[aria-pressed="true"] { color: #fff; background: #122345; border-color: #122345; }
+.search-status { color: #536176; font-size: 12px; line-height: 1.7; }
+.search-suggestions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 22px; }
+.search-suggestions:empty { display: none; }
+.search-suggestions button { text-align: left; padding: 18px; border: 1px solid #e0e7e3; border-radius: 10px; background: #f8faf9; font-size: 13px; font-weight: 500; color: #233d31; }
+.search-results { list-style: none; padding: 0; margin: 16px 0 0; }
+.search-result { display: block; position: relative; padding: 22px 40px 22px 17px; border: 1px solid #e1e7e4; border-radius: 12px; margin-bottom: 10px; text-decoration: none; background: #fff; transition: background .15s, border-color .15s; overflow-wrap: anywhere; }
+.search-result:hover, .search-suggestions button:hover { background: #f2f7f4; border-color: #86a693; }
+.search-result-meta { display: block; font-size: 10px; font-weight: 600; color: #46775d; margin-bottom: 8px; }
+.search-result-title { display: block; color: #122345; font-size: 15px; font-weight: 600; line-height: 1.5; }
+.search-result-preview { display: block; color: #5a6779; font-size: 12px; line-height: 1.8; margin-top: 7px; }
+.search-result-arrow { position: absolute; right: 17px; top: 22px; color: #46775d; }
+.search-result mark { background: #e3efbf; color: inherit; border-radius: 2px; }
+.search-more, .search-return { color: #235540; border: 1px solid #bfcfc6; background: #f4f8f5; border-radius: 9px; padding: 11px 16px; font-size: 12px; font-weight: 600; }
+.search-more { margin-top: 14px; }
+.search-return { margin-bottom: 18px; }
+.search-panel [hidden], .search-return[hidden] { display: none !important; }
+.search-panel :is(button, a):focus-visible, .search-return:focus-visible { outline: 3px solid #46775d; outline-offset: 3px; }
+.search-destination { animation: search-arrival 2.4s ease-out; scroll-margin-block: 32px; }
+@keyframes search-arrival { 0%, 40% { box-shadow: 0 0 0 5px #89a84f70; background-color: #f0f5e5; } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media (max-width: 560px) {
+  .search-suggestions { grid-template-columns: 1fr; }
+  .search-field { padding-inline: 10px; gap: 8px; }
+  .search-field input { font-size: 16px; }
+  .search-filters button { padding: 8px 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .search-destination { animation: none; outline: 3px solid #89a84f; } }
+
 html,
 body,
 #speakerPortalShell,

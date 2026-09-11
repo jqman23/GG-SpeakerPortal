@@ -1,4 +1,5 @@
 import { bindRegistrationLookup } from './registration-lookup.js';
+import { createPortalSearch } from './search.js';
 const SESSION_DATA_URL = "/api/sessions";
 const CHANGELOG_URL = "/api/changelog";
 const CHANGELOG_SEEN_KEY = "ggChangelogSeen";
@@ -29,6 +30,7 @@ const SESSION_FOLLOWUPS = [
 // Toggle tabs here. Set enabled: false to hide a tab without editing markup.
 const TAB_CONFIG = [
   { id: "overview-tab", label: "Overview", mobileLabel: "Overview", sectionId: "overview", enabled: true, trackingButton: "SpeakerPortal_OverviewTab" },
+  { id: "search-tab", label: "Search", mobileLabel: "Search", sectionId: "portal-search", enabled: true },
   {
     id: "survey-tab",
     label: "Speaker Questionnaire",
@@ -63,6 +65,7 @@ const TAB_CONFIG = [
 
 let SESSIONS_AS_OF = "";
 let sessions = [];
+let portalSearch;
 const SPEAKER_INDEX = [];
 let selectedSurveySession = null;
 // True when the currently selected session is an active (non-excluded) International
@@ -197,6 +200,16 @@ document.addEventListener("DOMContentLoaded", () => {
   bindShare();
   bindClickTracking();
   bindIframeHeight();
+  portalSearch = createPortalSearch({
+    tabs: TAB_CONFIG,
+    activateTab,
+    openSession(session) {
+      activateTab("session-lookup");
+      document.getElementById("lookup-tab-session").click();
+      document.getElementById("session-title").value = session.title;
+      renderResults([{ session }], document.getElementById("lookup-status"), document.getElementById("lookup-results"), "session");
+    }
+  });
   loadSessions();
   loadChangelog();
 });
@@ -245,6 +258,7 @@ function renderTabs() {
 }
 
 function activateTab(sectionId) {
+  portalSearch?.onTabChange(sectionId);
   TAB_CONFIG.filter(tab => tab.enabled && !tab.external).forEach(tab => {
     const button = document.getElementById(tab.id);
     if (!button) return;
@@ -721,7 +735,7 @@ function formatSessionDuration(session) {
   const end = parseTimeParts(endValue);
   if (!start || !end) return "";
   const diff = (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute);
-  if (diff <= 0) return "";
+  if (!Number.isFinite(diff) || diff <= 0) return "";
   const hours = Math.floor(diff / 60);
   const minutes = diff % 60;
   if (hours && minutes) return `${hours} hr ${minutes} min`;
@@ -1576,6 +1590,7 @@ async function loadSessions() {
     const data = await res.json();
     SESSIONS_AS_OF = data.SESSIONS_AS_OF || "";
     sessions = data.sessions || [];
+    portalSearch?.setSessions(sessions);
     SPEAKER_INDEX.splice(0, SPEAKER_INDEX.length, ...buildSpeakerIndex());
     updateOverviewSurveyCta();
     if (pendingOverviewSurveyLoad) {
@@ -1586,6 +1601,7 @@ async function loadSessions() {
     }
   } catch (err) {
     console.error("Error loading sessions:", err);
+    portalSearch?.setSessions([], true);
     const status = document.getElementById("lookup-status");
     if (status) status.textContent = "Session data could not be loaded. Please refresh the page or contact the Global Gathering Team if the problem continues.";
   }
