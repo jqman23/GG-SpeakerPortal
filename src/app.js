@@ -114,7 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gotoRegistrationLink) {
       event.preventDefault();
       activateTab("registration-lookup");
-      document.getElementById("registration-email").focus();
     }
     const gotoHubLink = event.target.closest?.("[data-goto-hub]");
     if (gotoHubLink) {
