@@ -247,6 +247,7 @@ a {
 .overview-steps { gap: 1.5rem !important; }
 .overview-steps h4 { color: #162a53; font-weight: 700; margin-bottom: .4rem; }
 .overview-steps p { margin-bottom: .5rem; }
+.overview-step-actions { display: flex; flex-wrap: wrap; gap: .35rem 1.25rem; }
 .overview-resources { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem; margin-top: 1.5rem; }
 .overview-resources a { padding: 1rem; border: 1px solid #dce3e9; border-radius: .75rem; color: #162a53 !important; }
 .overview-resources strong, .overview-resources span { display: block; }
