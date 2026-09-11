@@ -2438,10 +2438,20 @@ function computeWidgetHeight() {
   return height + 32;
 }
 
+let lastEmittedWidgetHeight = 0;
+
 function emitWidgetHeight() {
   if (!window.parent || window.parent === window) return;
-  const height = computeWidgetHeight();
+  let height = computeWidgetHeight();
   if (!height) return;
+  // Cvent applies this value directly to the iframe. Search is often shorter
+  // than the tab it replaces; shrinking the iframe while it is in view causes
+  // the parent page's scroll anchoring to jump. Preserve the current embedded
+  // height while Search is active, but still allow results to require more room.
+  if (document.getElementById("portal-search")?.classList.contains("active")) {
+    height = Math.max(height, lastEmittedWidgetHeight);
+  }
+  lastEmittedWidgetHeight = height;
   window.parent.postMessage({ ggWidgetHeight: height }, "*");
 }
 
