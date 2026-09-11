@@ -1,6 +1,6 @@
 const CONTACT_EMAIL = 'globalgathering@cuanschutz.edu';
 const SESSIONS_URL = '/api/sessions';
-const CONTACT_URL = 'https://gg-backend-masterplanner.vercel.app/api/resources?service=speaker-contact';
+const CONTACT_URL = '/api/contact';
 
 export function bindContactForm() {
   const modal = document.getElementById('contact-form-modal');

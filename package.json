@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:search": "node --test scripts/test-search.js"
+    "test:search": "node --test scripts/test-search.js",
+    "test:contact": "node --test scripts/test-contact.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4"
