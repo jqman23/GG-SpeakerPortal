@@ -327,6 +327,8 @@ a {
 #overview .hub-actions,
 #attendee-hub .hub-actions { margin-top: 1rem; }
 #registration-result { overflow-wrap: anywhere; }
+.registration-alert { margin-top: 1rem; }
+.registration-alert a { color: #162a53; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .overview-steps { gap: 1.5rem !important; }
 .overview-steps h4 { color: #162a53; font-weight: 700; margin-bottom: .4rem; }
 .overview-steps p { margin-bottom: .5rem; }
@@ -709,7 +711,9 @@ a {
   }
 
   #lookup-tab-speaker,
-  #lookup-tab-session {
+  #lookup-tab-session,
+  #registration-tab-email,
+  #registration-tab-name {
     min-height: 2.75rem;
     padding-left: 0.9rem !important;
     padding-right: 0.9rem !important;

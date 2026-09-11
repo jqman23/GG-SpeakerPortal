@@ -1,10 +1,33 @@
 export function bindRegistrationLookup() {
   const form = document.getElementById('registration-lookup-form');
-  const input = document.getElementById('registration-email');
+  const emailInput = document.getElementById('registration-email');
+  const nameInput = document.getElementById('registration-name');
+  const emailFields = document.getElementById('registration-email-fields');
+  const nameFields = document.getElementById('registration-name-fields');
+  const emailTab = document.getElementById('registration-tab-email');
+  const nameTab = document.getElementById('registration-tab-name');
   const result = document.getElementById('registration-result');
   const submit = form.querySelector('button');
+  let mode = 'email';
   let revision = 0;
-  input.addEventListener('input', () => { revision++; result.replaceChildren(); });
+  [emailInput, nameInput].forEach(input => input.addEventListener('input', () => { revision++; result.replaceChildren(); }));
+  function setMode(nextMode, focus = true) {
+    mode = nextMode;
+    const byEmail = mode === 'email';
+    emailFields.hidden = !byEmail;
+    nameFields.hidden = byEmail;
+    emailInput.required = byEmail;
+    nameInput.required = !byEmail;
+    emailTab.className = `px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg ${byEmail ? 'tab-active bg-[var(--survey-primary)] text-white' : 'tab-inactive'}`;
+    nameTab.className = `px-4 py-2 text-sm font-medium border border-gray-200 rounded-r-lg ${byEmail ? 'tab-inactive' : 'tab-active bg-[var(--survey-primary)] text-white'}`;
+    emailTab.setAttribute('aria-pressed', String(byEmail));
+    nameTab.setAttribute('aria-pressed', String(!byEmail));
+    result.replaceChildren();
+    revision++;
+    if (focus) (byEmail ? emailInput : nameInput).focus();
+  }
+  emailTab.addEventListener('click', () => setMode('email'));
+  nameTab.addEventListener('click', () => setMode('name'));
   function line(label, value) {
     const p = document.createElement('p');
     const strong = document.createElement('strong');
@@ -21,6 +44,25 @@ export function bindRegistrationLookup() {
       hour: 'numeric', minute: '2-digit', timeZone: 'UTC', timeZoneName: 'short'
     }).format(date);
   }
+  function paragraph(text, className = '') {
+    const p = document.createElement('p');
+    p.className = className;
+    p.textContent = text;
+    result.append(p);
+    return p;
+  }
+  function contactPrompt(text) {
+    const box = document.createElement('div');
+    box.className = 'hub-note registration-alert';
+    const strong = document.createElement('strong');
+    strong.textContent = 'Possible email mismatch. ';
+    const copy = document.createTextNode(text + ' ');
+    const link = document.createElement('a');
+    link.href = 'mailto:globalgathering@cuanschutz.edu';
+    link.textContent = 'Contact the Global Gathering Team';
+    box.append(strong, copy, link, document.createTextNode(' so they can verify your Host access.'));
+    result.append(box);
+  }
   async function checkRegistration() {
     const request = ++revision;
     submit.disabled = true;
@@ -28,7 +70,10 @@ export function bindRegistrationLookup() {
     try {
       const response = await fetch('https://gg-backend-masterplanner.vercel.app/api/resources?service=registration-lookup', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: input.value.trim().toLowerCase() }), signal: AbortSignal.timeout(20000)
+        body: JSON.stringify(mode === 'email'
+          ? { email: emailInput.value.trim().toLowerCase() }
+          : { name: nameInput.value.trim() }),
+        signal: AbortSignal.timeout(20000)
       });
       const data = await response.json();
       if (request !== revision) return;
@@ -36,17 +81,18 @@ export function bindRegistrationLookup() {
       result.replaceChildren();
       const heading = document.createElement('h3');
       heading.className = 'font-bold text-lg mb-3';
-      heading.textContent = data.found ? 'Registration confirmed' : 'We couldn’t confirm a registration for that email';
+      heading.textContent = data.found ? 'Registration confirmed' : data.ambiguous ? 'We found more than one possible match' : `We couldn’t confirm a registration for that ${mode === 'email' ? 'email' : 'name'}`;
       result.append(heading);
       if (data.found) {
         line('Name', data.registration.name || 'Not available');
         line('Email', data.registration.email);
         line('Registered', formatRegistrationDate(data.registration.registeredAt));
         line('CEUs included', data.registration.ceusIncluded ? 'Yes' : 'No');
+        if (data.emailMismatch) contactPrompt(`Your registration email (${data.registration.email}) appears to differ from the email on your speaker profile (${data.speakerEmail}).`);
+      } else if (data.ambiguous) {
+        paragraph('For your privacy, the lookup cannot choose between people or records with the same name. Try searching by email, or contact the Global Gathering Team.');
       } else {
-        const p = document.createElement('p');
-        p.textContent = 'Check the address, allow time for recent registrations to appear, or contact the Global Gathering Team. A missing result does not necessarily mean you aren’t registered.';
-        result.append(p);
+        paragraph(`Check the ${mode === 'email' ? 'address' : 'name'}, allow time for recent registrations to appear, or contact the Global Gathering Team. A missing result does not necessarily mean you aren’t registered.`);
       }
       line('Registration records last updated', new Date(data.updatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }));
     } catch (error) {
@@ -58,8 +104,9 @@ export function bindRegistrationLookup() {
     checkRegistration();
   });
   return email => {
-    input.value = String(email || '').trim().toLowerCase();
-    input.dispatchEvent(new Event('input', { bubbles: true }));
+    setMode('email', false);
+    emailInput.value = String(email || '').trim().toLowerCase();
+    emailInput.dispatchEvent(new Event('input', { bubbles: true }));
     return checkRegistration();
   };
 }

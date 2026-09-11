@@ -52,7 +52,7 @@
           </ol>
         </section>
         <div class="overview-resources">
-          <a href="#registration-lookup" data-goto-registration><strong>Check to see if you’re registered</strong><span>Confirm your registration using your email address.</span></a>
+          <a href="#registration-lookup" data-goto-registration><strong>Check to see if you’re registered</strong><span>Confirm your registration by email address or name.</span></a>
           <a href="#session-lookup" data-goto-lookup><strong>Review details about your session</strong><span>Look up your format, recording status, and CEU eligibility.</span></a>
           <a href="./2026speakerguide.pdf" data-open-speaker-guide><strong>📘 Read through the Speaker Guide →</strong><span>Step-by-step instructions in one PDF.</span></a>
         </div>
@@ -263,10 +263,24 @@
 
       <section id="registration-lookup" class="content-section bg-white p-6 rounded-lg shadow">
         <h2 class="text-2xl font-bold text-[#162A53] mb-4">Registration Information Lookup</h2>
-        <p class="text-gray-700 mb-4">Check your registration for the <em>2026 Global Gathering</em> using the email address associated with your registration.</p>
+        <p class="text-gray-700 mb-4">Check your registration for the <em>2026 Global Gathering</em> by email address or name.</p>
+        <div class="mb-4">
+          <div class="inline-flex rounded-md shadow-sm" role="group" aria-label="Registration lookup method">
+            <button id="registration-tab-email" type="button" class="px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg tab-active bg-[var(--survey-primary)] text-white" aria-pressed="true">By Email</button>
+            <button id="registration-tab-name" type="button" class="px-4 py-2 text-sm font-medium border border-gray-200 rounded-r-lg tab-inactive" aria-pressed="false">By Name</button>
+          </div>
+        </div>
         <form id="registration-lookup-form" class="space-y-3">
-          <label for="registration-email" class="block font-semibold">Registration email address</label>
-          <input id="registration-email" type="email" required maxlength="254" autocomplete="email" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2" placeholder="you@example.com" />
+          <div id="registration-email-fields">
+            <label for="registration-email" class="block font-semibold">Email address</label>
+            <input id="registration-email" type="email" required maxlength="254" autocomplete="email" class="mt-1 w-full border-2 border-gray-200 rounded-lg px-3 py-2" placeholder="you@example.com" />
+            <p class="mt-2 text-sm text-gray-600">You can check either the email submitted with your presentation or the email used to register.</p>
+          </div>
+          <div id="registration-name-fields" hidden>
+            <label for="registration-name" class="block font-semibold">First and last name</label>
+            <input id="registration-name" type="text" maxlength="160" autocomplete="name" class="mt-1 w-full border-2 border-gray-200 rounded-lg px-3 py-2" placeholder="e.g., Jane Smith" />
+            <p class="mt-2 text-sm text-gray-600">Enter your full name exactly as it appears on your registration or speaker profile.</p>
+          </div>
           <button type="submit" class="px-4 py-3 rounded-lg bg-[#162A53] text-white font-semibold disabled:opacity-50">Check registration</button>
         </form>
         <div id="registration-result" role="status" aria-live="polite" aria-atomic="true" class="mt-5 space-y-2 text-gray-800"></div>
