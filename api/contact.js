@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   if (clean(req.body?.website, 200)) return res.status(200).json({ sent: true });
   if (name.length < 2) return res.status(400).json({ error: 'Enter your full name.' });
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Enter a valid email address.' });
-  if (message.length < 5) return res.status(400).json({ error: 'Enter a brief message.' });
+  if (!message) return res.status(400).json({ error: 'Enter a message.' });
   const apiKey = process.env.RESEND_CONTACT_API_KEY;
   if (!apiKey) return res.status(503).json({ error: 'The contact form is temporarily unavailable. Please try again later.' });
   const from = process.env.CONTACT_FORM_FROM || 'Global Gathering Speaker Portal <onboarding@resend.dev>';
