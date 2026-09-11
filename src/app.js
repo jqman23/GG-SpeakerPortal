@@ -2443,11 +2443,13 @@ function emitWidgetHeight() {
   if (!window.parent || window.parent === window) return;
   let height = computeWidgetHeight();
   if (!height) return;
-  // Cvent applies this value directly to the iframe. Search is often shorter
-  // than the tab it replaces; shrinking the iframe while it is in view causes
-  // the parent page's scroll anchoring to jump. Preserve the current embedded
-  // height while Search is active, but still allow results to require more room.
-  if (document.getElementById("portal-search")?.classList.contains("active")) {
+  // Cvent applies this value directly to the iframe. These utility tabs are
+  // often shorter than the tab they replace; shrinking the iframe while one
+  // is in view causes the parent page's scroll anchoring to jump. Preserve the
+  // current embedded height for them, while still allowing content to require
+  // more room. A little extra space is preferable to moving the Cvent page.
+  const stableTabIds = ["portal-search", "session-lookup", "registration-lookup"];
+  if (stableTabIds.some(id => document.getElementById(id)?.classList.contains("active"))) {
     height = Math.max(height, lastEmittedWidgetHeight);
   }
   lastEmittedWidgetHeight = height;
