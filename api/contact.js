@@ -31,7 +31,9 @@ export default async function handler(req, res) {
   if (!message) return res.status(400).json({ error: 'Enter a message.' });
   const apiKey = process.env.RESEND_CONTACT_API_KEY;
   if (!apiKey) return res.status(503).json({ error: 'The contact form is temporarily unavailable. Please try again later.' });
-  const from = process.env.CONTACT_FORM_FROM || 'Global Gathering Speaker Portal <onboarding@resend.dev>';
+  const from = process.env.CONTACT_FORM_FROM
+    || process.env.SURVEY_CONFIRMATION_FROM
+    || 'Global Gathering Speaker Portal <onboarding@resend.dev>';
   try {
     const response = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from, to: RECIPIENT, reply_to: email, ...buildContactEmail({ name, email, session, message }) }) });
     if (response.ok) return res.status(200).json({ sent: true });
