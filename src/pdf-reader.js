@@ -11,6 +11,7 @@ export function bindPdfReader() {
   const status = document.getElementById('pdf-reader-status');
   const pageInput = document.getElementById('pdf-page-number');
   const pageCount = document.getElementById('pdf-page-count');
+  const pageJump = document.getElementById('pdf-page-jump');
   const prev = document.getElementById('pdf-prev');
   const next = document.getElementById('pdf-next');
   const zoomOut = document.getElementById('pdf-zoom-out');
@@ -47,6 +48,7 @@ export function bindPdfReader() {
     rendering = true;
     pageNumber = nextPage;
     pageInput.value = String(pageNumber);
+    pageJump.value = String(pageNumber);
     prev.disabled = pageNumber === 1;
     next.disabled = pageNumber === pdf.numPages;
     canvas.setAttribute('aria-label', `Speaker Guide page ${pageNumber} of ${pdf.numPages}`);
@@ -102,6 +104,7 @@ export function bindPdfReader() {
   zoomOut.addEventListener('click', () => changeZoom(-.1));
   zoomIn.addEventListener('click', () => changeZoom(.1));
   pageInput.addEventListener('change', () => renderPage(pageInput.value));
+  pageJump.addEventListener('change', () => renderPage(pageJump.value));
   stage.addEventListener('pointerdown', event => { pointerStart = { x: event.clientX, y: event.clientY }; });
   stage.addEventListener('pointerup', event => {
     if (!pointerStart) return;

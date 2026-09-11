@@ -65,16 +65,19 @@ body.pdf-reader-open { overflow: hidden; }
 .pdf-reader { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 18px; }
 .pdf-reader-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(9, 20, 43, .72); backdrop-filter: blur(8px); }
 .pdf-reader-dialog { position: relative; display: grid; grid-template-rows: auto auto minmax(0, 1fr); width: min(1100px, 100%); height: min(92vh, 900px); overflow: hidden; border-radius: 18px; background: #eef2f0; box-shadow: 0 28px 80px rgba(3, 11, 29, .45); outline: none; }
+.pdf-reader-dialog > * { min-width: 0; }
 .pdf-reader-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 20px; color: #fff; background: #122345; }
 .pdf-reader-kicker { display: block; color: #b8cc91; font-size: 9px; font-weight: 700; letter-spacing: .16em; }
 .pdf-reader-header h2 { margin: 2px 0 0; font-size: 18px; font-weight: 600; }
-.pdf-reader-actions { display: flex; align-items: center; gap: 8px; }
+.pdf-reader-actions { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
 .pdf-reader-actions a, .pdf-reader-actions button { border: 1px solid rgba(255,255,255,.3); border-radius: 8px; padding: 8px 11px; color: #fff !important; background: transparent; font-size: 11px; font-weight: 600; text-decoration: none; }
 .pdf-reader-toolbar { display: flex; align-items: center; gap: 9px; min-height: 52px; padding: 8px 14px; border-bottom: 1px solid #d2dbd6; background: #fff; color: #34445a; }
 .pdf-reader-toolbar button { width: 34px; height: 34px; border: 1px solid #d2dbd6; border-radius: 8px; background: #fff; color: #122345; font-size: 17px; }
 .pdf-reader-toolbar button:disabled { opacity: .35; }
 .pdf-reader-toolbar label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; }
 .pdf-reader-toolbar input { width: 50px; border: 1px solid #cbd5d0; border-radius: 7px; padding: 7px 4px; text-align: center; }
+.pdf-reader-toolbar select { max-width: 190px; border: 1px solid #cbd5d0; border-radius: 7px; padding: 7px 28px 7px 9px; color: #122345; background: #fff; font-size: 11px; }
+.pdf-jump-label { margin-left: 5px; }
 .pdf-toolbar-spacer { flex: 1; }
 #pdf-zoom-label { min-width: 36px; color: #5d6b7e; font-size: 10px; text-align: center; }
 .pdf-reader-stage { position: relative; overflow: auto; display: flex; align-items: flex-start; justify-content: center; padding: 16px; overscroll-behavior: contain; touch-action: pan-y; outline: none; }
@@ -90,6 +93,9 @@ body.pdf-reader-open { overflow: hidden; }
   .pdf-reader-header h2 { font-size: 14px; }
   .pdf-reader-actions a { display: none; }
   .pdf-reader-toolbar { padding-inline: 10px; }
+  .pdf-jump-label span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .pdf-reader-toolbar select { max-width: 135px; }
+  #pdf-zoom-out, #pdf-zoom-in, #pdf-zoom-label, .pdf-toolbar-spacer { display: none; }
   .pdf-reader-stage { padding: 10px; }
 }
 
@@ -329,6 +335,43 @@ a {
 #registration-result { overflow-wrap: anywhere; }
 .registration-alert { margin-top: 1rem; }
 .registration-alert a { color: #162a53; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.registration-form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.registration-demo-button { padding: .7rem .9rem; border: 1px solid #cbd5d0; border-radius: .5rem; color: #162a53; background: #fff; font-size: .82rem; font-weight: 650; }
+
+/* Contact form */
+body.contact-modal-open { overflow: hidden; }
+.contact-modal[hidden] { display: none !important; }
+.contact-modal { position: fixed; inset: 0; z-index: 1100; display: grid; place-items: center; padding: 18px; }
+.contact-modal-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(9, 20, 43, .72); backdrop-filter: blur(8px); }
+.contact-modal-dialog { position: relative; width: min(680px, 100%); max-height: min(92vh, 820px); overflow: auto; border-radius: 16px; background: #fff; box-shadow: 0 28px 80px rgba(3, 11, 29, .45); outline: none; }
+.contact-modal-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 22px; color: #fff; background: #122345; }
+.contact-modal-header span { color: #b8cc91; font-size: 9px; font-weight: 700; letter-spacing: .14em; }
+.contact-modal-header h2 { margin: 3px 0 0; font-size: 19px; font-weight: 700; }
+.contact-modal-header button { border: 1px solid rgba(255,255,255,.35); border-radius: 8px; padding: 8px 11px; color: #fff; background: transparent; font-size: 11px; font-weight: 650; }
+.contact-form { display: grid; gap: 17px; padding: 22px; color: #374151; }
+.contact-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.contact-form label { display: grid; gap: 6px; color: #162a53; font-size: .84rem; font-weight: 700; }
+.contact-form label span { color: #6b7280; font-weight: 500; }
+.contact-form input, .contact-form textarea { width: 100%; border: 2px solid #dce3e9; border-radius: 9px; padding: 10px 11px; color: #1f2937; background: #fff; font-size: 16px; font-weight: 400; }
+.contact-form textarea { resize: vertical; min-height: 130px; }
+.contact-form :is(input, textarea, button):focus-visible { outline: 3px solid #89a84f; outline-offset: 2px; }
+.contact-honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; }
+.contact-form-actions { position: sticky; bottom: -22px; display: flex; justify-content: flex-end; gap: 10px; margin: 0 -22px -22px; padding: 12px 22px 22px; background: #fff; box-shadow: 0 -8px 18px rgba(18,35,69,.06); }
+.contact-form-actions button { border: 1px solid #cbd5d0; border-radius: 9px; padding: 10px 15px; color: #162a53; background: #fff; font-weight: 700; }
+.contact-form-actions button[type="submit"] { border-color: #162a53; color: #fff; background: #162a53; }
+.contact-form-actions button:disabled { opacity: .55; }
+.contact-form-status { min-height: 1.25rem; font-size: .84rem; }
+.contact-form-success { color: #235540; font-weight: 700; }
+.contact-form-error { color: #9c2f2f; font-weight: 700; }
+@media (max-width: 600px) {
+  .contact-modal { padding: 0; }
+  .contact-modal-dialog { width: 100%; height: 100dvh; max-height: none; border-radius: 0; }
+  .contact-modal-header { padding: 14px 16px; }
+  .contact-modal-header h2 { font-size: 16px; }
+  .contact-form { padding: 18px 16px; }
+  .contact-form-grid { grid-template-columns: 1fr; }
+  .contact-form-actions { bottom: -18px; margin: 0 -16px -18px; padding: 12px 16px 18px; }
+}
 .overview-steps { gap: 1.5rem !important; }
 .overview-steps h4 { color: #162a53; font-weight: 700; margin-bottom: .4rem; }
 .overview-steps p { margin-bottom: .5rem; }

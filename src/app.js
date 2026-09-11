@@ -1,6 +1,7 @@
 import { bindRegistrationLookup } from './registration-lookup.js';
 import { createPortalSearch } from './search.js';
 import { bindPdfReader } from './pdf-reader.js';
+import { bindContactForm } from './contact-form.js';
 const SESSION_DATA_URL = "/api/sessions";
 const CHANGELOG_URL = "/api/changelog";
 const CANONICAL_PORTAL_ORIGIN = "https://gg-speaker-portal.vercel.app";
@@ -211,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindClickTracking();
   bindIframeHeight();
   bindPdfReader();
+  bindContactForm();
   portalSearch = createPortalSearch({
     tabs: TAB_CONFIG,
     activateTab,
@@ -654,7 +656,7 @@ function updateOverviewSurveyCta() {
   if (icon) icon.classList.add("flex");
   heading.textContent = "Speaker Questionnaire received";
   const sessionTitle = remembered.sessionTitle || "your session";
-  copy.innerHTML = `Thank you! We have your response on file for <em>${escapeHtml(sessionTitle)}</em>. Your Questionnaire is complete. If you have questions or need to request a change, please contact us at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.`;
+  copy.innerHTML = `Thank you! We have your response on file for <em>${escapeHtml(sessionTitle)}</em>. Your Questionnaire is complete. If you have questions or need to request a change, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.`;
   button.textContent = "Questionnaire complete";
   button.disabled = true;
   button.classList.add("opacity-50", "cursor-not-allowed");
@@ -1352,7 +1354,7 @@ async function renderSurveyForSession(session, options = {}) {
     box.classList.remove("hidden");
     box.innerHTML = `
       <p class="text-[#162A53] font-semibold mb-2">Latest response loaded for reference.</p>
-      <p class="text-gray-800">The Speaker Questionnaire deadline has passed and submissions are now closed. If you need to make a change, please contact us at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
+      <p class="text-gray-800">The Speaker Questionnaire deadline has passed and submissions are now closed. If you need to make a change, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
     `;
   }
 }
@@ -1480,7 +1482,7 @@ async function checkExistingSurveyResponse(session) {
     box.innerHTML = `
       <p class="text-[#162A53] font-semibold mb-2">A questionnaire response already exists for this session.</p>
       <p class="text-gray-800 mb-3">Latest submitted by: ${escapeHtml(data.latest.speakerName || "another presenter")}. Total submissions: ${escapeHtml(String(data.count))}.${submittedAt ? ` Latest submission: ${escapeHtml(submittedAt)}.` : ""}</p>
-      <p class="text-gray-800 mb-3">The Speaker Questionnaire deadline has passed and submissions are now closed. If you need to make a change, please contact us at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
+      <p class="text-gray-800 mb-3">The Speaker Questionnaire deadline has passed and submissions are now closed. If you need to make a change, please contact the Global Gathering Team at <a href="mailto:globalgathering@cuanschutz.edu" class="underline">globalgathering@cuanschutz.edu</a>.</p>
       <button id="load-existing-survey-response" type="button" class="px-4 py-2 bg-[var(--survey-primary)] text-white font-semibold rounded-lg hover:bg-[var(--survey-primary-dark)] transition-colors">View latest response</button>
     `;
     box.classList.remove("hidden");
