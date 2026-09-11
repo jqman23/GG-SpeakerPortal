@@ -20,7 +20,7 @@
             <label for="portal-search-input" class="sr-only">Search the speaker resources</label>
             <div class="search-field">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
-              <input id="portal-search-input" type="search" maxlength="200" autocomplete="off" placeholder="Type a question or speaker name" aria-controls="portal-search-results" />
+              <input id="portal-search-input" type="search" maxlength="200" autocomplete="off" placeholder="Search by keyword, session title, speaker name, or email" aria-controls="portal-search-results" />
               <button type="button" id="portal-search-clear" hidden aria-label="Clear search">Clear</button>
             </div>
           </form>
@@ -40,6 +40,7 @@
             <a class="hub-button hub-button--primary" href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer">Register for the Global Gathering <span aria-hidden="true">↗</span></a>
             <a class="hub-button hub-button--secondary" href="#attendee-hub" data-goto-hub>Explore the Attendee Hub guide <span aria-hidden="true">📘 →</span></a>
           </div>
+          <p class="mt-4 text-sm"><a href="#portal/search" data-goto-section="portal-search" class="underline">Looking for something specific? Search the speaker resources →</a></p>
         </div>
         <section class="hub-section" aria-labelledby="overview-ready-title">
           <p class="hub-eyebrow">Your next steps</p>
@@ -53,7 +54,7 @@
         <div class="overview-resources">
           <a href="#registration-lookup" data-goto-registration><strong>Check to see if you’re registered</strong><span>Confirm your registration using your email address.</span></a>
           <a href="#session-lookup" data-goto-lookup><strong>Review details about your session</strong><span>Look up your format, recording status, and CEU eligibility.</span></a>
-          <a href="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/83356837a8f54981a339ffdf4f10f95f.pdf" target="_blank" rel="noopener noreferrer"><strong>📘 Read through the Speaker Guide ↗</strong><span>Step-by-step instructions in one PDF.</span></a>
+          <a href="./2026speakerguide.pdf" data-open-speaker-guide><strong>📘 Read through the Speaker Guide →</strong><span>Step-by-step instructions in one PDF.</span></a>
         </div>
         <div class="hub-support"><div><h3>We’re here to help.</h3><p>Questions about registration, access, or your session? Reach out anytime.</p></div><a href="mailto:globalgathering@cuanschutz.edu">Email the Global Gathering Team ↗</a></div>
         <div id="overview-updates"></div>
@@ -175,7 +176,7 @@
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">Can I use polls during my session?</summary>
-            <p class="mt-2">Yes. Whether your session is Embedded or on Zoom, you will be able to create and launch polls. Please review the <a href="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/83356837a8f54981a339ffdf4f10f95f.pdf" target="_blank" rel="noopener noreferrer" class="underline">Speaker Guide (PDF)</a> for instructions about your format.</p>
+            <p class="mt-2">Yes. Whether your session is Embedded or on Zoom, you will be able to create and launch polls. Please review the <a href="./2026speakerguide.pdf" data-open-speaker-guide class="underline">Speaker Guide (PDF)</a> for instructions about your format.</p>
           </details>
           <details class="border border-gray-200 rounded-md p-3">
             <summary class="font-semibold cursor-pointer">How do I generate a transcript for my session?</summary>
@@ -285,15 +286,15 @@
 
       <section id="attendee-hub" class="content-section bg-white p-6 rounded-lg shadow">
         <div class="hub-hero">
-          <h2>Become comfortable before the event</h2>
+          <h2>Familiarize yourself with Attendee Hub.</h2>
           <p>Now is a good time to become familiar with Attendee Hub. To access Attendee Hub you must be registered. After you are registered, you can sign into Attendee Hub and explore the platform.</p>
           <div class="hub-actions">
             <a class="hub-button hub-button--primary" href="https://cvent.me/xx5n1g" target="_blank" rel="noopener noreferrer">Open Attendee Hub <span aria-hidden="true">↗</span></a>
-            <a class="hub-button hub-button--secondary" href="https://custom.cvent.com/AE944F71438646268B70FF5BF3772347/files/event/e7d15afcf2b14901ab0272ce8a401899/83356837a8f54981a339ffdf4f10f95f.pdf" target="_blank" rel="noopener noreferrer">Read the full Speaker Guide (PDF) <span aria-hidden="true">↗</span></a>
+            <a class="hub-button hub-button--secondary" href="./2026speakerguide.pdf" data-open-speaker-guide>Read the full Speaker Guide (PDF) <span aria-hidden="true">→</span></a>
           </div>
         </div>
-        <div class="hub-facts" aria-label="Before you begin">
-          <div><strong>Use Chrome or Edge</strong><span>The browsers fully compatible with Attendee Hub.</span></div>
+        <div class="hub-facts" role="region" aria-label="Before you begin">
+          <div><div class="hub-fact-title"><strong>Use Chrome or Edge</strong><span class="hub-info-wrap"><button type="button" class="hub-info-button" aria-label="Browser compatibility details" aria-describedby="hub-browser-note">i</button><span id="hub-browser-note" class="hub-info-tooltip" role="tooltip">Earlier event guidance may have listed Safari as compatible. Current guidance recommends Google Chrome or Microsoft Edge for full Attendee Hub compatibility.</span></span></div><span>These browsers are fully compatible with Attendee Hub.</span></div>
           <div><strong>Test your session as a host starting September 28</strong><span>Beginning September 28, 2026, select “Join as host” to explore and test your session’s virtual environment. Want to test your specific session before then? <a href="mailto:globalgathering@cuanschutz.edu" class="underline">Contact the Global Gathering Team to request early access</a>.</span></div>
           <div><strong>Become familiar with your session format</strong><span>Use the <a href="#" data-goto-lookup class="underline">Session Information Lookup tool</a> to check whether your session format is Zoom or Embedded, then explore the instructions below.</span></div>
         </div>
@@ -440,6 +441,26 @@
     </main>
   </div>
 
+  <div id="speaker-guide-reader" class="pdf-reader" hidden>
+    <button type="button" class="pdf-reader-backdrop" data-pdf-close tabindex="-1" aria-label="Close Speaker Guide"></button>
+    <section class="pdf-reader-dialog" role="dialog" aria-modal="true" aria-labelledby="pdf-reader-title" tabindex="-1">
+      <header class="pdf-reader-header">
+        <div><span class="pdf-reader-kicker">SPEAKER GUIDE</span><h2 id="pdf-reader-title">2026 Global Gathering</h2></div>
+        <div class="pdf-reader-actions"><a href="./2026speakerguide.pdf" download>Download PDF</a><button type="button" data-pdf-close aria-label="Close Speaker Guide">Close</button></div>
+      </header>
+      <div class="pdf-reader-toolbar" role="toolbar" aria-label="PDF controls">
+        <button type="button" id="pdf-prev" aria-label="Previous page">←</button>
+        <label>Page <input id="pdf-page-number" type="number" min="1" value="1" inputmode="numeric" aria-label="Page number" /> <span id="pdf-page-count">of …</span></label>
+        <button type="button" id="pdf-next" aria-label="Next page">→</button>
+        <span class="pdf-toolbar-spacer"></span>
+        <button type="button" id="pdf-zoom-out" aria-label="Zoom out">−</button><span id="pdf-zoom-label" aria-live="polite">Fit</span><button type="button" id="pdf-zoom-in" aria-label="Zoom in">+</button>
+      </div>
+      <div id="pdf-stage" class="pdf-reader-stage" role="region" tabindex="0" aria-label="Speaker Guide pages. Swipe or use arrow keys to change pages.">
+        <div id="pdf-reader-status" class="pdf-reader-status" role="status" aria-live="polite">Loading Speaker Guide…</div>
+        <canvas id="pdf-canvas" aria-label="Speaker Guide page">Speaker Guide page</canvas>
+      </div>
+    </section>
+  </div>
   <script type="module" src="./src/app.js"></script>
 </body>
 </html>

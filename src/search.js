@@ -1,6 +1,6 @@
 import { normalizeSearch, queryTerms, prepareRecord, rankRecords } from './search-engine.js';
 
-export function createPortalSearch({ tabs, activateTab, openSession }) {
+export function createPortalSearch({ tabs, activateTab, openSession, openRegistration }) {
   const $ = id => document.getElementById(id);
   const input = $('portal-search-input'), results = $('portal-search-results');
   const categories = ['All', 'FAQs', 'Guidance', 'Tools', 'Resources', 'Sessions'];
@@ -79,7 +79,14 @@ export function createPortalSearch({ tabs, activateTab, openSession }) {
   }
   function render() {
     const query = input.value.trim();
-    const ranked = rankRecords(records, query);
+    const registrationEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(query) ? query.toLowerCase() : '';
+    const searchableRecords = registrationEmail ? [prepareRecord({
+      id: 'registration/email-status', section: 'registration-lookup', target: 'registration-lookup',
+      title: `Check registration status for ${registrationEmail}`,
+      text: 'Open Registration Information Lookup and check this email address.',
+      type: 'Tools', path: 'Registration lookup', registrationEmail
+    }), ...records] : records;
+    const ranked = rankRecords(searchableRecords, query);
     const filtered = ranked.filter(({ record }) => filter === 'All' || record.type === filter);
     $('portal-search-clear').hidden = !input.value;
     $('search-filters').hidden = !query;
@@ -113,7 +120,8 @@ export function createPortalSearch({ tabs, activateTab, openSession }) {
   }
   function syncSearchUrl() {
     if (!$('portal-search').classList.contains('active')) return;
-    const params = new URLSearchParams({ q: input.value, type: filter });
+    const query = input.value.trim();
+    const params = new URLSearchParams({ q: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(query) ? '' : input.value, type: filter });
     history.replaceState(null, '', `#portal/search?${params}`);
   }
   function focusDestination(target) {
@@ -132,10 +140,12 @@ export function createPortalSearch({ tabs, activateTab, openSession }) {
   }
   function navigate(record) {
     navigating = true;
-    if (record.session) openSession(record.session); else activateTab(record.section);
+    if (record.session) openSession(record.session);
+    else if (record.registrationEmail) openRegistration(record.registrationEmail);
+    else activateTab(record.section);
     navigating = false;
     returnButton.hidden = false;
-    const target = record.session ? $('lookup-results') : record.section === 'registration-lookup' && record.target === record.section ? $('registration-email') : $(record.target);
+    const target = record.session ? $('lookup-results') : record.registrationEmail ? $('registration-result') : record.section === 'registration-lookup' && record.target === record.section ? $('registration-email') : $(record.target);
     focusDestination(target);
   }
   function showSearch(push = true) {

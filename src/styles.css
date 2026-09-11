@@ -59,6 +59,40 @@
 }
 @media (prefers-reduced-motion: reduce) { .search-destination { animation: none; outline: 3px solid #89a84f; } }
 
+/* Integrated Speaker Guide */
+body.pdf-reader-open { overflow: hidden; }
+.pdf-reader[hidden] { display: none !important; }
+.pdf-reader { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 18px; }
+.pdf-reader-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(9, 20, 43, .72); backdrop-filter: blur(8px); }
+.pdf-reader-dialog { position: relative; display: grid; grid-template-rows: auto auto minmax(0, 1fr); width: min(1100px, 100%); height: min(92vh, 900px); overflow: hidden; border-radius: 18px; background: #eef2f0; box-shadow: 0 28px 80px rgba(3, 11, 29, .45); outline: none; }
+.pdf-reader-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 20px; color: #fff; background: #122345; }
+.pdf-reader-kicker { display: block; color: #b8cc91; font-size: 9px; font-weight: 700; letter-spacing: .16em; }
+.pdf-reader-header h2 { margin: 2px 0 0; font-size: 18px; font-weight: 600; }
+.pdf-reader-actions { display: flex; align-items: center; gap: 8px; }
+.pdf-reader-actions a, .pdf-reader-actions button { border: 1px solid rgba(255,255,255,.3); border-radius: 8px; padding: 8px 11px; color: #fff !important; background: transparent; font-size: 11px; font-weight: 600; text-decoration: none; }
+.pdf-reader-toolbar { display: flex; align-items: center; gap: 9px; min-height: 52px; padding: 8px 14px; border-bottom: 1px solid #d2dbd6; background: #fff; color: #34445a; }
+.pdf-reader-toolbar button { width: 34px; height: 34px; border: 1px solid #d2dbd6; border-radius: 8px; background: #fff; color: #122345; font-size: 17px; }
+.pdf-reader-toolbar button:disabled { opacity: .35; }
+.pdf-reader-toolbar label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; }
+.pdf-reader-toolbar input { width: 50px; border: 1px solid #cbd5d0; border-radius: 7px; padding: 7px 4px; text-align: center; }
+.pdf-toolbar-spacer { flex: 1; }
+#pdf-zoom-label { min-width: 36px; color: #5d6b7e; font-size: 10px; text-align: center; }
+.pdf-reader-stage { position: relative; overflow: auto; display: flex; align-items: flex-start; justify-content: center; padding: 16px; overscroll-behavior: contain; touch-action: pan-y; outline: none; }
+.pdf-reader-stage canvas { display: block; max-width: none; background: #fff; box-shadow: 0 3px 18px rgba(22, 42, 83, .16); }
+.pdf-reader-status { position: absolute; top: 50%; left: 50%; z-index: 2; transform: translate(-50%, -50%); padding: 12px 16px; border-radius: 8px; color: #435168; background: rgba(255,255,255,.94); font-size: 12px; text-align: center; }
+.pdf-reader-status[hidden] { display: none; }
+.pdf-reader-error { color: #9c2f2f; }
+.pdf-reader :is(a, button, input):focus-visible { outline: 3px solid #89a84f; outline-offset: 2px; }
+@media (max-width: 600px) {
+  .pdf-reader { padding: 0; }
+  .pdf-reader-dialog { width: 100%; height: 100dvh; border-radius: 0; }
+  .pdf-reader-header { padding: 12px 14px; }
+  .pdf-reader-header h2 { font-size: 14px; }
+  .pdf-reader-actions a { display: none; }
+  .pdf-reader-toolbar { padding-inline: 10px; }
+  .pdf-reader-stage { padding: 10px; }
+}
+
 html,
 body,
 #speakerPortalShell,
@@ -313,11 +347,20 @@ a {
 .hub-button--primary { background: #d7e7c3; color: #162a53 !important; }
 .hub-button--secondary { border: 1px solid #8d9db7; color: #fff !important; }
 .hub-button:hover { box-shadow: 0 0 0 2px #c7ddb3; }
-.hub-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: #dce3e9; border: 1px solid #dce3e9; border-radius: .75rem; overflow: hidden; margin-top: 1rem; }
+.hub-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: #dce3e9; border: 1px solid #dce3e9; border-radius: .75rem; overflow: visible; margin-top: 1rem; }
 .hub-facts > div { background: #f5f7fa; padding: 1rem; }
+.hub-facts > div:first-child { border-radius: .7rem 0 0 .7rem; }
+.hub-facts > div:last-child { border-radius: 0 .7rem .7rem 0; }
 .hub-facts strong, .hub-facts span { display: block; }
 .hub-facts strong { font-size: .82rem; color: #162a53; margin-bottom: .4rem; }
 .hub-facts span { font-size: .76rem; line-height: 1.6; color: #4b5563; }
+.hub-facts .hub-fact-title { display: flex; align-items: flex-start; gap: .4rem; }
+.hub-facts .hub-fact-title strong { display: inline; }
+.hub-facts .hub-info-wrap { position: relative; display: inline-flex; flex: none; }
+.hub-info-button { display: inline-flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; padding: 0; border: 0; border-radius: 999px; color: #374151; background: #dfe4e8; font-size: .68rem; font-weight: 700; line-height: 1; }
+.hub-info-button:hover, .hub-info-button:focus { color: #fff; background: #122345; outline: 2px solid var(--survey-primary); outline-offset: 2px; }
+.hub-facts .hub-info-tooltip { position: absolute; z-index: 30; left: 50%; bottom: calc(100% + .55rem); display: none; width: min(17rem, 72vw); padding: .65rem .75rem; border-radius: .45rem; color: #fff; background: #122345; box-shadow: 0 8px 24px rgba(18,35,69,.25); font-size: .72rem; font-weight: 400; line-height: 1.5; transform: translateX(-50%); }
+.hub-info-wrap:hover .hub-info-tooltip, .hub-info-wrap:focus-within .hub-info-tooltip { display: block; }
 .hub-jump-links { display: flex; flex-wrap: wrap; gap: .5rem 1rem; padding: 1.25rem 0; border-bottom: 1px solid #e0e6eb; }
 .hub-jump-links a { font-size: .8rem; font-weight: 600; color: #235540 !important; text-decoration: underline; text-underline-offset: 4px; }
 .hub-section { padding: 2rem 0; border-bottom: 1px solid #e0e6eb; scroll-margin-top: 1.5rem; color: #374151; line-height: 1.7; }
@@ -351,6 +394,8 @@ a {
 @media (max-width: 640px) {
   .hub-hero { padding: 1.25rem; }
   .hub-facts, .hub-format-grid, .hub-end-grid { grid-template-columns: 1fr; }
+  .hub-facts > div:first-child { border-radius: .7rem .7rem 0 0; }
+  .hub-facts > div:last-child { border-radius: 0 0 .7rem .7rem; }
   .hub-button { width: 100%; }
   .hub-section { padding: 1.5rem 0; }
 }

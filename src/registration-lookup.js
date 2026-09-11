@@ -21,8 +21,7 @@ export function bindRegistrationLookup() {
       hour: 'numeric', minute: '2-digit', timeZone: 'UTC', timeZoneName: 'short'
     }).format(date);
   }
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
+  async function checkRegistration() {
     const request = ++revision;
     submit.disabled = true;
     result.textContent = 'Checking registration records…';
@@ -53,5 +52,14 @@ export function bindRegistrationLookup() {
     } catch (error) {
       if (request === revision) result.textContent = error.name === 'TimeoutError' || error instanceof TypeError ? 'Registration lookup is temporarily unavailable. Please try again or contact the Global Gathering Team.' : error.message;
     } finally { submit.disabled = false; }
+  }
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    checkRegistration();
   });
+  return email => {
+    input.value = String(email || '').trim().toLowerCase();
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    return checkRegistration();
+  };
 }

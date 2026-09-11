@@ -1,5 +1,6 @@
 import { bindRegistrationLookup } from './registration-lookup.js';
 import { createPortalSearch } from './search.js';
+import { bindPdfReader } from './pdf-reader.js';
 const SESSION_DATA_URL = "/api/sessions";
 const CHANGELOG_URL = "/api/changelog";
 const CHANGELOG_SEEN_KEY = "ggChangelogSeen";
@@ -83,7 +84,7 @@ let changelogEntries = [];
 let changelogSeen = new Set();
 
 document.addEventListener("DOMContentLoaded", () => {
-  bindRegistrationLookup();
+  const runRegistrationLookup = bindRegistrationLookup();
   const modalRoot = document.getElementById("format-comparison-modal-root");
   if (modalRoot) modalRoot.innerHTML = buildFormatComparisonModal();
   document.addEventListener("keydown", event => {
@@ -200,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindShare();
   bindClickTracking();
   bindIframeHeight();
+  bindPdfReader();
   portalSearch = createPortalSearch({
     tabs: TAB_CONFIG,
     activateTab,
@@ -208,6 +210,10 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("lookup-tab-session").click();
       document.getElementById("session-title").value = session.title;
       renderResults([{ session }], document.getElementById("lookup-status"), document.getElementById("lookup-results"), "session");
+    },
+    openRegistration(email) {
+      activateTab("registration-lookup");
+      runRegistrationLookup(email);
     }
   });
   loadSessions();
