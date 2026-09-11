@@ -387,8 +387,9 @@ body.contact-modal-open { overflow: hidden; }
 .hub-hero .hub-eyebrow { color: #c7ddb3; }
 .hub-hero h2 { font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 700; line-height: 1.15; margin-bottom: 1rem; }
 .hub-hero > p:last-of-type { max-width: 38rem; line-height: 1.7; color: #e0e7f2; }
-.hub-hero .hub-hero-search-link { color: #f4f8ec !important; font-weight: 650; text-decoration-color: #b8cc91; text-underline-offset: 4px; }
-.hub-hero .hub-hero-search-link:hover { color: #d7e7c3 !important; }
+.overview-search-link { margin: .8rem 0 0; text-align: right; }
+.overview-search-link a { color: #162a53 !important; font-size: .85rem; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
+.overview-search-link a:hover { color: #46775d !important; }
 .hub-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
 .hub-button { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .8rem 1rem; border-radius: .5rem; font-size: .85rem; font-weight: 700; text-decoration: none; }
 .hub-button--primary { background: #d7e7c3; color: #162a53 !important; }
