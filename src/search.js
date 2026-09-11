@@ -213,7 +213,9 @@ export function createPortalSearch({ tabs, activateTab, openSession, openRegistr
       returnButton.hidden = true;
       if (navigating) return;
       history.pushState(null, '', section === 'portal-search' ? `#portal/search?${new URLSearchParams({ q: input.value, type: filter })}` : `#portal-tab/${section}`);
-      if (section === 'portal-search') requestAnimationFrame(() => input.focus());
+      // Do not auto-focus the search field when its tab is clicked. When this
+      // portal is embedded in Cvent, focusing an input can scroll the parent
+      // page to reposition the iframe and make the entire page appear to snap.
     }
   };
 }
