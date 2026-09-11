@@ -335,9 +335,6 @@ a {
 #registration-result { overflow-wrap: anywhere; }
 .registration-alert { margin-top: 1rem; }
 .registration-alert a { color: #162a53; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
-.registration-form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
-.registration-demo-button { padding: .7rem .9rem; border: 1px solid #cbd5d0; border-radius: .5rem; color: #162a53; background: #fff; font-size: .82rem; font-weight: 650; }
-
 /* Contact form */
 body.contact-modal-open { overflow: hidden; }
 .contact-modal[hidden] { display: none !important; }

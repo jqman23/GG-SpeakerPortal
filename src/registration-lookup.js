@@ -8,7 +8,6 @@ export function bindRegistrationLookup() {
   const nameTab = document.getElementById('registration-tab-name');
   const result = document.getElementById('registration-result');
   const submit = form.querySelector('button');
-  const demo = document.getElementById('registration-demo');
   let mode = 'email';
   let revision = 0;
   [emailInput, nameInput].forEach(input => input.addEventListener('input', () => { revision++; result.replaceChildren(); }));
@@ -61,7 +60,13 @@ export function bindRegistrationLookup() {
     const link = document.createElement('a');
     link.href = 'mailto:globalgathering@cuanschutz.edu';
     link.textContent = 'Contact the Global Gathering Team';
-    box.append(strong, copy, link, document.createTextNode(' so they can verify your Host access.'));
+    box.append(
+      strong,
+      copy,
+      document.createTextNode('The email on your speaker profile is used to cross-reference your registration and grant permission to host your session(s). '),
+      link,
+      document.createTextNode(' so they can verify your information and Host access.')
+    );
     result.append(box);
   }
   function renderResult(data, resultMode = mode) {
@@ -83,16 +88,6 @@ export function bindRegistrationLookup() {
     }
     if (data.updatedAt) line('Registration records last updated', new Date(data.updatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }));
   }
-  demo.addEventListener('click', () => {
-    revision++;
-    renderResult({
-      found: true,
-      registration: { name: 'Jordan S.', email: 'j•••••@registration.example', registeredAt: '2026-09-01T18:30:00Z', ceusIncluded: true },
-      speakerEmail: 'j•••••@speaker.example',
-      emailMismatch: true
-    }, 'email');
-    result.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' });
-  });
   async function checkRegistration() {
     const request = ++revision;
     submit.disabled = true;
