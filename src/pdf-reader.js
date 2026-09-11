@@ -8,6 +8,8 @@ export function bindPdfReader() {
   const dialog = reader.querySelector('.pdf-reader-dialog');
   const stage = document.getElementById('pdf-stage');
   const canvas = document.getElementById('pdf-canvas');
+  const pageWrap = document.getElementById('pdf-page-wrap');
+  const linkLayer = document.getElementById('pdf-link-layer');
   const status = document.getElementById('pdf-reader-status');
   const pageInput = document.getElementById('pdf-page-number');
   const pageCount = document.getElementById('pdf-page-count');
@@ -65,7 +67,27 @@ export function bindPdfReader() {
       canvas.height = Math.floor(renderViewport.height);
       canvas.style.width = `${Math.floor(displayViewport.width)}px`;
       canvas.style.height = `${Math.floor(displayViewport.height)}px`;
+      pageWrap.style.width = `${Math.floor(displayViewport.width)}px`;
+      pageWrap.style.height = `${Math.floor(displayViewport.height)}px`;
+      linkLayer.replaceChildren();
       await page.render({ canvasContext: canvas.getContext('2d'), viewport: renderViewport }).promise;
+      const annotations = await page.getAnnotations({ intent: 'display' });
+      annotations.filter(annotation => annotation.subtype === 'Link').forEach(annotation => {
+        const href = annotation.url || annotation.unsafeUrl;
+        if (!/^(https?:|mailto:)/i.test(String(href || ''))) return;
+        const [left, top, right, bottom] = displayViewport.convertToViewportRectangle(annotation.rect);
+        const link = document.createElement('a');
+        link.href = href;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.className = 'pdf-link-target';
+        link.style.left = `${Math.min(left, right)}px`;
+        link.style.top = `${Math.min(top, bottom)}px`;
+        link.style.width = `${Math.abs(right - left)}px`;
+        link.style.height = `${Math.abs(bottom - top)}px`;
+        link.setAttribute('aria-label', annotation.contents || 'Open linked resource in a new tab');
+        linkLayer.append(link);
+      });
       setStatus('');
     } catch (error) {
       console.error('Speaker Guide page failed:', error);

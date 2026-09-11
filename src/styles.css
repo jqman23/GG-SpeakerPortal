@@ -82,6 +82,11 @@ body.pdf-reader-open { overflow: hidden; }
 #pdf-zoom-label { min-width: 36px; color: #5d6b7e; font-size: 10px; text-align: center; }
 .pdf-reader-stage { position: relative; overflow: auto; display: flex; align-items: flex-start; justify-content: center; padding: 16px; overscroll-behavior: contain; touch-action: pan-y; outline: none; }
 .pdf-reader-stage canvas { display: block; max-width: none; background: #fff; box-shadow: 0 3px 18px rgba(22, 42, 83, .16); }
+.pdf-page-wrap { position: relative; flex: 0 0 auto; }
+.pdf-link-layer { position: absolute; inset: 0; pointer-events: none; }
+.pdf-link-target { position: absolute; display: block; pointer-events: auto; border-radius: 2px; }
+.pdf-link-target:hover { background: rgba(137, 168, 79, .18); outline: 1px solid rgba(70, 119, 93, .45); }
+.pdf-link-target:focus-visible { outline: 3px solid #89a84f; outline-offset: 1px; background: rgba(137, 168, 79, .18); }
 .pdf-reader-status { position: absolute; top: 50%; left: 50%; z-index: 2; transform: translate(-50%, -50%); padding: 12px 16px; border-radius: 8px; color: #435168; background: rgba(255,255,255,.94); font-size: 12px; text-align: center; }
 .pdf-reader-status[hidden] { display: none; }
 .pdf-reader-error { color: #9c2f2f; }

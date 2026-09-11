@@ -34,7 +34,7 @@
       </section>
       <section id="overview" class="content-section active bg-white p-6 rounded-lg shadow mb-6">
         <div class="hub-hero">
-          <h2>Welcome, Global Gathering speakers.</h2>
+          <h2>Welcome, Global Gathering speakers</h2>
           <p>Thank you for being part of the <em>2026 Global Gathering for the Future of Child Welfare</em>. This page is intended to help you prepare for your session(s).</p>
           <div class="hub-actions">
             <a class="hub-button hub-button--primary" href="https://cvent.me/2zyRx2" target="_blank" rel="noopener noreferrer">Register for the Global Gathering <span aria-hidden="true">↗</span></a>
@@ -508,7 +508,10 @@
       </div>
       <div id="pdf-stage" class="pdf-reader-stage" role="region" tabindex="0" aria-label="Speaker Guide pages. Swipe or use arrow keys to change pages.">
         <div id="pdf-reader-status" class="pdf-reader-status" role="status" aria-live="polite">Loading Speaker Guide…</div>
-        <canvas id="pdf-canvas" aria-label="Speaker Guide page">Speaker Guide page</canvas>
+        <div id="pdf-page-wrap" class="pdf-page-wrap">
+          <canvas id="pdf-canvas" aria-label="Speaker Guide page">Speaker Guide page</canvas>
+          <div id="pdf-link-layer" class="pdf-link-layer" aria-label="Links on this page"></div>
+        </div>
       </div>
     </section>
   </div>
