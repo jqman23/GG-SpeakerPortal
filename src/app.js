@@ -3,6 +3,7 @@ import { createPortalSearch } from './search.js';
 import { bindPdfReader } from './pdf-reader.js';
 const SESSION_DATA_URL = "/api/sessions";
 const CHANGELOG_URL = "/api/changelog";
+const CANONICAL_PORTAL_ORIGIN = "https://gg-speaker-portal.vercel.app";
 const CHANGELOG_SEEN_KEY = "ggChangelogSeen";
 const SURVEY_SUBMISSION_KEY = "ggSpeakerSurveyLastSubmission";
 const SURVEY_DRAFT_KEY = "ggSpeakerSurveyDraft";
@@ -82,6 +83,14 @@ let selectedShareSession = null;
 let shareGenerationRequestId = 0;
 let changelogEntries = [];
 let changelogSeen = new Set();
+
+async function fetchPortalData(path) {
+  let response = await fetch(path, { cache: "no-store" });
+  if (!response.ok && window.location.origin !== CANONICAL_PORTAL_ORIGIN) {
+    response = await fetch(`${CANONICAL_PORTAL_ORIGIN}${path}`, { cache: "no-store" });
+  }
+  return response;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   const runRegistrationLookup = bindRegistrationLookup();
@@ -421,7 +430,7 @@ function renderOverviewUpdates() {
 async function loadChangelog() {
   changelogSeen = getChangelogSeen();
   try {
-    const res = await fetch(CHANGELOG_URL, { cache: "no-store" });
+    const res = await fetchPortalData(CHANGELOG_URL);
     if (!res.ok) throw new Error("Failed to fetch changelog");
     const data = await res.json();
     changelogEntries = data.entries || [];
@@ -1590,7 +1599,7 @@ function updateCeuGenerateButtonLabel(button) {
 
 async function loadSessions() {
   try {
-    const res = await fetch(SESSION_DATA_URL, { cache: "no-store" });
+    const res = await fetchPortalData(SESSION_DATA_URL);
     if (!res.ok) throw new Error("Failed to fetch sessions JSON");
 
     const data = await res.json();
