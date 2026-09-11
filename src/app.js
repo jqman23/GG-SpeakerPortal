@@ -42,7 +42,7 @@ const TAB_CONFIG = [
   { id: "session-lookup-tab", label: "Session Information Lookup", mobileLabel: "Lookup", sectionId: "session-lookup", enabled: true, trackingButton: "SpeakerPortal_SessionLookupTab" },
   { id: "registration-lookup-tab", label: "Registration Information Lookup", mobileLabel: "Registration", sectionId: "registration-lookup", enabled: true },
   { id: "share-tab", label: "📣 Share your participation", mobileLabel: "Share", sectionId: "share", enabled: true, trackingButton: "SpeakerPortal_ShareWidgetTab" },
-  { id: "attendee-hub-tab", label: "📘 Attendee Hub", mobileLabel: "Hub", sectionId: "attendee-hub", enabled: true, trackingButton: "SpeakerPortal_AttendeeHubTab" },
+  { id: "attendee-hub-tab", label: "🧭 Attendee Hub", mobileLabel: "Hub", sectionId: "attendee-hub", enabled: true, trackingButton: "SpeakerPortal_AttendeeHubTab" },
   {
     id: "speaker-resource-guide",
     label: "Speaker Resource Guide (PDF)",
