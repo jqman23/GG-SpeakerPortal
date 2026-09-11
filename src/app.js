@@ -1307,7 +1307,7 @@ async function renderSurveyForSession(session, options = {}) {
   followupSection.classList.toggle("hidden", !followup);
   if (followup) {
     followupHeading.textContent = followup.heading;
-    followupCopy.textContent = followup.copy;
+    followupCopy.innerHTML = linkifyEmails(followup.copy);
     followupResponse.placeholder = followup.placeholder;
   } else {
     followupHeading.textContent = "";
@@ -1698,7 +1698,7 @@ function searchByTitle(query) {
 function renderResults(rows, statusEl, containerEl, mode) {
   if (!rows.length) {
     containerEl.innerHTML = "";
-    statusEl.textContent = "No matches found. Try a shorter search or email globalgathering@cuanschutz.edu.";
+    statusEl.innerHTML = linkifyEmails("No matches found. Try a shorter search or email globalgathering@cuanschutz.edu.");
     return;
   }
 
@@ -2075,6 +2075,13 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function linkifyEmails(text) {
+  return escapeHtml(text).replace(
+    /([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/g,
+    '<a href="mailto:$1" class="underline">$1</a>'
+  );
 }
 
 // Click tracking (once per session)
