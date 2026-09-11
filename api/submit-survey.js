@@ -129,8 +129,8 @@ function buildConfirmationEmail({
     `Hello ${salutationName},`,
     '',
     isResubmission
-      ? 'Thank you for updating your Speaker Questionnaire for the 2026 Global Gathering. We received your updated response for:'
-      : 'Thank you for completing the Speaker Questionnaire for the 2026 Global Gathering. We received your response for:',
+      ? 'Thank you for updating your Speaker Questionnaire for the 2026 Global Gathering for the Future of Child Welfare. We received your updated response for:'
+      : 'Thank you for completing the Speaker Questionnaire for the 2026 Global Gathering for the Future of Child Welfare. We received your response for:',
     '',
     `*${cleanSessionTitle}*`,
     '',
