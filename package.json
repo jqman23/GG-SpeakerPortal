@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test:search": "node --test scripts/test-search.js",
-    "test:contact": "node --test scripts/test-contact.js"
+    "test:contact": "node --test scripts/test-contact.js",
+    "test:registration": "node --test scripts/test-registration-lookup.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4"

@@ -1,3 +1,17 @@
+export function registrationResultHeading(data, resultMode, searchedEmail = '') {
+  if (data.ambiguous) return 'We found more than one possible match';
+  const enteredEmail = resultMode === 'email' ? String(searchedEmail).trim().toLowerCase() : '';
+  const registrationEmail = String(data.registration?.email || '').trim().toLowerCase();
+  const foundUnderDifferentEmail = data.found
+    && data.emailMismatch
+    && enteredEmail
+    && registrationEmail
+    && enteredEmail !== registrationEmail;
+  if (foundUnderDifferentEmail) return 'Registration found under a different email';
+  if (data.found) return 'Registration confirmed';
+  return `We couldn’t confirm a registration for that ${resultMode === 'email' ? 'email' : 'name'}`;
+}
+
 export function bindRegistrationLookup() {
   const form = document.getElementById('registration-lookup-form');
   const emailInput = document.getElementById('registration-email');
@@ -73,13 +87,7 @@ export function bindRegistrationLookup() {
     result.replaceChildren();
     const heading = document.createElement('h3');
     heading.className = 'font-bold text-lg mb-3';
-    heading.textContent = data.ambiguous
-      ? 'We found more than one possible match'
-      : data.emailMismatch && resultMode === 'email'
-        ? 'Registration found under a different email'
-        : data.found
-          ? 'Registration confirmed'
-          : `We couldn’t confirm a registration for that ${resultMode === 'email' ? 'email' : 'name'}`;
+    heading.textContent = registrationResultHeading(data, resultMode, emailInput.value);
     result.append(heading);
     if (data.found) {
       line('Name', data.registration.name || 'Not available');
