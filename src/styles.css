@@ -406,10 +406,11 @@ body.contact-modal-open { overflow: hidden; }
 .hub-facts span { font-size: .76rem; line-height: 1.6; color: #4b5563; }
 .hub-facts .hub-fact-title { display: flex; align-items: flex-start; gap: .4rem; }
 .hub-facts .hub-fact-title strong { display: inline; }
-.hub-info-wrap { position: relative; display: inline-flex; flex: none; }
+.hub-info-wrap, .hub-facts .hub-info-wrap { position: relative; display: inline-flex; flex: none; }
 .hub-info-button { display: inline-flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; padding: 0; border: 0; border-radius: 999px; color: #374151; background: #dfe4e8; font-size: .68rem; font-weight: 700; line-height: 1; }
 .hub-info-button:hover, .hub-info-button:focus { color: #fff; background: #122345; outline: 2px solid var(--survey-primary); outline-offset: 2px; }
-.hub-info-tooltip { position: absolute; z-index: 30; left: 50%; bottom: calc(100% + .55rem); display: none; width: min(17rem, 72vw); padding: .65rem .75rem; border-radius: .45rem; color: #fff; background: #122345; box-shadow: 0 8px 24px rgba(18,35,69,.25); font-size: .72rem; font-weight: 400; line-height: 1.5; transform: translateX(-50%); }
+.hub-info-wrap .hub-info-tooltip, .hub-facts .hub-info-tooltip { position: absolute; z-index: 30; left: 50%; bottom: calc(100% + .55rem); display: none; width: min(17rem, 72vw); padding: .65rem .75rem; border-radius: .45rem; color: #fff; background: #122345; box-shadow: 0 8px 24px rgba(18,35,69,.25); font-size: .72rem; font-weight: 400; line-height: 1.5; transform: translateX(-50%); }
+.hub-info-tooltip strong { display: inline; margin: 0; color: inherit; font-size: inherit; }
 .hub-info-wrap:hover .hub-info-tooltip, .hub-info-wrap:focus-within .hub-info-tooltip { display: block; }
 .hub-jump-links { display: flex; flex-wrap: wrap; gap: .5rem 1rem; padding: 1.25rem 0; border-bottom: 1px solid #e0e6eb; }
 .hub-jump-links a { font-size: .8rem; font-weight: 600; color: #235540 !important; text-decoration: underline; text-underline-offset: 4px; }
