@@ -73,7 +73,13 @@ export function bindRegistrationLookup() {
     result.replaceChildren();
     const heading = document.createElement('h3');
     heading.className = 'font-bold text-lg mb-3';
-    heading.textContent = data.found ? 'Registration confirmed' : data.ambiguous ? 'We found more than one possible match' : `We couldn’t confirm a registration for that ${resultMode === 'email' ? 'email' : 'name'}`;
+    heading.textContent = data.emailMismatch
+      ? 'Registration found under a different email'
+      : data.found
+        ? 'Registration confirmed'
+        : data.ambiguous
+          ? 'We found more than one possible match'
+          : `We couldn’t confirm a registration for that ${resultMode === 'email' ? 'email' : 'name'}`;
     result.append(heading);
     if (data.found) {
       line('Name', data.registration.name || 'Not available');
