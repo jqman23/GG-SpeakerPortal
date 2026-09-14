@@ -30,6 +30,8 @@ export function bindRegistrationLookup() {
     const byEmail = mode === 'email';
     emailFields.hidden = !byEmail;
     nameFields.hidden = byEmail;
+    emailInput.disabled = !byEmail;
+    nameInput.disabled = byEmail;
     emailInput.required = byEmail;
     nameInput.required = !byEmail;
     emailTab.className = `px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg ${byEmail ? 'tab-active bg-[var(--survey-primary)] text-white' : 'tab-inactive'}`;
